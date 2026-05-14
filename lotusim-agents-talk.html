@@ -1,0 +1,1262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>From idea to LOTUSim contribution — faster with AI agents</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0e0c0d;
+    --bg-2:#171314;
+    --ink:#ece6d8;
+    --ink-dim:#9a9486;
+    --rule:#2a2122;
+    --accent:#FF5A36;
+    --accent-light:#FF8A6B;
+    --accent-deep:#C73E1F;
+    --danger:#ff5a5a;
+    --display:"Instrument Serif", "Times New Roman", serif;
+    --mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--mono);font-weight:400;font-size:16px;overflow:hidden}
+  body{
+    background-image:
+      radial-gradient(1200px 600px at 80% -10%, rgba(255,90,54,.07), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(255,138,107,.04), transparent 60%);
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:2;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    mix-blend-mode:overlay;opacity:.5;
+  }
+
+  .deck{position:relative;height:100vh;width:100vw}
+  .slide{
+    position:absolute;inset:0;
+    padding:6vh 7vw 8vh;
+    display:none;
+    flex-direction:column;
+    animation:slideIn .45s cubic-bezier(.2,.7,.2,1);
+  }
+  .slide.is-active{display:flex}
+  @keyframes slideIn{
+    from{opacity:0;transform:translateY(8px)}
+    to{opacity:1;transform:none}
+  }
+
+  .hud{
+    position:fixed;left:0;right:0;bottom:0;z-index:5;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 28px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;
+    color:var(--ink-dim);text-transform:uppercase;
+    border-top:1px solid var(--rule);
+    background:linear-gradient(180deg,transparent,rgba(0,0,0,.4));
+  }
+  .hud .left{display:flex;gap:18px;align-items:center}
+  .hud .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent);animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{
+    0%,100%{opacity:.7;box-shadow:0 0 8px var(--accent)}
+    50%{opacity:1;box-shadow:0 0 18px var(--accent)}
+  }
+  .hud .right{display:flex;gap:14px}
+  .progress{position:fixed;left:0;right:0;bottom:0;height:2px;background:var(--rule);z-index:6}
+  .progress > i{display:block;height:100%;background:var(--accent);width:0;transition:width .35s ease}
+
+  .eyebrow{
+    font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--ink-dim);display:inline-flex;gap:10px;align-items:center;
+  }
+  .eyebrow::before{
+    content:"⟩";color:var(--accent);font-family:var(--mono);
+    font-weight:700;font-size:14px;
+  }
+  h1,h2,h3{margin:0;font-weight:400}
+  h1.display{
+    font-family:var(--display);font-style:italic;
+    font-size:clamp(48px,7.4vw,120px);line-height:.95;letter-spacing:-.01em;
+  }
+  h2.title{
+    font-family:var(--display);font-style:italic;
+    font-size:clamp(40px,5.2vw,80px);line-height:1;letter-spacing:-.01em;
+    margin-bottom:.4em;
+  }
+  h2.title em{font-style:normal;color:var(--accent)}
+  h3.sub{
+    font-family:var(--mono);font-size:13px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ink-dim);margin-bottom:2.2em;
+  }
+  p,li{font-family:var(--mono);font-size:17px;line-height:1.55;color:var(--ink)}
+  .lead{font-size:20px;color:var(--ink);max-width:62ch}
+  .dim{color:var(--ink-dim)}
+  .hl{color:var(--accent)}
+  .hl-2{color:var(--accent-light)}
+  .strike{text-decoration:line-through;color:var(--ink-dim)}
+
+  .stack > * + *{margin-top:18px}
+  .cols-2{display:grid;grid-template-columns:1.1fr .9fr;gap:6vw;align-items:start}
+  .cols-3{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+  .row{display:flex;gap:32px;align-items:flex-start}
+  .grow{flex:1}
+  .spacer{flex:1}
+
+  .card{
+    border:1px solid var(--rule);background:var(--bg-2);
+    padding:22px 22px 20px;border-radius:2px;
+    position:relative;overflow:hidden;
+  }
+  .card .num{
+    font-family:var(--display);font-style:italic;font-size:44px;line-height:1;
+    color:var(--accent);margin-bottom:14px;display:block;
+  }
+  .card h4{margin:0 0 8px;font-family:var(--mono);font-size:14px;letter-spacing:.1em;text-transform:uppercase}
+  .card p{font-size:14px;color:var(--ink-dim);line-height:1.5;margin:0}
+  .card.warn .num{color:var(--accent-light)}
+  .card.danger .num{color:var(--danger)}
+
+  .term{
+    background:#08070a;border:1px solid var(--rule);border-radius:2px;
+    padding:18px 20px;font-family:var(--mono);font-size:13px;line-height:1.7;
+    color:var(--ink);
+    box-shadow:inset 0 0 0 1px rgba(255,90,54,.04);
+    position:relative;
+  }
+  /* Blinking cursor at the bottom of the terminal */
+  .term::after{
+    content:"▊";
+    color:var(--accent);
+    margin-left:2px;
+    animation:cursor 1.1s steps(2) infinite;
+    display:inline-block;
+  }
+  @keyframes cursor{
+    0%,50%{opacity:1}
+    51%,100%{opacity:0}
+  }
+  .term .p{color:var(--accent)}
+  .term .c{color:var(--ink-dim)}
+  .term .k{color:var(--accent-light)}
+  .term .s{color:#cdd1d8}
+
+  /* Agent relay layout (replaces the old .pipe) */
+  .relay{position:relative;padding-bottom:64px;margin-top:8px}
+  .agents{display:flex;justify-content:space-around;align-items:flex-end;gap:8px}
+  .agent{
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+    width:120px;text-align:center;position:relative;
+  }
+  .sprite-wrap{
+    width:96px;height:80px;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;
+  }
+  .sprite{
+    width:100%;height:100%;
+    color:var(--ink-dim);
+    transition:color .3s ease,filter .3s ease,transform .3s ease;
+  }
+  .sprite svg{display:block;width:100%;height:100%}
+  .role-name{
+    font-family:var(--mono);font-size:11px;letter-spacing:.22em;
+    color:var(--ink-dim);text-transform:uppercase;
+  }
+  .verb{
+    font-family:var(--display);font-style:italic;font-size:20px;
+    color:var(--ink);line-height:1;
+  }
+
+  /* Baton — a glowing orange orb that arcs between agents */
+  .baton{
+    position:absolute;
+    bottom:14px;left:10%;
+    width:14px;height:14px;
+    border-radius:50%;
+    background:var(--accent);
+    box-shadow:
+      0 0 10px var(--accent),
+      0 0 24px rgba(255,90,54,.55),
+      0 0 48px rgba(255,90,54,.25);
+    transform:translateX(-50%) translateY(0);
+    opacity:0;
+    pointer-events:none;
+  }
+
+  ul.checks{list-style:none;padding:0;margin:0}
+  ul.checks li{padding:10px 0;border-bottom:1px dashed var(--rule);display:flex;gap:14px;align-items:baseline}
+  ul.checks li::before{content:"›";color:var(--accent);font-family:var(--mono);width:14px;flex:0 0 14px}
+  ul.checks.warn li::before{content:"!";color:var(--accent-light)}
+
+  .cover{display:flex;flex-direction:column;justify-content:space-between;height:100%}
+  .cover .top,.cover .bottom{display:flex;justify-content:space-between;align-items:center}
+  .cover .meta{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim)}
+  .cover h1.display{max-width:18ch}
+  .cover .tag{
+    display:inline-block;border:1px solid var(--accent);color:var(--accent);
+    padding:6px 12px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  }
+
+  .bignum{
+    font-family:var(--display);font-style:italic;
+    font-size:clamp(140px,22vw,300px);line-height:.9;color:var(--ink);letter-spacing:-.04em;
+  }
+  .bignum .unit{font-size:.25em;color:var(--ink-dim);font-style:normal;font-family:var(--mono);letter-spacing:.1em;vertical-align:top;margin-left:8px}
+
+  .bignum-small{
+    font-family:var(--display);font-style:italic;
+    font-size:clamp(72px,9vw,128px);line-height:.95;color:var(--ink);letter-spacing:-.03em;
+  }
+  .bignum-small .unit{font-size:.22em;color:var(--ink-dim);font-style:normal;font-family:var(--mono);letter-spacing:.1em;vertical-align:top;margin-left:8px;text-transform:uppercase}
+
+  blockquote{
+    margin:0;padding:0;font-family:var(--display);font-style:italic;
+    font-size:clamp(34px,4.2vw,64px);line-height:1.08;letter-spacing:-.005em;
+    max-width:20ch;
+  }
+  blockquote .small{font-family:var(--mono);font-style:normal;font-size:14px;letter-spacing:.18em;color:var(--ink-dim);text-transform:uppercase;display:block;margin-top:24px}
+
+  .pull{
+    border-left:2px solid var(--accent);
+    padding:6px 0 6px 22px;
+    font-family:var(--display);font-style:italic;
+    font-size:clamp(22px,2.4vw,32px);line-height:1.25;
+    color:var(--ink);max-width:30ch;
+  }
+  .pull .attr{
+    display:block;font-family:var(--mono);font-style:normal;
+    font-size:11px;letter-spacing:.16em;color:var(--ink-dim);
+    text-transform:uppercase;margin-top:14px;
+  }
+
+  .sources{
+    margin-top:auto;padding-top:24px;border-top:1px solid var(--rule);
+    font-family:var(--mono);font-size:10px;letter-spacing:.08em;
+    color:var(--ink-dim);text-transform:uppercase;
+    display:flex;gap:24px;flex-wrap:wrap;
+  }
+  .sources b{color:var(--ink);font-weight:400;letter-spacing:.18em;margin-right:8px}
+
+  .endgrid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:end;height:100%}
+
+  .filler{flex:1}
+  .footer-note{margin-top:auto;font-size:12px;color:var(--ink-dim);letter-spacing:.1em;text-transform:uppercase}
+  hr.rule{border:none;border-top:1px solid var(--rule);margin:32px 0}
+
+  .badge{
+    display:inline-block;padding:3px 8px;border:1px solid var(--rule);border-radius:2px;
+    font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim);
+    margin-right:6px;margin-bottom:6px;
+  }
+  .badge.hl{border-color:var(--accent);color:var(--accent)}
+
+  /* ─────────────────────────────────────────────────────────────────
+     ANIMATIONS
+     All animations are gated on .slide.is-active so they restart
+     each time you navigate to the slide (display:none → display:flex
+     resets CSS animations natively).
+  */
+
+  /* 1) Cards stagger entrance */
+  .card{opacity:0;transform:translateY(12px)}
+  .slide.is-active .card{
+    animation:cardIn .55s cubic-bezier(.2,.7,.2,1) forwards;
+    animation-delay:var(--card-delay,.15s);
+  }
+  @keyframes cardIn{
+    to{opacity:1;transform:none}
+  }
+
+  /* 2) Terminal lines cascade */
+  .term > *{opacity:0}
+  .slide.is-active .term > *{
+    animation:termLineIn .28s ease forwards;
+  }
+  /* per-line delays — covers up to 28 children per terminal */
+  .slide.is-active .term > *:nth-child(1) {animation-delay:.12s}
+  .slide.is-active .term > *:nth-child(2) {animation-delay:.16s}
+  .slide.is-active .term > *:nth-child(3) {animation-delay:.20s}
+  .slide.is-active .term > *:nth-child(4) {animation-delay:.24s}
+  .slide.is-active .term > *:nth-child(5) {animation-delay:.28s}
+  .slide.is-active .term > *:nth-child(6) {animation-delay:.32s}
+  .slide.is-active .term > *:nth-child(7) {animation-delay:.36s}
+  .slide.is-active .term > *:nth-child(8) {animation-delay:.40s}
+  .slide.is-active .term > *:nth-child(9) {animation-delay:.44s}
+  .slide.is-active .term > *:nth-child(10){animation-delay:.48s}
+  .slide.is-active .term > *:nth-child(11){animation-delay:.52s}
+  .slide.is-active .term > *:nth-child(12){animation-delay:.56s}
+  .slide.is-active .term > *:nth-child(13){animation-delay:.60s}
+  .slide.is-active .term > *:nth-child(14){animation-delay:.64s}
+  .slide.is-active .term > *:nth-child(15){animation-delay:.68s}
+  .slide.is-active .term > *:nth-child(16){animation-delay:.72s}
+  .slide.is-active .term > *:nth-child(17){animation-delay:.76s}
+  .slide.is-active .term > *:nth-child(18){animation-delay:.80s}
+  .slide.is-active .term > *:nth-child(19){animation-delay:.84s}
+  .slide.is-active .term > *:nth-child(20){animation-delay:.88s}
+  .slide.is-active .term > *:nth-child(21){animation-delay:.92s}
+  .slide.is-active .term > *:nth-child(22){animation-delay:.96s}
+  .slide.is-active .term > *:nth-child(23){animation-delay:1.00s}
+  .slide.is-active .term > *:nth-child(24){animation-delay:1.04s}
+  .slide.is-active .term > *:nth-child(25){animation-delay:1.08s}
+  .slide.is-active .term > *:nth-child(26){animation-delay:1.12s}
+  .slide.is-active .term > *:nth-child(27){animation-delay:1.16s}
+  .slide.is-active .term > *:nth-child(28){animation-delay:1.20s}
+  @keyframes termLineIn{
+    from{opacity:0;transform:translateX(-4px)}
+    to{opacity:1;transform:none}
+  }
+
+  /* 3) Agent relay — pixel agents pass a glowing baton.
+        Total cycle: 6s. Each agent lights up when the baton is at them.
+        The last agent (Reviewer) stays lit at the end. */
+
+  /* Baton — appears, then arcs between agents. Five hold-positions
+     (10%, 30%, 50%, 70%, 90%) with arcs interpolated. */
+  .slide.is-active .baton{
+    animation:batonRelay 6s ease-in-out forwards;
+  }
+  @keyframes batonRelay{
+    /* Phase 1: at agent 1 */
+    0%      {left:10%;transform:translateX(-50%) translateY(0);opacity:0}
+    3%      {opacity:1}
+    10%     {left:10%;transform:translateX(-50%) translateY(0);opacity:1}
+    /* Arc 1→2 */
+    14%     {left:17%;transform:translateX(-50%) translateY(-22px)}
+    18%     {left:23%;transform:translateX(-50%) translateY(-22px)}
+    22%     {left:30%;transform:translateX(-50%) translateY(0)}
+    /* Phase 2: at agent 2 */
+    32%     {left:30%;transform:translateX(-50%) translateY(0)}
+    /* Arc 2→3 */
+    36%     {left:37%;transform:translateX(-50%) translateY(-22px)}
+    40%     {left:43%;transform:translateX(-50%) translateY(-22px)}
+    44%     {left:50%;transform:translateX(-50%) translateY(0)}
+    /* Phase 3: at agent 3 */
+    54%     {left:50%;transform:translateX(-50%) translateY(0)}
+    /* Arc 3→4 */
+    58%     {left:57%;transform:translateX(-50%) translateY(-22px)}
+    62%     {left:63%;transform:translateX(-50%) translateY(-22px)}
+    66%     {left:70%;transform:translateX(-50%) translateY(0)}
+    /* Phase 4: at agent 4 */
+    76%     {left:70%;transform:translateX(-50%) translateY(0)}
+    /* Arc 4→5 */
+    80%     {left:77%;transform:translateX(-50%) translateY(-22px)}
+    84%     {left:83%;transform:translateX(-50%) translateY(-22px)}
+    88%     {left:90%;transform:translateX(-50%) translateY(0)}
+    /* Phase 5: settled at agent 5 */
+    100%    {left:90%;transform:translateX(-50%) translateY(0);opacity:1}
+  }
+
+  /* Agents 1-4: light up when the baton arrives, then settle to "done" */
+  .slide.is-active .agent .sprite{
+    animation:agentLight 1s ease forwards;
+  }
+  /* Agent 5: light up and STAY fully lit at the end */
+  .slide.is-active .agent:nth-child(5) .sprite{
+    animation:agentLightFinal 1s ease forwards;
+  }
+  /* Delays: roughly when the baton lands on each agent */
+  .slide.is-active .agent:nth-child(1) .sprite{animation-delay:.2s}
+  .slide.is-active .agent:nth-child(2) .sprite{animation-delay:1.5s}
+  .slide.is-active .agent:nth-child(3) .sprite{animation-delay:2.8s}
+  .slide.is-active .agent:nth-child(4) .sprite{animation-delay:4.1s}
+  .slide.is-active .agent:nth-child(5) .sprite{animation-delay:5.4s}
+
+  @keyframes agentLight{
+    0%   {color:var(--ink-dim);filter:none;transform:scale(1)}
+    30%  {color:var(--accent);filter:drop-shadow(0 0 14px rgba(255,90,54,.7));transform:scale(1.08)}
+    70%  {color:var(--accent);filter:drop-shadow(0 0 14px rgba(255,90,54,.7));transform:scale(1.08)}
+    100% {color:var(--accent);filter:drop-shadow(0 0 4px rgba(255,90,54,.25));transform:scale(1);opacity:.55}
+  }
+  @keyframes agentLightFinal{
+    0%   {color:var(--ink-dim);filter:none;transform:scale(1)}
+    100% {color:var(--accent);filter:drop-shadow(0 0 16px rgba(255,90,54,.75));transform:scale(1.08)}
+  }
+
+  /* Agent role-name and verb shift subtly when their agent is active */
+  .slide.is-active .agent .role-name,
+  .slide.is-active .agent .verb{
+    animation:labelLight 1s ease forwards;
+  }
+  .slide.is-active .agent:nth-child(5) .role-name,
+  .slide.is-active .agent:nth-child(5) .verb{
+    animation:labelLightFinal 1s ease forwards;
+  }
+  .slide.is-active .agent:nth-child(1) .role-name,
+  .slide.is-active .agent:nth-child(1) .verb{animation-delay:.2s}
+  .slide.is-active .agent:nth-child(2) .role-name,
+  .slide.is-active .agent:nth-child(2) .verb{animation-delay:1.5s}
+  .slide.is-active .agent:nth-child(3) .role-name,
+  .slide.is-active .agent:nth-child(3) .verb{animation-delay:2.8s}
+  .slide.is-active .agent:nth-child(4) .role-name,
+  .slide.is-active .agent:nth-child(4) .verb{animation-delay:4.1s}
+  .slide.is-active .agent:nth-child(5) .role-name,
+  .slide.is-active .agent:nth-child(5) .verb{animation-delay:5.4s}
+
+  @keyframes labelLight{
+    0%, 30%  {color:var(--ink-dim)}
+    50%, 70% {color:var(--accent)}
+    100%     {color:var(--ink-dim);opacity:.7}
+  }
+  @keyframes labelLightFinal{
+    0%   {color:var(--ink-dim)}
+    100% {color:var(--accent)}
+  }
+
+  @keyframes spin{
+    to{transform:rotate(360deg)}
+  }
+
+  /* 4) Loop icon — used to illustrate "close the loop" */
+  .loop-icon{
+    display:inline-block;
+    color:var(--accent);
+    animation:spin 3s linear infinite;
+    margin-right:4px;
+    font-size:1.1em;
+    transform-origin:center;
+  }
+  @keyframes rotate{to{transform:rotate(360deg)}}  /* alias kept for safety */
+
+  /* 4b) Reveal-num — punctual reveal for single-digit big numbers
+        (scale + fade). Used on the "≈3 hours" demo slide. */
+  .reveal-num{
+    display:inline-block;
+    opacity:0;
+    transform:scale(.55);
+    transform-origin:center;
+  }
+  .slide.is-active .reveal-num{
+    animation:numIn .75s cubic-bezier(.2,.7,.2,1) forwards;
+    animation-delay:.35s;
+  }
+  @keyframes numIn{
+    0%{opacity:0;transform:scale(.55)}
+    60%{opacity:1;transform:scale(1.08)}
+    100%{opacity:1;transform:scale(1)}
+  }
+
+  /* 5) Hook — animated weeks-vs-hours bars */
+  .timer-row{display:flex;align-items:center;gap:18px;margin-top:8px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim)}
+  .timer-row .lbl{min-width:80px}
+  .timer-row .bar{
+    flex:1;height:6px;background:var(--rule);border-radius:1px;overflow:hidden;position:relative;
+  }
+  .timer-row .bar > i{
+    display:block;height:100%;background:var(--accent);width:0;
+  }
+  .slide.is-active .timer-row.weeks .bar > i{
+    animation:fillSlow 4.5s cubic-bezier(.4,0,.6,1) forwards;
+    animation-delay:.6s;
+  }
+  .slide.is-active .timer-row.hours .bar > i{
+    animation:fillFast .9s cubic-bezier(.2,.7,.3,1) forwards;
+    animation-delay:5.3s;
+  }
+  @keyframes fillSlow{
+    from{width:0}
+    to{width:100%}
+  }
+  @keyframes fillFast{
+    from{width:0}
+    to{width:100%}
+  }
+
+  /* 6) Subtle highlight pulse on accent words at slide entrance */
+  /* (kept off by default — only on .hl-pulse class) */
+  .slide.is-active .hl-pulse{
+    animation:highlight 1.2s ease forwards;
+    animation-delay:.4s;
+  }
+  @keyframes highlight{
+    0%{color:var(--ink)}
+    40%{color:var(--accent);text-shadow:0 0 12px rgba(255,90,54,.5)}
+    100%{color:var(--accent);text-shadow:none}
+  }
+
+  @media (max-width:900px){
+    .cols-2,.cols-3,.endgrid{grid-template-columns:1fr;gap:24px}
+    .agents{flex-direction:column;align-items:center;gap:20px}
+    .baton{display:none}  /* baton arc doesn't work in stacked layout */
+  }
+
+  @media print{
+    html,body{overflow:visible;background:#fff;color:#000}
+    .hud,.progress{display:none}
+    .slide{display:flex !important;page-break-after:always;position:relative;height:100vh;min-height:100vh}
+    .card,.term > *{opacity:1 !important;transform:none !important}
+    .term::after,.loop-icon,.hud .dot{animation:none !important}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{
+      animation-duration:.01s !important;
+      animation-iteration-count:1 !important;
+      transition-duration:.01s !important;
+    }
+  }
+
+  /* Naval Group logo on cover slide — discreet white-on-dark */
+  .cover .bottom-left{
+    display:flex;flex-direction:column;align-items:flex-start;gap:12px;
+  }
+  .ng-logo{
+    height:128px;width:auto;display:block;
+    opacity:.85;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- 1. COVER -->
+  <section class="slide is-active">
+    <div class="cover">
+      <div class="top">
+        <span class="meta">⌘ Talk · 15 min</span>
+        <span class="tag">LOTUSim × AI agents</span>
+      </div>
+
+      <div class="stack">
+        <span class="eyebrow">From idea → contribution</span>
+        <h1 class="display">
+          LOTUSim,<br/>
+          <em style="font-style:normal;color:var(--accent)">accelerated</em><br/>
+          by AI agents.
+        </h1>
+        <p class="lead dim" style="max-width:54ch;margin-top:32px">
+          How well-orchestrated agents collapse the entry barrier<br/>
+          of a ROS&nbsp;/&nbsp;Gazebo&nbsp;/&nbsp;Xdyn simulator.
+        </p>
+      </div>
+
+      <div class="bottom">
+        <div class="bottom-left">
+          <img class="ng-logo" alt="Naval Group" src="data:image/png;base64,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"/>
+          <span class="meta">Cyril · Lead Developer</span>
+        </div>
+        <span class="meta">__/__/____ · [conf]</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. DISAMBIGUATION -->
+  <section class="slide">
+    <span class="eyebrow">Quick disambiguation</span>
+    <h2 class="title">Two kinds of «&nbsp;agents&nbsp;»<br/>in this story.</h2>
+
+    <div class="cols-2" style="margin-top:8px">
+      <div class="card" style="padding:28px">
+        <span class="eyebrow" style="display:inline-flex">Agent — in LOTUSim</span>
+        <h4 style="margin:14px 0 6px">Simulated platform</h4>
+        <p style="color:var(--ink);font-size:15px;line-height:1.6">
+          A physical entity in the sim: aerial drone, surface vessel, underwater vehicle.<br/>
+          Behaviour, sensors, dynamics, environment.
+        </p>
+        <div style="margin-top:14px">
+          <span class="badge">Gazebo</span><span class="badge">ROS</span><span class="badge">Xdyn</span>
+        </div>
+      </div>
+      <div class="card" style="padding:28px">
+        <span class="eyebrow" style="display:inline-flex">Agent — in this talk</span>
+        <h4 style="margin:14px 0 6px">Tool-using LLM</h4>
+        <p style="color:var(--ink);font-size:15px;line-height:1.6">
+          An assistant that can <span class="hl">read</span> code, <span class="hl">act</span> on a repo, <span class="hl">chain</span> steps — not a chatbot.
+        </p>
+        <div style="margin-top:14px">
+          <span class="badge hl">Claude Code</span><span class="badge">MCP</span><span class="badge">CLI</span>
+        </div>
+      </div>
+    </div>
+    <p class="footer-note" style="margin-top:36px">→ Today: how <span class="hl-2">the second kind</span> helps you contribute faster to <span class="hl">the first</span>.</p>
+  </section>
+
+  <!-- 3. HOOK -->
+  <section class="slide">
+    <span class="eyebrow">The hook</span>
+    <div class="filler"></div>
+    <blockquote>
+      How long,<br/>
+      between an idea<br/>
+      and your <em style="font-style:normal;color:var(--accent)">first PR</em><br/>
+      on LOTUSim?
+      <span class="small">— Honest question to anyone in the room.</span>
+    </blockquote>
+
+    <div class="stack" style="margin-top:32px;max-width:60ch">
+      <div class="timer-row weeks">
+        <span class="lbl">Today</span>
+        <span class="bar"><i></i></span>
+        <span class="dim">weeks</span>
+      </div>
+      <div class="timer-row hours">
+        <span class="lbl hl">With agents</span>
+        <span class="bar"><i></i></span>
+        <span class="hl">hours</span>
+      </div>
+    </div>
+
+    <div class="filler"></div>
+    <p class="dim" style="max-width:60ch">
+      I'll try to convince you the second bar isn't a fantasy — and that the quality holds.
+    </p>
+  </section>
+
+  <!-- 4. THE WALL -->
+  <section class="slide">
+    <span class="eyebrow">Where we stand</span>
+    <h2 class="title">Contributing to a robotics sim<br/><em>is a wall.</em></h2>
+    <div class="cols-3" style="margin-top:24px">
+      <div class="card">
+        <span class="num">01</span>
+        <h4>Technical surface</h4>
+        <p>Modern C++, CMake, ROS, Gazebo plugins, SDF/URDF, Xdyn. Every brick has its idioms. The learning curve is real.</p>
+      </div>
+      <div class="card">
+        <span class="num">02</span>
+        <h4>Physical coupling</h4>
+        <p>A sensor isn't just a class: it's a physical model, a ROS message, a Gazebo plugin, and a launch scenario integration.</p>
+      </div>
+      <div class="card">
+        <span class="num">03</span>
+        <h4>Implicit conventions</h4>
+        <p>Topic naming, plugin structure, C++ style, launchfile format. All the things never written in the README.</p>
+      </div>
+    </div>
+    <p class="footer-note">→ Many good ideas die between <span class="hl">«&nbsp;I want to contribute&nbsp;»</span> and <span class="hl">«&nbsp;my PR is ready&nbsp;»</span>.</p>
+  </section>
+
+  <!-- 5. WHY NOW -->
+  <section class="slide">
+    <span class="eyebrow">Why now</span>
+    <h2 class="title">Agents crossed <em>the useful threshold.</em></h2>
+    <h3 class="sub">— not for demos. For production code.</h3>
+
+    <div class="cols-2">
+      <div class="stack">
+        <p>Three things shifted recently:</p>
+        <ul class="checks">
+          <li><span><span class="hl">Long, structured context.</span> An entire codebase plus docs plus conventions fits in the agent's window.</span></li>
+          <li><span><span class="hl">CLI and orchestration.</span> Agents <span class="hl-2">act</span>: they read, write, build, run tests, open PRs.</span></li>
+          <li><span><span class="hl">Open protocols (MCP).</span> Agents plug into your tools — issues, docs, build — not the other way around.</span></li>
+        </ul>
+      </div>
+      <div class="term">
+        <div class="c"># what wasn't true 18 months ago</div>
+        <div><span class="p">$</span> claude <span class="k">"explain the Gazebo plugin → ROS topic pipeline in systems/"</span></div>
+        <div class="c">  → answer in 30 s, with file:line pointers</div>
+        <br/>
+        <div><span class="p">$</span> claude <span class="k">"propose 2 ways to add a sonar to the AUV"</span></div>
+        <div class="c">  → two strategies, explicit trade-offs</div>
+        <br/>
+        <div><span class="p">$</span> claude <span class="k">"implement option B + tests + doc"</span></div>
+        <div class="c">  → readable first draft, ready to challenge</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. LINUX KERNEL -->
+  <section class="slide">
+    <span class="eyebrow">Industry signal · legitimacy</span>
+    <h2 class="title">The Linux kernel <em>made the call.</em></h2>
+
+    <div class="cols-2" style="margin-top:8px">
+      <div class="stack">
+        <p>After months of heated debate, the kernel published its <span class="hl">first official policy</span> on AI-assisted contributions.</p>
+        <ul class="checks">
+          <li>A dedicated document in <span class="dim">Documentation/process/coding-assistants.rst</span>.</li>
+          <li><span class="hl">AI is «&nbsp;just a tool&nbsp;»</span> — Torvalds' position, codified in the docs.</li>
+          <li>No ban. No evangelism. Full human responsibility.</li>
+          <li><span class="hl">Signed-off-by stays human</span> (DCO). The submitter owns the code, licence, and bugs.</li>
+        </ul>
+        <div class="pull" style="margin-top:24px">
+          The documentation is for good actors.
+          <span class="attr">— L. Torvalds · LKML, jan. 2026</span>
+        </div>
+      </div>
+      <div class="term">
+        <div class="c"># new commit tag</div>
+        <div class="s">Assisted-by: AGENT_NAME:MODEL_VERSION [TOOL1] [TOOL2]</div>
+        <br/>
+        <div class="c"># concrete example from the official doc</div>
+        <div class="s">Assisted-by: <span class="k">Claude:claude-3-opus</span> coccinelle sparse</div>
+        <br/>
+        <div class="c"># what the tag declares</div>
+        <div class="c">  → which agent contributed</div>
+        <div class="c">  → which model version</div>
+        <div class="c">  → which specialised analysis tools (not git, gcc, make)</div>
+        <br/>
+        <div class="c"># what the tag does NOT remove</div>
+        <div><span class="k">→ human responsibility stays total.</span></div>
+      </div>
+    </div>
+
+    <div class="sources">
+      <span><b>Sources</b> docs.kernel.org/process/coding-assistants.html</span>
+      <span>phoronix.com · jan. 2026</span>
+      <span>Linux 7.0 release</span>
+    </div>
+  </section>
+
+  <!-- 7. OPENCLAW -->
+  <section class="slide">
+    <span class="eyebrow">Industry signal · scale</span>
+    <h2 class="title">And the most active open source<br/>project <em>in GitHub history.</em></h2>
+
+    <div class="cols-2" style="margin-top:0">
+      <div class="stack">
+        <p><span class="hl">OpenClaw</span> (Peter Steinberger, founder of PSPDFKit): a personal AI agent, built agent-first end to end.</p>
+        <ul class="checks">
+          <li>Zero to <span class="hl">370,000+ stars</span> in months — unprecedented on GitHub.</li>
+          <li>~2,000 contributors, ~30,000 commits in 5 months.</li>
+          <li>The solo maintainer shipped <span class="hl">6,600 commits in January</span>, up to 600 in a single day.</li>
+          <li>Workflow: <span class="hl-2">5 to 10 agents in parallel</span>, continuous human supervision.</li>
+        </ul>
+        <p class="dim" style="margin-top:16px">Flip side: 1,142 security advisories in 153 days — 2× the kernel's rate. <span class="hl-2">The hidden cost of velocity.</span> We'll come back to this.</p>
+      </div>
+      <div class="stack" style="align-items:flex-start">
+        <div>
+          <div class="bignum-small"><span class="countup" data-target="370" data-suffix="k">0</span><span class="unit">stars</span></div>
+          <p class="dim" style="font-size:13px;margin-top:8px">in less than a year</p>
+        </div>
+        <div style="margin-top:12px">
+          <div class="bignum-small" style="font-size:clamp(48px,6vw,80px)"><span class="countup" data-target="6600" data-format="comma">0</span><span class="unit">commits / month</span></div>
+          <p class="dim" style="font-size:13px;margin-top:8px">one maintainer</p>
+        </div>
+        <div class="pull" style="margin-top:24px;max-width:32ch">
+          Close the loop — agents must be able to verify their own work.
+          <span class="attr">— P. Steinberger · Pragmatic Engineer, jan. 2026</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sources">
+      <span><b>Sources</b> newsletter.pragmaticengineer.com · «&nbsp;The creator of Clawd&nbsp;»</span>
+      <span>steipete.me · AI Engineer Summit keynote</span>
+      <span>Lex Fridman Podcast #491</span>
+    </div>
+  </section>
+
+  <!-- 8. DISTILLED PRINCIPLES -->
+  <section class="slide">
+    <span class="eyebrow">Industry signal · practice</span>
+    <h2 class="title">What the pioneers <em>learned.</em></h2>
+
+    <div class="cols-3" style="margin-top:24px">
+      <div class="card">
+        <span class="num">①</span>
+        <h4>Close the loop</h4>
+        <p>The agent must compile, run, and test its own work. Without a closed feedback loop, you're not doing serious work.</p>
+      </div>
+      <div class="card">
+        <span class="num">②</span>
+        <h4>Prompt &gt; pull request</h4>
+        <p>Steinberger reads the prompt more than the diff. The quality of the ask predicts the quality of the result better than the code does.</p>
+      </div>
+      <div class="card">
+        <span class="num">③</span>
+        <h4>Architecture &gt; code review</h4>
+        <p>The human debate moves up a level: we discuss decisions, not lines. Line-by-line review can be delegated.</p>
+      </div>
+      <div class="card">
+        <span class="num">④</span>
+        <h4>Transparency</h4>
+        <p><span class="dim">Assisted-by</span> tag, versioned prompts, clear attribution. No shame, no hiding. Linux set the standard.</p>
+      </div>
+      <div class="card">
+        <span class="num">⑤</span>
+        <h4>The human signs</h4>
+        <p>DCO is human-only. No blind auto-merge («&nbsp;dark factory&nbsp;»). Someone is on the hook for what ships.</p>
+      </div>
+      <div class="card">
+        <span class="num">⑥</span>
+        <h4>Learn the agent</h4>
+        <p>Like an instrument. First session frustrating? Normal. You learn its strengths and weak spots the way you'd learn a new teammate.</p>
+      </div>
+    </div>
+
+    <p class="footer-note" style="margin-top:24px">→ None of these is tied to a specific tool or vendor. <span class="hl">Portable.</span></p>
+  </section>
+
+  <!-- 9. SCENARIO -->
+  <section class="slide">
+    <span class="eyebrow">Back to LOTUSim · the scenario we'll walk through</span>
+    <h2 class="title">Adding a <em>sonar sensor</em><br/>to an underwater platform.</h2>
+
+    <div class="cols-2" style="margin-top:16px">
+      <div class="stack">
+        <p class="lead">
+          Credible case. Deliberately non-trivial.<br/>
+          Enough to touch the whole stack:
+        </p>
+        <ul class="checks">
+          <li><span class="hl">physics/</span> — simplified acoustic propagation model,</li>
+          <li><span class="hl">systems/</span> — Gazebo plugin that publishes on ROS,</li>
+          <li><span class="hl">interfaces/</span> — a new <span class="dim">SonarPing.msg</span>,</li>
+          <li><span class="hl">launch/</span> — demo scenario with the equipped AUV,</li>
+          <li><span class="hl">docs/</span> — the spec page and usage example.</li>
+        </ul>
+      </div>
+      <div class="card" style="padding:32px">
+        <span class="num">↳</span>
+        <h4>Stated objective</h4>
+        <p style="font-size:16px;color:var(--ink);line-height:1.6;margin-top:10px">
+          From zero knowledge of the repo,<br/>
+          to a <span class="hl">PR ready for review</span>,<br/>
+          in a single work session.
+        </p>
+        <p style="margin-top:16px"><span class="hl-2">No magic. Just method.</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. PIPELINE OVERVIEW -->
+  <section class="slide">
+    <span class="eyebrow">The method at a glance</span>
+    <h2 class="title">Five stages, <em>five agent roles.</em></h2>
+    <h3 class="sub" style="margin-top:-1.8em">— one possible breakdown, not a doctrine. Adapt to your project.</h3>
+
+    <div class="relay">
+      <div class="agents">
+        <div class="agent">
+          <div class="sprite-wrap"><div class="sprite" data-sprite="............|...X....X...|...X....X...|..XXXXXXXX..|.XXXXXXXXXX.|XX.XXXXXX.XX|XXXXXXXXXXXX|.XX.XXXX.XX.|X.X......X.X|.X........X."></div></div>
+          <div class="role-name">Cartographer</div>
+          <div class="verb">maps</div>
+        </div>
+        <div class="agent">
+          <div class="sprite-wrap"><div class="sprite" data-sprite="............|.....XX.....|....XXXX....|...XXXXXX...|..XXXXXXXX..|.XX.XXXX.XX.|XX.XXXXXX.XX|.XX.XXXX.XX.|X.X.XXXX.X.X|.X.X....X.X."></div></div>
+          <div class="role-name">Architect</div>
+          <div class="verb">plans</div>
+        </div>
+        <div class="agent">
+          <div class="sprite-wrap"><div class="sprite" data-sprite="X.X......X.X|.XX......XX.|..XXXXXXXX..|.XX.XXXX.XX.|XXXXXXXXXXXX|XX.XXXXXX.XX|XXXXXXXXXXXX|.XX.XXXX.XX.|X.X......X.X|.X........X."></div></div>
+          <div class="role-name">Companion</div>
+          <div class="verb">builds</div>
+        </div>
+        <div class="agent">
+          <div class="sprite-wrap"><div class="sprite" data-sprite="............|.XX......XX.|.XXXXXXXXXX.|XX.XXXXXX.XX|XX.XXXXXX.XX|XXXXXXXXXXXX|XX.XXXXXX.XX|XX.XXXXXX.XX|.XXXXXXXXXX.|.X.X....X.X."></div></div>
+          <div class="role-name">Writer</div>
+          <div class="verb">writes</div>
+        </div>
+        <div class="agent">
+          <div class="sprite-wrap"><div class="sprite" data-sprite="............|...XXXXXX...|..XXXXXXXX..|.X.XXXXXX.X.|XXXXXXXXXXXX|XX.XXXXXX.XX|XXXXXXXXXXXX|.XXX.XX.XXX.|X.X..XX..X.X|.X..XXXX..X."></div></div>
+          <div class="role-name">Reviewer</div>
+          <div class="verb">ships</div>
+        </div>
+      </div>
+      <div class="baton" aria-hidden="true"></div>
+    </div>
+
+    <p class="footer-note" style="margin-top:32px">→ Different agents. Different prompts. Different latitude. <span class="hl">Specialisation = quality.</span></p>
+  </section>
+
+  <!-- 11. STEP 1 - MAP -->
+  <section class="slide">
+    <span class="eyebrow">Stage 01 · MAP</span>
+    <h2 class="title">Understanding the codebase<br/>in <em>minutes</em>, not days.</h2>
+
+    <div class="cols-2">
+      <div class="stack">
+        <p>What the agent does, concretely:</p>
+        <ul class="checks">
+          <li>walks the tree, reads CMakeLists, follows <span class="dim">#include</span>s,</li>
+          <li>identifies where Gazebo plugins live and their lifecycle,</li>
+          <li>answers <span class="hl">«&nbsp;where is the AUV → ROS topic wiring defined?&nbsp;»</span> with files and lines,</li>
+          <li>produces a digest the next stages can reuse.</li>
+        </ul>
+        <p class="dim" style="margin-top:18px">Typical tools: <span class="hl">Claude Code</span>, local RAG on Gazebo/ROS docs, <span class="dim">grep/clangd</span>.</p>
+      </div>
+      <div class="term">
+        <div class="c">// abbreviated session</div>
+        <div><span class="p">›</span> <span class="k">how</span> are Gazebo sensor plugins wired to ROS in this repo?</div>
+        <div class="c"># systems/sensors/&lt;type&gt;/ : plugin + ROS publisher</div>
+        <div class="c"># pattern: gz::sim::System + ros_gz_bridge config</div>
+        <br/>
+        <div><span class="p">›</span> <span class="k">show</span> the closest existing analog to a sonar</div>
+        <div class="c"># systems/sensors/depth_camera/ — same lifecycle,</div>
+        <div class="c"># different physics + different msg type</div>
+        <br/>
+        <div><span class="p">›</span> <span class="k">summarise</span> contribution conventions (CONTRIBUTING.md)</div>
+        <div class="s">→ issue → label → fork → PR → review (maintainers or committee)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12. STEP 2 - PLAN -->
+  <section class="slide">
+    <span class="eyebrow">Stage 02 · PLAN · this is where taste lives</span>
+    <h2 class="title">Where <em>taste</em><br/>shows up most.</h2>
+
+    <div class="cols-2">
+      <div class="stack">
+        <p>The architect agent doesn't write code. It <span class="hl">proposes</span>.</p>
+        <ul class="checks">
+          <li>2 to 3 distinct integration strategies,</li>
+          <li>impact on existing modules,</li>
+          <li>risks, potential debt, alternatives,</li>
+          <li>a step-by-step execution plan, calibrated for the PR.</li>
+        </ul>
+        <div class="pull" style="margin-top:22px">
+          Taste and system design remain the ultimate moats.
+          <span class="attr">— P. Steinberger · State of the Claw, 2026</span>
+        </div>
+        <p style="margin-top:14px;font-size:15px">My human edge: <span class="hl-2">choosing</span>. Quickly. Wisely. <span class="dim">That's the part that doesn't transfer to the agent.</span></p>
+      </div>
+      <div class="card" style="padding:28px">
+        <span class="eyebrow" style="margin-bottom:14px;display:inline-flex">Expected output</span>
+        <div style="font-family:var(--mono);font-size:13px;line-height:1.8;color:var(--ink);margin-top:10px">
+          <span class="hl">Option A</span> — «&nbsp;ideal&nbsp;» analytical range-bearing sensor.<br/>
+          <span class="dim">+ simple, fast · − acoustically thin</span><br/><br/>
+          <span class="hl">Option B</span> — Gazebo ray-casting + tunable attenuation.<br/>
+          <span class="dim">+ realistic, extensible · − more code, more tests</span><br/><br/>
+          <span class="hl">Option C</span> — wrap a third-party acoustic plugin.<br/>
+          <span class="dim">+ state of the art · − external dep, licence check</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13. STEP 3 - BUILD -->
+  <section class="slide">
+    <span class="eyebrow"><span class="loop-icon">↻</span>Stage 03 · BUILD · close the loop</span>
+    <h2 class="title">First draft of code,<br/>in <em>one flow.</em></h2>
+
+    <div class="cols-2">
+      <div class="stack">
+        <p>What really changes is not typing speed. It's the <span class="hl">cycle</span>:</p>
+        <ul class="checks">
+          <li>you describe intent and constraints,</li>
+          <li>the agent proposes plugin C++ + CMake + message + tests,</li>
+          <li>you run <span class="dim">colcon build</span> and the sim locally,</li>
+          <li>you steer by exception, not by dictation.</li>
+        </ul>
+        <p style="margin-top:18px"><span class="hl-2">Local CI &gt; remote CI</span> — the agent sees the failure in 12 seconds, not 10 minutes.</p>
+      </div>
+      <div class="term">
+        <div class="c"># tight loop, agent at the wheel</div>
+        <div><span class="p">$</span> colcon build --packages-select lotusim_sonar</div>
+        <div class="c">Finished &lt;&lt;&lt; lotusim_sonar [12.4s]</div>
+        <br/>
+        <div><span class="p">$</span> ros2 launch lotusim auv_with_sonar.launch.py</div>
+        <div class="c">[INFO] sonar plugin loaded · publishing /auv/sonar @ 10 Hz</div>
+        <br/>
+        <div><span class="p">$</span> ros2 topic echo /auv/sonar --once</div>
+        <div class="s">header: ...   ranges: [4.21, 4.18, ..., 7.92]</div>
+        <br/>
+        <div><span class="p">›</span> <span class="k">add</span> a unit test for the ray-cast fallback case</div>
+        <div class="s">→ targeted patch, follows repo style</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14. STEP 4 - DOC -->
+  <section class="slide">
+    <span class="eyebrow">Stage 04 · DOC</span>
+    <h2 class="title">Docs <em>while you still know</em><br/>why you did it.</h2>
+
+    <div class="cols-2">
+      <div class="stack">
+        <p>The classic trap: documenting <span class="strike">later</span> <span class="dim">= never</span>.</p>
+        <ul class="checks">
+          <li>the agent writes in the project's format (Markdown, <span class="dim">docs/</span> structure),</li>
+          <li>it picks up the decisions from the PLAN stage,</li>
+          <li>it generates a Jupyter example consistent with <span class="dim">examples/jupyter-python/</span>,</li>
+          <li>you read, refine, sign off.</li>
+        </ul>
+        <p class="dim" style="margin-top:18px">→ Docs become a <span class="hl">deliverable of the same session</span>, not debt.</p>
+      </div>
+      <div class="card">
+        <span class="eyebrow" style="margin-bottom:14px;display:inline-flex">Why it works now</span>
+        <div style="margin-top:10px">
+          <p style="font-size:15px;color:var(--ink);line-height:1.6">
+            Docs-as-code fits the agent flow perfectly:
+            same repo, same PR, same review. The agent sees the code,
+            the tests, the launch scenario. It has everything it needs
+            to write what you would have written yourself <span class="hl-2">if you'd had the time</span>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15. STEP 5 - SHIP -->
+  <section class="slide">
+    <span class="eyebrow">Stage 05 · SHIP · the human signs</span>
+    <h2 class="title">A PR <em>you'll want</em><br/>to review.</h2>
+
+    <div class="cols-2">
+      <div class="stack">
+        <p>LOTUSim's process is explicit: <span class="hl">labelled issue → fork → PR → review</span>. Agents execute it to the letter, I sign.</p>
+        <ul class="checks">
+          <li>issue with the right label (<span class="dim">new_model</span>, <span class="dim">new_feature</span>…),</li>
+          <li>clean commit message, transparent about AI assistance,</li>
+          <li>PR description: goals, roadmap fit, technical decisions,</li>
+          <li>first <span class="hl-2">honest</span> critical pass before the human maintainer.</li>
+        </ul>
+      </div>
+      <div class="term">
+        <div class="c">feat(systems): add sonar sensor for underwater platforms</div>
+        <br/>
+        <div class="s">Why</div>
+        <div class="c">  Closes #NNN. Adds a configurable sonar sensor to the AUV...</div>
+        <br/>
+        <div class="s">Design notes</div>
+        <div class="c">  Chose option B (ray-cast + attenuation) over A.</div>
+        <div class="c">  Rationale: acoustically defensible, no external dep.</div>
+        <br/>
+        <div><span class="k">Assisted-by:</span> Claude:claude-opus-4.6 clangd</div>
+        <div><span class="k">Signed-off-by:</span> Cyril &lt;...&gt;</div>
+        <div class="c">  ↳ format borrowed from the Linux kernel</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 16. DEMO / RECAP -->
+  <section class="slide">
+    <span class="eyebrow">Demonstration</span>
+    <h2 class="title">From cloned repo<br/>to PR <em>in one session.</em></h2>
+
+    <div class="row" style="margin-top:24px;align-items:center">
+      <div class="bignum">≈<span class="reveal-num">3</span><span class="unit">hours</span></div>
+      <div class="stack" style="flex:1">
+        <p class="lead">
+          The real timeline:<br/>
+          <span class="dim">— 25 min MAP (understanding the repo)<br/>
+          — 20 min PLAN (3 options, reasoned choice)<br/>
+          — 70 min BUILD (C++ plugin + msg + green colcon)<br/>
+          — 25 min DOC (docs/ page + example notebook)<br/>
+          — 20 min SHIP (issue, PR, self-review)</span>
+        </p>
+        <p style="margin-top:14px"><span class="hl-2">And the code isn't disposable.</span> It's readable, tested, documented, and follows the repo's conventions.</p>
+      </div>
+    </div>
+
+    <p class="footer-note">→ [Live demo here, or sped-up video capture.]</p>
+  </section>
+
+  <!-- 17. LIMITS / HONESTY -->
+  <section class="slide">
+    <span class="eyebrow">Honest limits — the price of velocity</span>
+    <h2 class="title">What I'm <em>not</em> selling you.</h2>
+
+    <div class="cols-3" style="margin-top:24px">
+      <div class="card warn">
+        <span class="num">!</span>
+        <h4>Hallucinations</h4>
+        <p>In C++/ROS/Gazebo, the agent sometimes invents Gazebo APIs that no longer exist, or confuses versions. Build + tests = mandatory safety net.</p>
+      </div>
+      <div class="card warn">
+        <span class="num">!</span>
+        <h4>Attack surface</h4>
+        <p>OpenClaw: 1,142 advisories in 5 months, 2× the kernel rate. Velocity creates perimeter. Bake it into review.</p>
+      </div>
+      <div class="card warn">
+        <span class="num">!</span>
+        <h4>Silent debt</h4>
+        <p>Code that compiles and passes tests is not clean code. Without an architecture that fits in a human head, debt piles up fast.</p>
+      </div>
+      <div class="card danger">
+        <span class="num">×</span>
+        <h4>Security &amp; confidentiality</h4>
+        <p>Whatever leaves the workstation must be allowed to leave. Self-hosted models, local RAG, context separation: non-negotiable depending on the environment.</p>
+      </div>
+      <div class="card danger">
+        <span class="num">×</span>
+        <h4>Supervision is not optional</h4>
+        <p>No «&nbsp;dark factory&nbsp;» (Steinberger). An agent that can write and commit needs to be supervised like a junior dev — not as a metaphor.</p>
+      </div>
+      <div class="card danger">
+        <span class="num">×</span>
+        <h4>Not a substitute</h4>
+        <p>AI is «&nbsp;just a tool&nbsp;» (Torvalds). Without a real foundation in C++/ROS/physics, the agent helps you hit the wall faster.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18. WHAT IT CHANGES -->
+  <section class="slide">
+    <span class="eyebrow">What this changes for LOTUSim</span>
+    <h2 class="title">The entry barrier<br/>drops <em>an order of magnitude.</em></h2>
+
+    <div class="cols-2" style="margin-top:16px">
+      <div class="stack">
+        <ul class="checks">
+          <li><span class="hl">For a contributor:</span> from «&nbsp;weeks before my first contribution&nbsp;» to «&nbsp;a useful PR in the first session&nbsp;».</li>
+          <li><span class="hl">For the project:</span> more, better-prepared PRs → less friction in review → shorter cycles.</li>
+          <li><span class="hl">For the community:</span> profiles who wouldn't have crossed the technical wall — researchers, integrators, partners.</li>
+          <li><span class="hl">For the governance committee:</span> less «&nbsp;where do I start?&nbsp;», more «&nbsp;here's a documented proposal, what do you think?&nbsp;».</li>
+        </ul>
+      </div>
+      <div class="card" style="padding:32px">
+        <span class="eyebrow" style="display:inline-flex;margin-bottom:14px">The moment</span>
+        <p style="font-size:17px;line-height:1.6;color:var(--ink)">
+          LOTUSim is publishing its first roadmap in 2026, releases are biannual,
+          the governance committee will open to major contributors.
+        </p>
+        <p style="font-size:17px;line-height:1.6;color:var(--ink);margin-top:14px">
+          And the agentic tooling to <span class="hl">contribute cleanly</span>
+          is mature today: Linux wrote the contract, OpenClaw proved the scale.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 19. CLOSE -->
+  <section class="slide">
+    <div class="endgrid">
+      <div>
+        <span class="eyebrow">Closing</span>
+        <h1 class="display" style="margin-top:24px">
+          An open<br/>
+          simulator.<br/>
+          An <em style="font-style:normal;color:var(--accent)">augmented</em><br/>
+          practice.
+        </h1>
+      </div>
+      <div class="stack" style="padding-bottom:8px">
+        <p class="lead">
+          LOTUSim is a technically rich project — and it has never been more accessible than today.
+        </p>
+        <hr class="rule"/>
+        <p class="dim">— Clone the repo.<br/>— Ask an agent a question.<br/>— Pick an issue, or open one.<br/>— Come back with your first PR.</p>
+        <p style="margin-top:24px"><span class="hl">Thank you.</span> <span class="dim">· Questions?</span></p>
+        <p class="footer-note" style="margin-top:32px">Cyril · @handle · github.com/naval-group/LOTUSim</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="hud">
+  <div class="left">
+    <span class="dot"></span>
+    <span>From idea → LOTUSim contribution</span>
+  </div>
+  <div class="right">
+    <span id="counter">01 / 19</span>
+    <span>← → / space</span>
+  </div>
+</div>
+<div class="progress"><i id="progress"></i></div>
+
+<script>
+(function(){
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  let i = 0;
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  // ── Count-up animation for .countup elements
+  function formatVal(val, format){
+    if(format === 'comma') return val.toLocaleString('en-US');
+    return String(val);
+  }
+  function animateCountUp(el){
+    const target = parseInt(el.dataset.target, 10);
+    const suffix = el.dataset.suffix || '';
+    const format = el.dataset.format || 'plain';
+    const duration = Math.max(1000, Math.min(1800, 600 + target / 4));
+    const start = performance.now();
+    function tick(now){
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+      const val = Math.round(target * eased);
+      el.textContent = formatVal(val, format) + suffix;
+      if(t < 1) requestAnimationFrame(tick);
+    }
+    el.textContent = formatVal(0, format) + suffix;
+    requestAnimationFrame(tick);
+  }
+  function triggerCountUps(slide){
+    const list = slide.querySelectorAll('.countup');
+    list.forEach(el => {
+      // Small delay so it kicks in after the slide settles
+      setTimeout(() => animateCountUp(el), 250);
+    });
+  }
+
+  // ── Pixel sprite generation
+  // Converts a string-encoded bitmap (e.g. "..XX..|XXXX..") into an SVG.
+  // Compresses contiguous "X" runs in each row into single <rect>s.
+  function spriteToSVG(str){
+    const rows = str.split('|');
+    const w = rows[0].length;
+    const h = rows.length;
+    let rects = '';
+    for(let y=0; y<h; y++){
+      let runStart = -1;
+      for(let x=0; x<=w; x++){
+        const isOn = x<w && rows[y][x]==='X';
+        if(isOn && runStart===-1){
+          runStart = x;
+        } else if(!isOn && runStart!==-1){
+          rects += '<rect x="'+runStart+'" y="'+y+'" width="'+(x-runStart)+'" height="1"/>';
+          runStart = -1;
+        }
+      }
+    }
+    return '<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="xMidYMid meet" shape-rendering="crispEdges" fill="currentColor">'+rects+'</svg>';
+  }
+  function setupSprites(){
+    document.querySelectorAll('.sprite[data-sprite]').forEach(el => {
+      el.innerHTML = spriteToSVG(el.dataset.sprite);
+    });
+  }
+
+  // ── Card stagger — set custom delays based on order
+  function setupCardDelays(){
+    document.querySelectorAll('.cols-3, .cols-2').forEach(grid => {
+      let cardIdx = 0;
+      Array.from(grid.children).forEach(child => {
+        if(child.classList.contains('card')){
+          child.style.setProperty('--card-delay', (0.15 + cardIdx * 0.09) + 's');
+          cardIdx++;
+        }
+      });
+    });
+  }
+
+  function render(){
+    slides.forEach((s,k)=>s.classList.toggle('is-active', k===i));
+    counter.textContent = pad(i+1) + ' / ' + pad(slides.length);
+    progress.style.width = ((i+1)/slides.length*100) + '%';
+    location.hash = '#'+(i+1);
+    triggerCountUps(slides[i]);
+  }
+  function go(n){
+    i = Math.max(0, Math.min(slides.length-1, n));
+    render();
+  }
+  function next(){ go(i+1); }
+  function prev(){ go(i-1); }
+
+  document.addEventListener('keydown', e=>{
+    if(['ArrowRight','PageDown',' '].includes(e.key)){ e.preventDefault(); next(); }
+    else if(['ArrowLeft','PageUp'].includes(e.key)){ e.preventDefault(); prev(); }
+    else if(e.key==='Home'){ go(0); }
+    else if(e.key==='End'){ go(slides.length-1); }
+    else if(e.key==='f' || e.key==='F'){
+      if(!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+  });
+
+  document.getElementById('deck').addEventListener('click', e=>{
+    if(e.target.closest('a,button,input')) return;
+    next();
+  });
+
+  setupCardDelays();
+  setupSprites();
+
+  const h = parseInt((location.hash||'').replace('#',''),10);
+  if(!isNaN(h) && h>=1 && h<=slides.length) i = h-1;
+  render();
+})();
+</script>
+</body>
+</html>
