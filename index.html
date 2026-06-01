@@ -18,6 +18,7 @@
     --accent-light:#FF8A6B;
     --accent-deep:#C73E1F;
     --danger:#ff5a5a;
+    --glow:255,90,54;     /* accent as r,g,b — for glow shadows */
     --display:"Instrument Serif", "Times New Roman", serif;
     --mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   }
@@ -141,48 +142,37 @@
   .term .k{color:var(--accent-light)}
   .term .s{color:#cdd1d8}
 
-  /* Agent relay layout (replaces the old .pipe) */
-  .relay{position:relative;padding-bottom:64px;margin-top:8px}
-  .agents{display:flex;justify-content:space-around;align-items:flex-end;gap:8px}
-  .agent{
-    display:flex;flex-direction:column;align-items:center;gap:10px;
-    width:120px;text-align:center;position:relative;
+  /* Pipeline diagram (slide 10) — Map → Plan → Build → Doc → Ship */
+  .pipeline{position:relative;display:flex;align-items:stretch;gap:10px;margin-top:36px}
+  .stage{
+    flex:1 1 0;
+    border:1px solid var(--rule);background:var(--bg-2);
+    border-radius:2px;padding:22px 18px 20px;
+    display:flex;flex-direction:column;gap:8px;
   }
-  .sprite-wrap{
-    width:96px;height:80px;
-    display:flex;align-items:center;justify-content:center;
-    position:relative;
-  }
-  .sprite{
-    width:100%;height:100%;
-    color:var(--ink-dim);
-    transition:color .3s ease,filter .3s ease,transform .3s ease;
-  }
-  .sprite svg{display:block;width:100%;height:100%}
-  .role-name{
-    font-family:var(--mono);font-size:11px;letter-spacing:.22em;
-    color:var(--ink-dim);text-transform:uppercase;
-  }
-  .verb{
-    font-family:var(--display);font-style:italic;font-size:20px;
-    color:var(--ink);line-height:1;
-  }
+  .stage .st-no{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim)}
+  .stage .st-name{font-family:var(--display);font-style:italic;font-size:clamp(28px,3vw,40px);line-height:1;color:var(--ink)}
+  .stage .st-role{font-family:var(--mono);font-size:12px;line-height:1.45;color:var(--ink-dim)}
+  .stage.st-final{border-color:var(--accent)}
+  .stage.st-final .st-name{color:var(--accent)}
+  .st-link{align-self:center;color:var(--accent);font-size:18px;flex:0 0 auto}
 
-  /* Baton — a glowing orange orb that arcs between agents */
-  .baton{
-    position:absolute;
-    bottom:14px;left:10%;
-    width:14px;height:14px;
-    border-radius:50%;
-    background:var(--accent);
-    box-shadow:
-      0 0 10px var(--accent),
-      0 0 24px rgba(255,90,54,.55),
-      0 0 48px rgba(255,90,54,.25);
-    transform:translateX(-50%) translateY(0);
-    opacity:0;
-    pointer-events:none;
+  /* Sense → decide → act loop (slide 2) */
+  .loopflow{
+    margin-top:22px;border:1px solid var(--rule);background:var(--bg-2);
+    border-radius:2px;padding:22px 26px 18px;
+    display:flex;align-items:stretch;gap:14px;flex-wrap:wrap;
   }
+  .lf-node{flex:1 1 0;min-width:150px;display:flex;flex-direction:column;gap:6px}
+  .lf-k{font-family:var(--display);font-style:italic;font-size:26px;line-height:1;color:var(--accent)}
+  .lf-d{font-family:var(--mono);font-size:13px;line-height:1.45;color:var(--ink-dim)}
+  .lf-arrow{align-self:center;color:var(--accent);font-size:22px;line-height:1;flex:0 0 auto}
+  .lf-feedback{
+    flex:1 1 100%;margin-top:6px;padding-top:12px;border-top:1px dashed var(--rule);
+    font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-dim);
+    display:flex;align-items:center;gap:8px;
+  }
+  .lf-feedback::before{content:"↻";color:var(--accent);font-size:16px}
 
   ul.checks{list-style:none;padding:0;margin:0}
   ul.checks li{padding:10px 0;border-bottom:1px dashed var(--rule);display:flex;gap:14px;align-items:baseline}
@@ -307,100 +297,46 @@
     to{opacity:1;transform:none}
   }
 
-  /* 3) Agent relay — pixel agents pass a glowing baton.
-        Total cycle: 6s. Each agent lights up when the baton is at them.
-        The last agent (Reviewer) stays lit at the end. */
-
-  /* Baton — appears, then arcs between agents. Five hold-positions
-     (10%, 30%, 50%, 70%, 90%) with arcs interpolated. */
-  .slide.is-active .baton{
-    animation:batonRelay 6s ease-in-out forwards;
+  /* 3) Pipeline relay — stages cascade in, then a baton travels
+        Map→…→Ship and each stage glows as it passes (the motion
+        from the old agent relay, on the new clean pipeline). */
+  .stage{opacity:0;transform:translateY(10px)}
+  .slide.is-active .pipeline .stage{
+    animation:cardIn .5s cubic-bezier(.2,.7,.2,1) forwards,
+              stageGlow 1.3s ease forwards;
   }
-  @keyframes batonRelay{
-    /* Phase 1: at agent 1 */
-    0%      {left:10%;transform:translateX(-50%) translateY(0);opacity:0}
-    3%      {opacity:1}
-    10%     {left:10%;transform:translateX(-50%) translateY(0);opacity:1}
-    /* Arc 1→2 */
-    14%     {left:17%;transform:translateX(-50%) translateY(-22px)}
-    18%     {left:23%;transform:translateX(-50%) translateY(-22px)}
-    22%     {left:30%;transform:translateX(-50%) translateY(0)}
-    /* Phase 2: at agent 2 */
-    32%     {left:30%;transform:translateX(-50%) translateY(0)}
-    /* Arc 2→3 */
-    36%     {left:37%;transform:translateX(-50%) translateY(-22px)}
-    40%     {left:43%;transform:translateX(-50%) translateY(-22px)}
-    44%     {left:50%;transform:translateX(-50%) translateY(0)}
-    /* Phase 3: at agent 3 */
-    54%     {left:50%;transform:translateX(-50%) translateY(0)}
-    /* Arc 3→4 */
-    58%     {left:57%;transform:translateX(-50%) translateY(-22px)}
-    62%     {left:63%;transform:translateX(-50%) translateY(-22px)}
-    66%     {left:70%;transform:translateX(-50%) translateY(0)}
-    /* Phase 4: at agent 4 */
-    76%     {left:70%;transform:translateX(-50%) translateY(0)}
-    /* Arc 4→5 */
-    80%     {left:77%;transform:translateX(-50%) translateY(-22px)}
-    84%     {left:83%;transform:translateX(-50%) translateY(-22px)}
-    88%     {left:90%;transform:translateX(-50%) translateY(0)}
-    /* Phase 5: settled at agent 5 */
-    100%    {left:90%;transform:translateX(-50%) translateY(0);opacity:1}
+  .slide.is-active .pipeline .stage:nth-child(1){animation-delay:.15s,.6s}
+  .slide.is-active .pipeline .stage:nth-child(3){animation-delay:.27s,1.65s}
+  .slide.is-active .pipeline .stage:nth-child(5){animation-delay:.39s,2.7s}
+  .slide.is-active .pipeline .stage:nth-child(7){animation-delay:.51s,3.75s}
+  .slide.is-active .pipeline .stage:nth-child(9){animation-delay:.63s,4.7s}
+  @keyframes stageGlow{
+    0%  {box-shadow:none}
+    30% {box-shadow:0 0 0 1px var(--accent),0 0 22px rgba(var(--glow),.32)}
+    65% {box-shadow:0 0 0 1px var(--accent),0 0 22px rgba(var(--glow),.32)}
+    100%{box-shadow:none}
   }
-
-  /* Agents 1-4: light up when the baton arrives, then settle to "done" */
-  .slide.is-active .agent .sprite{
-    animation:agentLight 1s ease forwards;
+  /* the baton — a glowing orb that runs across the pipeline */
+  .baton{
+    position:absolute;top:-15px;left:10%;margin-left:-6px;
+    width:12px;height:12px;border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 9px var(--accent),0 0 20px rgba(var(--glow),.5),0 0 36px rgba(var(--glow),.25);
+    opacity:0;pointer-events:none;z-index:3;
   }
-  /* Agent 5: light up and STAY fully lit at the end */
-  .slide.is-active .agent:nth-child(5) .sprite{
-    animation:agentLightFinal 1s ease forwards;
-  }
-  /* Delays: roughly when the baton lands on each agent */
-  .slide.is-active .agent:nth-child(1) .sprite{animation-delay:.2s}
-  .slide.is-active .agent:nth-child(2) .sprite{animation-delay:1.5s}
-  .slide.is-active .agent:nth-child(3) .sprite{animation-delay:2.8s}
-  .slide.is-active .agent:nth-child(4) .sprite{animation-delay:4.1s}
-  .slide.is-active .agent:nth-child(5) .sprite{animation-delay:5.4s}
-
-  @keyframes agentLight{
-    0%   {color:var(--ink-dim);filter:none;transform:scale(1)}
-    30%  {color:var(--accent);filter:drop-shadow(0 0 14px rgba(255,90,54,.7));transform:scale(1.08)}
-    70%  {color:var(--accent);filter:drop-shadow(0 0 14px rgba(255,90,54,.7));transform:scale(1.08)}
-    100% {color:var(--accent);filter:drop-shadow(0 0 4px rgba(255,90,54,.25));transform:scale(1);opacity:.55}
-  }
-  @keyframes agentLightFinal{
-    0%   {color:var(--ink-dim);filter:none;transform:scale(1)}
-    100% {color:var(--accent);filter:drop-shadow(0 0 16px rgba(255,90,54,.75));transform:scale(1.08)}
-  }
-
-  /* Agent role-name and verb shift subtly when their agent is active */
-  .slide.is-active .agent .role-name,
-  .slide.is-active .agent .verb{
-    animation:labelLight 1s ease forwards;
-  }
-  .slide.is-active .agent:nth-child(5) .role-name,
-  .slide.is-active .agent:nth-child(5) .verb{
-    animation:labelLightFinal 1s ease forwards;
-  }
-  .slide.is-active .agent:nth-child(1) .role-name,
-  .slide.is-active .agent:nth-child(1) .verb{animation-delay:.2s}
-  .slide.is-active .agent:nth-child(2) .role-name,
-  .slide.is-active .agent:nth-child(2) .verb{animation-delay:1.5s}
-  .slide.is-active .agent:nth-child(3) .role-name,
-  .slide.is-active .agent:nth-child(3) .verb{animation-delay:2.8s}
-  .slide.is-active .agent:nth-child(4) .role-name,
-  .slide.is-active .agent:nth-child(4) .verb{animation-delay:4.1s}
-  .slide.is-active .agent:nth-child(5) .role-name,
-  .slide.is-active .agent:nth-child(5) .verb{animation-delay:5.4s}
-
-  @keyframes labelLight{
-    0%, 30%  {color:var(--ink-dim)}
-    50%, 70% {color:var(--accent)}
-    100%     {color:var(--ink-dim);opacity:.7}
-  }
-  @keyframes labelLightFinal{
-    0%   {color:var(--ink-dim)}
-    100% {color:var(--accent)}
+  .slide.is-active .baton{animation:batonRun 5.6s ease-in-out forwards}
+  @keyframes batonRun{
+    0%  {left:10%;opacity:0}
+    5%  {opacity:1}
+    13% {left:10%}
+    22% {left:30%}
+    33% {left:30%}
+    42% {left:50%}
+    53% {left:50%}
+    62% {left:70%}
+    73% {left:70%}
+    82% {left:90%}
+    100%{left:90%;opacity:1}
   }
 
   @keyframes spin{
@@ -476,16 +412,17 @@
 
   @media (max-width:900px){
     .cols-2,.cols-3,.endgrid{grid-template-columns:1fr;gap:24px}
-    .agents{flex-direction:column;align-items:center;gap:20px}
-    .baton{display:none}  /* baton arc doesn't work in stacked layout */
+    .pipeline{flex-direction:column}
+    .st-link{transform:rotate(90deg)}
   }
 
   @media print{
     html,body{overflow:visible;background:#fff;color:#000}
     .hud,.progress{display:none}
     .slide{display:flex !important;page-break-after:always;position:relative;height:100vh;min-height:100vh}
-    .card,.term > *{opacity:1 !important;transform:none !important}
+    .card,.stage,.term > *{opacity:1 !important;transform:none !important}
     .term::after,.loop-icon,.hud .dot{animation:none !important}
+    .baton{display:none !important}
   }
   @media (prefers-reduced-motion:reduce){
     *,*::before,*::after{
@@ -503,6 +440,41 @@
     height:128px;width:auto;display:block;
     opacity:.85;
   }
+
+  /* ───────────────────────────────────────────────────────────────
+     NAVAL GROUP — white-background theme.
+     Toggle at runtime: press "t", or open with ?theme=ng in the URL.
+     Palette pulled from naval-group.com brand tokens.
+  */
+  body.theme-ng{
+    --bg:#ffffff;
+    --bg-2:#f2f5fb;
+    --ink:#061835;        /* deep navy */
+    --ink-dim:#5b6b86;
+    --rule:#d3dce9;
+    --accent:#164194;     /* Naval Group blue */
+    --accent-light:#3d6ec2;
+    --accent-deep:#061835;
+    --danger:#ed051d;     /* Naval Group red */
+    --glow:22,65,148;     /* brand-blue glow */
+    background-image:none;
+  }
+  body.theme-ng::before{opacity:0}                         /* drop the dark film-grain overlay */
+  body.theme-ng .hud{
+    background:linear-gradient(180deg,transparent,rgba(6,24,53,.05));
+    border-top-color:var(--rule);
+  }
+  /* Terminals become a sharp deep-navy block on white — on-brand, high contrast */
+  body.theme-ng .term{
+    background:#061835;border-color:#13294d;color:#e7ecf6;box-shadow:none;
+  }
+  body.theme-ng .term .p{color:#78c8f5}
+  body.theme-ng .term .c{color:#8aa0c4}
+  body.theme-ng .term .k{color:#ffc851}
+  body.theme-ng .term .s{color:#dbe3f2}
+  body.theme-ng .term::after{color:#78c8f5}
+  /* Cover logo is a white silhouette → render it dark on white */
+  body.theme-ng .ng-logo{filter:brightness(0);opacity:.9}
 
 </style>
 </head>
@@ -526,8 +498,7 @@
           by AI agents.
         </h1>
         <p class="lead dim" style="max-width:54ch;margin-top:32px">
-          How well-orchestrated agents collapse the entry barrier<br/>
-          of a ROS&nbsp;/&nbsp;Gazebo&nbsp;/&nbsp;Xdyn simulator.
+          How well-orchestrated agents collapse the entry barrier of a ROS&nbsp;/&nbsp;Gazebo&nbsp;/&nbsp;Xdyn simulator.
         </p>
       </div>
 
@@ -548,29 +519,38 @@ g1RFMrXkGCv3WZz5iS9aKaUS6lGdtREMi8kSMnFCMTASJxkXoT5ePuMwDU5AreRcDg7DQHz3UX5IdeVV
     <h2 class="title">Two kinds of «&nbsp;agents&nbsp;»<br/>in this story.</h2>
 
     <div class="cols-2" style="margin-top:8px">
-      <div class="card" style="padding:28px">
+      <div class="card" style="padding:24px">
         <span class="eyebrow" style="display:inline-flex">Agent — in LOTUSim</span>
-        <h4 style="margin:14px 0 6px">Simulated platform</h4>
+        <h4 style="margin:12px 0 6px">A simulated platform</h4>
         <p style="color:var(--ink);font-size:15px;line-height:1.6">
-          A physical entity in the sim: aerial drone, surface vessel, underwater vehicle.<br/>
-          Behaviour, sensors, dynamics, environment.
+          A physical entity in the sim: aerial drone, surface vessel, underwater vehicle. Behaviour, sensors, dynamics, environment.
         </p>
-        <div style="margin-top:14px">
+        <div style="margin-top:12px">
           <span class="badge">Gazebo</span><span class="badge">ROS</span><span class="badge">Xdyn</span>
         </div>
       </div>
-      <div class="card" style="padding:28px">
+      <div class="card" style="padding:24px">
         <span class="eyebrow" style="display:inline-flex">Agent — in this talk</span>
-        <h4 style="margin:14px 0 6px">Tool-using LLM</h4>
+        <h4 style="margin:12px 0 6px">A model that <span class="hl">acts</span>, not just answers</h4>
         <p style="color:var(--ink);font-size:15px;line-height:1.6">
-          An assistant that can <span class="hl">read</span> code, <span class="hl">act</span> on a repo, <span class="hl">chain</span> steps — not a chatbot.
+          A chatbot only talks. An agent is given a body — it reads the repo, runs commands, sees the result, and tries again.
         </p>
-        <div style="margin-top:14px">
-          <span class="badge hl">Claude Code</span><span class="badge">MCP</span><span class="badge">CLI</span>
+        <div style="margin-top:12px">
+          <span class="badge hl">Claude Code</span><span class="badge">OpenClaw</span>
         </div>
       </div>
     </div>
-    <p class="footer-note" style="margin-top:36px">→ Today: how <span class="hl-2">the second kind</span> helps you contribute faster to <span class="hl">the first</span>.</p>
+
+    <div class="loopflow">
+      <div class="lf-node"><span class="lf-k">Perceive</span><span class="lf-d">reads the repo, runs tools, reads the output</span></div>
+      <span class="lf-arrow">→</span>
+      <div class="lf-node"><span class="lf-k">Decide</span><span class="lf-d">the model picks the next step</span></div>
+      <span class="lf-arrow">→</span>
+      <div class="lf-node"><span class="lf-k">Act</span><span class="lf-d">edits code, runs the build &amp; tests</span></div>
+      <span class="lf-feedback">feedback — the loop repeats, under human supervision</span>
+    </div>
+
+    <p class="footer-note" style="margin-top:20px">→ The very same <span class="hl">sense → decide → act</span> loop your platforms run. «&nbsp;Harness&nbsp;» = the body, loop &amp; guardrails around the model — <span class="hl-2">the second kind</span> helps you build <span class="hl">the first</span>.</p>
   </section>
 
   <!-- 3. HOOK -->
@@ -636,11 +616,11 @@ g1RFMrXkGCv3WZz5iS9aKaUS6lGdtREMi8kSMnFCMTASJxkXoT5ePuMwDU5AreRcDg7DQHz3UX5IdeVV
 
     <div class="cols-2">
       <div class="stack">
-        <p>Three things shifted recently:</p>
+        <p>Three things shifted <span class="hl">late 2025</span>:</p>
         <ul class="checks">
-          <li><span><span class="hl">Long, structured context.</span> An entire codebase plus docs plus conventions fits in the agent's window.</span></li>
-          <li><span><span class="hl">CLI and orchestration.</span> Agents <span class="hl-2">act</span>: they read, write, build, run tests, open PRs.</span></li>
-          <li><span><span class="hl">Open protocols (MCP).</span> Agents plug into your tools — issues, docs, build — not the other way around.</span></li>
+          <li><span><span class="hl">Models good at tool calling.</span> <span class="dim">Opus 4.5, GPT-5.2</span> — multi-step tool chains finally stay on track.</span></li>
+          <li><span><span class="hl">Long context windows.</span> A full codebase + docs + conventions fits in one shot — no more lossy summaries.</span></li>
+          <li><span><span class="hl">Sustained autonomy.</span> METR: at 50% reliability, today's models hold a task for <span class="hl-2">~hours</span>, not minutes — and the horizon doubles every ~4 months.</span></li>
         </ul>
       </div>
       <div class="term">
@@ -703,22 +683,22 @@ g1RFMrXkGCv3WZz5iS9aKaUS6lGdtREMi8kSMnFCMTASJxkXoT5ePuMwDU5AreRcDg7DQHz3UX5IdeVV
   <!-- 7. OPENCLAW -->
   <section class="slide">
     <span class="eyebrow">Industry signal · scale</span>
-    <h2 class="title">And the most active open source<br/>project <em>in GitHub history.</em></h2>
+    <h2 class="title">And the fastest-growing open<br/>source project <em>in GitHub history.</em></h2>
 
     <div class="cols-2" style="margin-top:0">
       <div class="stack">
-        <p><span class="hl">OpenClaw</span> (Peter Steinberger, founder of PSPDFKit): a personal AI agent, built agent-first end to end.</p>
+        <p><span class="hl">OpenClaw</span> (Peter Steinberger, founder of PSPDFKit): a personal AI agent, built agent-first end to end — now a large, independent open project.</p>
         <ul class="checks">
-          <li>Zero to <span class="hl">370,000+ stars</span> in 6 months — unprecedented on GitHub.</li>
-          <li>~2,300 contributors, <span class="hl">50,000+ commits</span> since November 2025.</li>
-          <li>The solo maintainer shipped <span class="hl">6,600 commits in January</span>, up to 600 in a single day.</li>
+          <li>Zero to <span class="hl">376,000+ stars</span> in 6 months — unprecedented on GitHub.</li>
+          <li>~2,300 contributors, <span class="hl">55,000+ commits</span> since November 2025.</li>
+          <li>The maintainer shipped <span class="hl">6,600 commits in January</span>, up to 600 in a single day.</li>
           <li>Workflow: <span class="hl-2">5 to 10 agents in parallel</span>, continuous human supervision.</li>
         </ul>
-        <p class="dim" style="margin-top:16px">Flip side: 500+ published security advisories in 6 months — ~2× the kernel's rate. <span class="hl-2">The hidden cost of velocity.</span> We'll come back to this.</p>
+        <p class="dim" style="margin-top:16px">Flip side: <span class="hl-2">~600 published security advisories</span> in 6 months. <span class="hl-2">The hidden cost of velocity.</span> We'll come back to this.</p>
       </div>
       <div class="stack" style="align-items:flex-start">
         <div>
-          <div class="bignum-small"><span class="countup" data-target="373" data-suffix="k">0</span><span class="unit">stars</span></div>
+          <div class="bignum-small"><span class="countup" data-target="376" data-suffix="k">0</span><span class="unit">stars</span></div>
           <p class="dim" style="font-size:13px;margin-top:8px">in 6 months</p>
         </div>
         <div style="margin-top:12px">
@@ -733,7 +713,7 @@ g1RFMrXkGCv3WZz5iS9aKaUS6lGdtREMi8kSMnFCMTASJxkXoT5ePuMwDU5AreRcDg7DQHz3UX5IdeVV
     </div>
 
     <div class="sources">
-      <span><b>Sources</b> github.com/openclaw/openclaw · sampled 2026-05-20</span>
+      <span><b>Sources</b> github.com/openclaw/openclaw · sampled 2026-06-01</span>
       <span>newsletter.pragmaticengineer.com · «&nbsp;The creator of Clawd&nbsp;»</span>
       <span>steipete.me · AI Engineer Summit keynote</span>
     </div>
@@ -744,7 +724,8 @@ g1RFMrXkGCv3WZz5iS9aKaUS6lGdtREMi8kSMnFCMTASJxkXoT5ePuMwDU5AreRcDg7DQHz3UX5IdeVV
     <span class="eyebrow">Industry signal · practice</span>
     <h2 class="title">What the pioneers <em>learned.</em></h2>
 
-    <div class="cols-3" style="margin-top:24px">
+    <div class="filler"></div>
+    <div class="cols-3" style="grid-template-columns:repeat(4,1fr);margin-top:0">
       <div class="card">
         <span class="num">①</span>
         <h4>Close the loop</h4>
@@ -762,22 +743,13 @@ g1RFMrXkGCv3WZz5iS9aKaUS6lGdtREMi8kSMnFCMTASJxkXoT5ePuMwDU5AreRcDg7DQHz3UX5IdeVV
       </div>
       <div class="card">
         <span class="num">④</span>
-        <h4>Transparency</h4>
-        <p><span class="dim">Assisted-by</span> tag, versioned prompts, clear attribution. No shame, no hiding. Linux set the standard.</p>
-      </div>
-      <div class="card">
-        <span class="num">⑤</span>
         <h4>The human signs</h4>
         <p>DCO is human-only. No blind auto-merge («&nbsp;dark factory&nbsp;»). Someone is on the hook for what ships.</p>
       </div>
-      <div class="card">
-        <span class="num">⑥</span>
-        <h4>Learn the agent</h4>
-        <p>Like an instrument. First session frustrating? Normal. You learn its strengths and weak spots the way you'd learn a new teammate.</p>
-      </div>
     </div>
+    <div class="filler"></div>
 
-    <p class="footer-note" style="margin-top:24px">→ None of these is tied to a specific tool or vendor. <span class="hl">Portable.</span></p>
+    <p class="footer-note">→ None of these is tied to a specific tool or vendor. <span class="hl">Portable.</span></p>
   </section>
 
   <!-- 9. SCENARIO -->
@@ -818,38 +790,42 @@ g1RFMrXkGCv3WZz5iS9aKaUS6lGdtREMi8kSMnFCMTASJxkXoT5ePuMwDU5AreRcDg7DQHz3UX5IdeVV
     <h2 class="title">Five stages, <em>five agent roles.</em></h2>
     <h3 class="sub" style="margin-top:-1.8em">— one possible breakdown, not a doctrine. Adapt to your project.</h3>
 
-    <div class="relay">
-      <div class="agents">
-        <div class="agent">
-          <div class="sprite-wrap"><div class="sprite" data-sprite="............|...X....X...|...X....X...|..XXXXXXXX..|.XXXXXXXXXX.|XX.XXXXXX.XX|XXXXXXXXXXXX|.XX.XXXX.XX.|X.X......X.X|.X........X."></div></div>
-          <div class="role-name">Cartographer</div>
-          <div class="verb">maps</div>
-        </div>
-        <div class="agent">
-          <div class="sprite-wrap"><div class="sprite" data-sprite="............|.....XX.....|....XXXX....|...XXXXXX...|..XXXXXXXX..|.XX.XXXX.XX.|XX.XXXXXX.XX|.XX.XXXX.XX.|X.X.XXXX.X.X|.X.X....X.X."></div></div>
-          <div class="role-name">Architect</div>
-          <div class="verb">plans</div>
-        </div>
-        <div class="agent">
-          <div class="sprite-wrap"><div class="sprite" data-sprite="X.X......X.X|.XX......XX.|..XXXXXXXX..|.XX.XXXX.XX.|XXXXXXXXXXXX|XX.XXXXXX.XX|XXXXXXXXXXXX|.XX.XXXX.XX.|X.X......X.X|.X........X."></div></div>
-          <div class="role-name">Companion</div>
-          <div class="verb">builds</div>
-        </div>
-        <div class="agent">
-          <div class="sprite-wrap"><div class="sprite" data-sprite="............|.XX......XX.|.XXXXXXXXXX.|XX.XXXXXX.XX|XX.XXXXXX.XX|XXXXXXXXXXXX|XX.XXXXXX.XX|XX.XXXXXX.XX|.XXXXXXXXXX.|.X.X....X.X."></div></div>
-          <div class="role-name">Writer</div>
-          <div class="verb">writes</div>
-        </div>
-        <div class="agent">
-          <div class="sprite-wrap"><div class="sprite" data-sprite="............|...XXXXXX...|..XXXXXXXX..|.X.XXXXXX.X.|XXXXXXXXXXXX|XX.XXXXXX.XX|XXXXXXXXXXXX|.XXX.XX.XXX.|X.X..XX..X.X|.X..XXXX..X."></div></div>
-          <div class="role-name">Reviewer</div>
-          <div class="verb">ships</div>
-        </div>
+    <div class="filler"></div>
+    <div class="pipeline">
+      <div class="stage">
+        <span class="st-no">Stage 01</span>
+        <span class="st-name">Map</span>
+        <span class="st-role">understand the repo</span>
+      </div>
+      <span class="st-link">→</span>
+      <div class="stage">
+        <span class="st-no">Stage 02</span>
+        <span class="st-name">Plan</span>
+        <span class="st-role">weigh 2–3 options</span>
+      </div>
+      <span class="st-link">→</span>
+      <div class="stage">
+        <span class="st-no">Stage 03</span>
+        <span class="st-name">Build</span>
+        <span class="st-role">code + tests, close the loop</span>
+      </div>
+      <span class="st-link">→</span>
+      <div class="stage">
+        <span class="st-no">Stage 04</span>
+        <span class="st-name">Doc</span>
+        <span class="st-role">write it down now</span>
+      </div>
+      <span class="st-link">→</span>
+      <div class="stage st-final">
+        <span class="st-no">Stage 05</span>
+        <span class="st-name">Ship</span>
+        <span class="st-role">PR — the human signs</span>
       </div>
       <div class="baton" aria-hidden="true"></div>
     </div>
+    <div class="filler"></div>
 
-    <p class="footer-note" style="margin-top:32px">→ Different agents. Different prompts. Different latitude. <span class="hl">Specialisation = quality.</span></p>
+    <p class="footer-note">→ Different agents. Different prompts. Different latitude. <span class="hl">Specialisation = quality.</span></p>
   </section>
 
   <!-- 11. STEP 1 - MAP -->
@@ -1006,7 +982,7 @@ g1RFMrXkGCv3WZz5iS9aKaUS6lGdtREMi8kSMnFCMTASJxkXoT5ePuMwDU5AreRcDg7DQHz3UX5IdeVV
         <div class="c">  Chose option B (ray-cast + attenuation) over A.</div>
         <div class="c">  Rationale: acoustically defensible, no external dep.</div>
         <br/>
-        <div><span class="k">Assisted-by:</span> Claude:claude-opus-4-7 clangd</div>
+        <div><span class="k">Assisted-by:</span> Claude:claude-opus-4-8 clangd</div>
         <div><span class="k">Signed-off-by:</span> Cyril &lt;...&gt;</div>
         <div class="c">  ↳ format borrowed from the Linux kernel</div>
       </div>
@@ -1041,26 +1017,17 @@ g1RFMrXkGCv3WZz5iS9aKaUS6lGdtREMi8kSMnFCMTASJxkXoT5ePuMwDU5AreRcDg7DQHz3UX5IdeVV
     <span class="eyebrow">Honest limits — the price of velocity</span>
     <h2 class="title">What I'm <em>not</em> selling you.</h2>
 
-    <div class="cols-3" style="margin-top:24px">
+    <div class="filler"></div>
+    <div class="cols-3" style="grid-template-columns:repeat(4,1fr);margin-top:0">
+      <div class="card danger">
+        <span class="num">×</span>
+        <h4>Security &amp; confidentiality</h4>
+        <p>Whatever leaves the workstation must be allowed to leave. Self-hosted models, local RAG, context separation: non-negotiable in a defence setting.</p>
+      </div>
       <div class="card warn">
         <span class="num">!</span>
         <h4>Hallucinations</h4>
         <p>In C++/ROS/Gazebo, the agent sometimes invents Gazebo APIs that no longer exist, or confuses versions. Build + tests = mandatory safety net.</p>
-      </div>
-      <div class="card warn">
-        <span class="num">!</span>
-        <h4>Attack surface</h4>
-        <p>OpenClaw: 1,142 advisories in 5 months, 2× the kernel rate. Velocity creates perimeter. Bake it into review.</p>
-      </div>
-      <div class="card warn">
-        <span class="num">!</span>
-        <h4>Silent debt</h4>
-        <p>Code that compiles and passes tests is not clean code. Without an architecture that fits in a human head, debt piles up fast.</p>
-      </div>
-      <div class="card danger">
-        <span class="num">×</span>
-        <h4>Security &amp; confidentiality</h4>
-        <p>Whatever leaves the workstation must be allowed to leave. Self-hosted models, local RAG, context separation: non-negotiable depending on the environment.</p>
       </div>
       <div class="card danger">
         <span class="num">×</span>
@@ -1073,6 +1040,7 @@ g1RFMrXkGCv3WZz5iS9aKaUS6lGdtREMi8kSMnFCMTASJxkXoT5ePuMwDU5AreRcDg7DQHz3UX5IdeVV
         <p>AI is «&nbsp;just a tool&nbsp;» (Torvalds). Without a real foundation in C++/ROS/physics, the agent helps you hit the wall faster.</p>
       </div>
     </div>
+    <div class="filler"></div>
   </section>
 
   <!-- 18. WHAT IT CHANGES -->
@@ -1179,34 +1147,6 @@ g1RFMrXkGCv3WZz5iS9aKaUS6lGdtREMi8kSMnFCMTASJxkXoT5ePuMwDU5AreRcDg7DQHz3UX5IdeVV
     });
   }
 
-  // ── Pixel sprite generation
-  // Converts a string-encoded bitmap (e.g. "..XX..|XXXX..") into an SVG.
-  // Compresses contiguous "X" runs in each row into single <rect>s.
-  function spriteToSVG(str){
-    const rows = str.split('|');
-    const w = rows[0].length;
-    const h = rows.length;
-    let rects = '';
-    for(let y=0; y<h; y++){
-      let runStart = -1;
-      for(let x=0; x<=w; x++){
-        const isOn = x<w && rows[y][x]==='X';
-        if(isOn && runStart===-1){
-          runStart = x;
-        } else if(!isOn && runStart!==-1){
-          rects += '<rect x="'+runStart+'" y="'+y+'" width="'+(x-runStart)+'" height="1"/>';
-          runStart = -1;
-        }
-      }
-    }
-    return '<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="xMidYMid meet" shape-rendering="crispEdges" fill="currentColor">'+rects+'</svg>';
-  }
-  function setupSprites(){
-    document.querySelectorAll('.sprite[data-sprite]').forEach(el => {
-      el.innerHTML = spriteToSVG(el.dataset.sprite);
-    });
-  }
-
   // ── Card stagger — set custom delays based on order
   function setupCardDelays(){
     document.querySelectorAll('.cols-3, .cols-2').forEach(grid => {
@@ -1243,6 +1183,7 @@ g1RFMrXkGCv3WZz5iS9aKaUS6lGdtREMi8kSMnFCMTASJxkXoT5ePuMwDU5AreRcDg7DQHz3UX5IdeVV
       if(!document.fullscreenElement) document.documentElement.requestFullscreen();
       else document.exitFullscreen();
     }
+    else if(e.key==='t' || e.key==='T'){ document.body.classList.toggle('theme-ng'); }
   });
 
   document.getElementById('deck').addEventListener('click', e=>{
@@ -1251,7 +1192,11 @@ g1RFMrXkGCv3WZz5iS9aKaUS6lGdtREMi8kSMnFCMTASJxkXoT5ePuMwDU5AreRcDg7DQHz3UX5IdeVV
   });
 
   setupCardDelays();
-  setupSprites();
+
+  // ── Naval Group theme: apply on load if ?theme=ng is present
+  if(new URLSearchParams(location.search).get('theme') === 'ng'){
+    document.body.classList.add('theme-ng');
+  }
 
   const h = parseInt((location.hash||'').replace('#',''),10);
   if(!isNaN(h) && h>=1 && h<=slides.length) i = h-1;
