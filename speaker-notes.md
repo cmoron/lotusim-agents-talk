@@ -1,124 +1,124 @@
-# Support de présentation — *From idea to LOTUSim contribution, faster with AI agents*
+# Speaker notes — *From idea to LOTUSim contribution, faster with AI agents*
 
 > Talk ~15 min · LOTUSim Technical Conference · Naval Group · 02/07/2026
-> Notes perso (FR) à garder sous les yeux pendant la prez. **Slides en anglais, notes en français.**
-> ⚠️ Ébauche — à retravailler / resserrer / chronométrer.
+> Personal notes to keep in front of me during the talk. **Slides and notes both in English.**
+> ⚠️ Draft — to refine / tighten / time.
 
-**Audience :** surtout des partenaires externes qui vont contribuer à la partie **open-source** de LOTUSim ; beaucoup ne sont **pas** experts agents IA.
-**Ton :** concret, honnête, zéro hype. Jargon bas. On vend une méthode, pas un produit.
-**Fil rouge :** la barrière d'entrée d'un simu robotique peut tomber d'un ordre de grandeur — sans sacrifier la qualité.
+**Audience:** mostly external partners who will contribute to the **open-source** part of LOTUSim; many are **not** AI-agent experts.
+**Tone:** concrete, honest, zero hype. Low jargon. We're selling a method, not a product.
+**Through-line:** the entry barrier of a robotics simulator can drop by an order of magnitude — without sacrificing quality.
 
-Budget ~15 min : intro 1' · contexte (3-7) 4' · méthode (8-14) 6' · démo 2' · limites/clôture 2'.
+Budget ~15 min: intro 1' · context (3-7) 4' · method (8-14) 6' · demo 2' · limits/close 2'.
 
 ---
 
 ## 1 · Cover
-- Me présenter en une ligne : Cyril, lead dev LOTUSim.
-- La promesse du talk : *« comment des agents IA bien orchestrés font tomber la barrière d'entrée d'un simu ROS / Gazebo / Xdyn. »*
-- Annoncer le format : 15 min, une méthode + une démo.
+- Introduce myself in one line: Cyril, lead dev of LOTUSim.
+- The promise of the talk: *"how well-orchestrated AI agents bring down the entry barrier of a ROS / Gazebo / Xdyn simulator."*
+- Announce the format: 15 min, one method + one demo.
 
-## 2 · Two kinds of « agents »
-- Désambiguïsation rapide, importante pour cette salle (MAS / robotique).
-- Dans **LOTUSim** : un agent = une plateforme simulée (drone, navire, sous-marin).
-- Dans **ce talk** : un agent = *a large language model given tools* — il lit le repo, édite des fichiers, lance build/tests/git, voit le résultat, recommence.
-- Punchline : **« the second kind of agent helps you build the first. »**
+## 2 · Two kinds of "agents"
+- Quick disambiguation, important for this room (MAS / robotics).
+- In **LOTUSim**: an agent = a simulated platform (drone, ship, submarine).
+- In **this talk**: an agent = *a large language model given tools* — it reads the repo, edits files, runs build/tests/git, sees the result, repeats.
+- Punchline: **"the second kind of agent helps you build the first."**
 
 ## 3 · The wall
-- Contribuer à un simu robotique, c'est un mur, sur 3 axes :
-  - surface technique (C++, CMake, ROS, Gazebo, SDF/URDF, Xdyn),
-  - couplage physique (un capteur = modèle + message ROS + plugin + scénario),
-  - conventions implicites jamais écrites dans le README.
-- Message : *« beaucoup de bonnes idées meurent entre "je veux contribuer" et "ma PR est prête". »*
+- Contributing to a robotics simulator is a wall, along 3 axes:
+  - technical surface (C++, CMake, ROS, Gazebo, SDF/URDF, Xdyn),
+  - physical coupling (one sensor = model + ROS message + plugin + scenario),
+  - implicit conventions never written down in the README.
+- Message: *"many good ideas die between 'I want to contribute' and 'my PR is ready'."*
 
 ## 4 · Why now
-- Pourquoi *maintenant* et pas il y a 18 mois ? 3 bascules fin 2025 :
-  - modèles enfin fiables sur le tool-calling (Opus 4.5, GPT-5.2),
-  - contextes longs (tout le codebase + docs en un coup),
-  - **autonomie tenue par la boucle agentique** : *map → build → run → test → review*, en boucle jusqu'au vert.
-- Insister : ce qui tient une tâche sur la durée, c'est la boucle, pas un prompt plus gros.
+- Why *now* and not 18 months ago? 3 shifts in late 2025:
+  - models finally reliable at tool-calling (Opus 4.5, GPT-5.2),
+  - long contexts (the whole codebase + docs in one go),
+  - **autonomy held by the agentic loop**: *map → build → run → test → review*, looping until green.
+- Stress: what sustains a task over time is the loop, not a bigger prompt.
 
-## 5 · The Linux kernel made the call  *(signal n°1 : légitimité)*
-- Même le noyau Linux — communauté la plus conservatrice qui soit — a **tranché** et publié sa 1re politique officielle sur l'IA (`coding-assistants.rst`).
-- Pas d'interdiction, pas d'évangélisme. **AI = just a tool**, responsabilité humaine **totale**, `Signed-off-by` reste humain.
-- Nouveau trailer `Assisted-by:` (montre quel agent / modèle / outils). Exemple tiré tel quel de la doc kernel.
+## 5 · The Linux kernel made the call  *(signal #1: legitimacy)*
+- Even the Linux kernel — the most conservative community there is — **made the call** and published its first official AI policy (`coding-assistants.rst`).
+- No ban, no evangelism. **AI = just a tool**, **full** human responsibility, `Signed-off-by` stays human.
+- New `Assisted-by:` trailer (shows which agent / model / tools). Example taken verbatim from the kernel doc.
 
-## 6 · OpenClaw  *(signal n°2 : échelle — SLIDE CLÉ, ~1.5 min)*
-- OpenClaw : le projet open-source à la croissance **la plus rapide de l'histoire de GitHub**.
-- Taille : **376 k stars**, **56 k commits** en 6 mois.
-- Mode de travail : **~100 agents en parallèle** qui codent **et se reviewent entre eux**, chassent les failles, dédupliquent les issues.
-- Le coût, à bien préciser : Steinberger **à lui seul** a brûlé **~1.3 M$ de tokens en un mois (avril 2026)** — financé par **OpenAI** comme recherche.
-- Garde-fous humains : *real-behavior proof* sur chaque PR, 28+ mainteneurs qui signent.
-- Le revers, qu'on assume : **~600 advisories de sécurité** en 6 mois → *le coût caché de la vitesse* (on y revient slide 16).
+## 6 · OpenClaw  *(signal #2: scale — KEY SLIDE, ~1.5 min)*
+- OpenClaw: the **fastest-growing** open-source project in GitHub history.
+- Size: **376k stars**, **56k commits** in 6 months.
+- Working mode: **~100 agents in parallel** that code **and review each other**, hunt for vulnerabilities, dedupe issues.
+- The cost, to spell out clearly: Steinberger **alone** burned **~$1.3M of tokens in one month (April 2026)** — funded by **OpenAI** as research.
+- Human guardrails: *real-behavior proof* on every PR, 28+ maintainers signing off.
+- The flip side, which we own: **~600 security advisories** in 6 months → *the hidden cost of speed* (back to it on slide 16).
 
 ## 7 · What the pioneers learned
-- 4 principes **portables**, indépendants de l'outil/vendor :
-  - **Close the loop** — l'agent compile, exécute, teste son propre travail.
-  - **Prompt > pull request** — la qualité de la demande prédit la qualité du résultat.
-  - **Architecture > code review** — le débat humain monte d'un cran.
-  - **The human signs** — pas de « dark factory », quelqu'un est responsable.
+- 4 **portable** principles, independent of tool/vendor:
+  - **Close the loop** — the agent compiles, runs, tests its own work.
+  - **Prompt > pull request** — the quality of the request predicts the quality of the result.
+  - **Architecture > code review** — the human debate moves up a level.
+  - **The human signs** — no "dark factory", someone is responsible.
 
 ## 8 · Scenario — sonar sensor
-- Cas concret qu'on va dérouler : **ajouter un capteur sonar à une plateforme sous-marine**.
-- Volontairement non-trivial : touche **toute la stack** (physics / systems / interfaces / launch / docs).
-- Objectif : de zéro connaissance du repo → une **PR prête à review**, en une session. *No magic, just method.*
+- Concrete case we'll walk through: **adding a sonar sensor to an underwater platform**.
+- Deliberately non-trivial: touches **the whole stack** (physics / systems / interfaces / launch / docs).
+- Goal: from zero knowledge of the repo → a **PR ready to review**, in one session. *No magic, just method.*
 
 ## 9 · Five stages, five agent roles
-- Ma méthode : 5 étapes, 5 rôles d'agents **spécialisés** (Map · Plan · Build · Doc · Ship).
-- Pointer l'animation : un agent passe le relais au suivant — *specialisation = quality*.
-- Bien préciser : *« une décomposition possible, pas une doctrine — adaptez à votre projet. »*
+- My method: 5 stages, 5 **specialized** agent roles (Map · Plan · Build · Doc · Ship).
+- Point to the animation: one agent passes the baton to the next — *specialization = quality*.
+- Make clear: *"one possible decomposition, not a doctrine — adapt it to your project."*
 
 ## 10 · Map
-- Étape 1 : comprendre le codebase en **minutes**, pas en jours.
-- L'agent parcourt l'arbre, suit les `#include`, situe les plugins Gazebo, répond *« où est câblé AUV → topic ROS ? »* avec fichier:ligne.
-- Outils : Claude Code, docs Gazebo/ROS à jour via context7/MCP.
+- Stage 1: understand the codebase in **minutes**, not days.
+- The agent walks the tree, follows the `#include`s, locates the Gazebo plugins, answers *"where is AUV → ROS topic wired?"* with file:line.
+- Tools: Claude Code, up-to-date Gazebo/ROS docs via context7/MCP.
 
-## 11 · Plan  *(là où le « taste » vit le plus)*
-- Étape 2 : l'architecte **ne code pas**, il **propose** 2-3 stratégies avec trade-offs, risques, dette.
-- Exemple à l'écran : option A (analytique) / B (ray-cast) / C (plugin tiers).
-- Mon edge humain : **choisir** — vite, bien. *C'est la part qui ne se délègue pas.*
+## 11 · Plan  *(where "taste" lives most)*
+- Stage 2: the architect **doesn't code**, it **proposes** 2-3 strategies with trade-offs, risks, debt.
+- Example on screen: option A (analytical) / B (ray-cast) / C (third-party plugin).
+- My human edge: **choosing** — fast, well. *That's the part that doesn't get delegated.*
 
 ## 12 · Build  *(close the loop)*
-- Étape 3 : ce qui change, ce n'est pas la vitesse de frappe, c'est **le cycle**.
-- **L'agent** (pas moi) lance `colcon build` + le simu, lit l'échec, corrige. Je pilote **par exception**.
-- **Local CI > remote CI** : l'agent voit l'échec en 12 s, pas en 10 min.
+- Stage 3: what changes isn't typing speed, it's **the cycle**.
+- **The agent** (not me) runs `colcon build` + the sim, reads the failure, fixes it. I steer **by exception**.
+- **Local CI > remote CI**: the agent sees the failure in 12 s, not in 10 min.
 
 ## 13 · Doc
-- Étape 4 : documenter **pendant qu'on sait encore pourquoi** (documenter « plus tard » = jamais).
-- Docs-as-code : même repo, même PR, même review ; l'agent reprend les décisions du Plan, génère un exemple notebook.
-- La doc devient un **livrable de la session**, pas une dette.
+- Stage 4: document **while we still know why** (documenting "later" = never).
+- Docs-as-code: same repo, same PR, same review; the agent picks up the decisions from Plan, generates a notebook example.
+- Docs become a **deliverable of the session**, not debt.
 
-## 14 · Ship  *(l'humain signe)*
-- Étape 5 : process LOTUSim explicite — *issue labellisée → fork → PR → review*. Les agents l'exécutent à la lettre, **je signe**.
-- Commit **transparent** sur l'assistance IA : `Assisted-by:` + `Signed-off-by:` (format emprunté au kernel).
+## 14 · Ship  *(the human signs)*
+- Stage 5: explicit LOTUSim process — *labeled issue → fork → PR → review*. The agents execute it to the letter, **I sign**.
+- **Transparent** commit about the AI assistance: `Assisted-by:` + `Signed-off-by:` (format borrowed from the kernel).
 
 ## 15 · Demo
-- De repo cloné à PR **en une session, ≈3 h** (timings réels, estimés : 25 Map / 20 Plan / 70 Build / 25 Doc / 20 Ship).
-- [LIVE ou vidéo accélérée — à décider.]
-- Message : **le code n'est pas jetable** — lisible, testé, documenté, aux conventions du repo.
+- From cloned repo to PR **in one session, ≈3 h** (real timings, estimated: 25 Map / 20 Plan / 70 Build / 25 Doc / 20 Ship).
+- [LIVE or sped-up video — to decide.]
+- Message: **the code is not throwaway** — readable, tested, documented, follows the repo's conventions.
 
-## 16 · What I'm not selling you  *(honnêteté)*
-- **Mind what's confidential** — l'open-source est public, le partager avec un agent est OK ; la prudence c'est le jour où le travail touche de l'**interne/classifié** → adapter la garde à la donnée. *(Ne pas faire peur : personne ici n'est obligé d'héberger des modèles locaux pour contribuer à l'open-source.)*
-- Hallucinations (APIs Gazebo inventées) → build + tests = filet obligatoire.
-- Supervision **pas optionnelle** (pas de « dark factory »).
-- **Pas un substitut** : sans socle C++/ROS/physique, l'agent te fait juste foncer dans le mur plus vite.
+## 16 · What I'm not selling you  *(honesty)*
+- **Mind what's confidential** — open-source is public, sharing it with an agent is OK; caution kicks in the day the work touches **internal/classified** material → match the guard to the data. *(Don't scare anyone: no one here has to host local models to contribute to the open-source.)*
+- Hallucinations (made-up Gazebo APIs) → build + tests = mandatory safety net.
+- Supervision **not optional** (no "dark factory").
+- **Not a substitute**: without a C++/ROS/physics foundation, the agent just lets you hit the wall faster.
 
 ## 17 · What it changes for LOTUSim
-- La barrière d'entrée tombe d'**un ordre de grandeur**.
-- Contributeur : *« des semaines avant ma 1re contribution »* → *« une PR utile dès la 1re session »*.
-- Projet : plus de PR mieux préparées → moins de friction en review.
-- Communauté : des profils qui n'auraient pas franchi le mur (chercheurs, intégrateurs, partenaires).
-- Mainteneurs : le débat monte à l'architecture, pas le ligne-à-ligne.
+- The entry barrier drops by **an order of magnitude**.
+- Contributor: *"weeks before my first contribution"* → *"a useful PR from the very first session"*.
+- Project: more, better-prepared PRs → less friction in review.
+- Community: profiles who wouldn't have made it over the wall (researchers, integrators, partners).
+- Maintainers: the debate rises to architecture, not line-by-line.
 
 ## 18 · Close
-- *« An open simulator. An augmented practice. »*
-- Call to action : **clone the repo · ask an agent a question · pick an issue · come back with your first PR.**
-- Merci — questions ?
+- *"An open simulator. An augmented practice."*
+- Call to action: **clone the repo · ask an agent a question · pick an issue · come back with your first PR.**
+- Thanks — questions?
 
 ---
 
-## Prep Q&A (à garder en tête, pas sur slide)
-- **Torvalds / kernel** : la citation a été retirée du deck ; son ton réel était plus sceptique (« the AI slop issue is NOT going to be solved with documentation »). Si on me cite la doc, l'assumer : la doc est *« for good actors »*, elle ne règle pas tout.
-- **Sécurité OpenClaw** : ~600 advisories = argument pour *close the loop* + revue, pas contre l'approche. Vitesse sans garde-fou = dette de sécu.
-- **Confidentialité défense** : si on me pousse, distinguer clairement *contribuer à l'open-source* (OK) vs *travailler sur de l'interne* (modèles self-hosted, séparation de contexte).
-- **« L'IA va remplacer les devs ? »** : non — *taste & system design remain the ultimate moats* (Steinberger). L'humain choisit et signe.
-- **Repo** : github.com/naval-group/LOTUSim.
+## Prep Q&A (keep in mind, not on slide)
+- **Torvalds / kernel**: the quote was removed from the deck; his actual tone was more skeptical ("the AI slop issue is NOT going to be solved with documentation"). If someone cites the doc at me, own it: the doc is *"for good actors"*, it doesn't solve everything.
+- **OpenClaw security**: ~600 advisories = an argument *for* close-the-loop + review, not against the approach. Speed without guardrails = security debt.
+- **Defense confidentiality**: if pushed, clearly distinguish *contributing to the open-source* (OK) vs *working on internal material* (self-hosted models, context separation).
+- **"Will AI replace devs?"**: no — *taste & system design remain the ultimate moats* (Steinberger). The human chooses and signs.
+- **Repo**: github.com/naval-group/LOTUSim.
