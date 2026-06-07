@@ -206,12 +206,6 @@
     padding:6px 12px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;
   }
 
-  .bignum{
-    font-family:var(--display);font-style:italic;
-    font-size:clamp(140px,22vw,300px);line-height:.9;color:var(--ink);letter-spacing:-.04em;
-  }
-  .bignum .unit{font-size:.25em;color:var(--ink-dim);font-style:normal;font-family:var(--mono);letter-spacing:.1em;vertical-align:top;margin-left:8px}
-
   .bignum-small{
     font-family:var(--display);font-style:italic;
     font-size:clamp(72px,9vw,128px);line-height:.95;color:var(--ink);letter-spacing:-.03em;
@@ -239,7 +233,6 @@
   }
   .sources b{color:var(--ink);font-weight:400;letter-spacing:.18em;margin-right:8px}
 
-  .endgrid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:end;height:100%}
 
   .filler{flex:1}
   .footer-note{margin-top:auto;font-size:12px;color:var(--ink-dim);letter-spacing:.1em;text-transform:uppercase}
@@ -400,24 +393,6 @@
   }
   @keyframes rotate{to{transform:rotate(360deg)}}  /* alias kept for safety */
 
-  /* 4b) Reveal-num — punctual reveal for single-digit big numbers
-        (scale + fade). Used on the "≈3 hours" demo slide. */
-  .reveal-num{
-    display:inline-block;
-    opacity:0;
-    transform:scale(.55);
-    transform-origin:center;
-  }
-  .slide.is-active .reveal-num{
-    animation:numIn .75s cubic-bezier(.2,.7,.2,1) forwards;
-    animation-delay:.35s;
-  }
-  @keyframes numIn{
-    0%{opacity:0;transform:scale(.55)}
-    60%{opacity:1;transform:scale(1.08)}
-    100%{opacity:1;transform:scale(1)}
-  }
-
   /* 6) Subtle highlight pulse on accent words at slide entrance */
   /* (kept off by default — only on .hl-pulse class) */
   .slide.is-active .hl-pulse{
@@ -431,7 +406,7 @@
   }
 
   @media (max-width:900px){
-    .cols-2,.cols-3,.endgrid{grid-template-columns:1fr;gap:24px}
+    .cols-2,.cols-3{grid-template-columns:1fr;gap:24px}
     .agents{flex-direction:column;align-items:center;gap:20px}
   }
 
@@ -531,41 +506,7 @@
     </div>
   </section>
 
-  <!-- 2. DISAMBIGUATION -->
-  <section class="slide">
-    <span class="eyebrow">Quick disambiguation</span>
-    <h2 class="title">Two kinds of «&nbsp;agents&nbsp;»<br/>in this story.</h2>
-
-    <div class="cols-2" style="margin-top:8px">
-      <div class="card" style="padding:24px">
-        <span class="eyebrow" style="display:inline-flex">Agent — in LOTUSim</span>
-        <h4 style="margin:12px 0 6px">A simulated platform</h4>
-        <p style="color:var(--ink);font-size:15px;line-height:1.6">
-          A physical entity in the sim: aerial drone, surface vessel, underwater vehicle. Behaviour, sensors, dynamics, environment.
-        </p>
-        <div style="margin-top:12px">
-          <span class="badge">Gazebo</span><span class="badge">ROS</span><span class="badge">Xdyn</span>
-        </div>
-      </div>
-      <div class="card" style="padding:24px">
-        <span class="eyebrow" style="display:inline-flex">Agent — in this talk</span>
-        <h4 style="margin:12px 0 6px">A model that <span class="hl">acts</span>, not just answers</h4>
-        <p style="color:var(--ink);font-size:15px;line-height:1.6">
-          A chatbot only talks. An agent is a large language model given <span class="hl">tools</span>: it reads the repo, edits files, runs commands (build, tests, git), sees the result, and tries again.
-        </p>
-        <div style="margin-top:12px">
-              <span class="badge">Claude Code</span>
-              <span class="badge">Codex</span>
-              <span class="badge">Openclaw</span>
-              <span class="badge">Hermes</span>
-        </div>
-      </div>
-    </div>
-
-    <p class="footer-note" style="margin-top:auto;text-align:center;font-size:24px;letter-spacing:0;text-transform:none;color:var(--ink)"><span class="hl-2">The second kind</span> of agent helps you build <span class="hl">the first</span>.</p>
-  </section>
-
-  <!-- 3. THE WALL -->
+  <!-- 2. THE WALL -->
   <section class="slide">
     <span class="eyebrow">Where we stand</span>
     <h2 class="title">Contributing to a robotics sim<br/><em>is a wall.</em></h2>
@@ -589,19 +530,53 @@
     <p class="footer-note">→ Many good ideas die between <span class="hl">«&nbsp;I want to contribute&nbsp;»</span> and <span class="hl">«&nbsp;my PR is ready&nbsp;»</span>.</p>
   </section>
 
+  <!-- 3. DISAMBIGUATION -->
+  <section class="slide">
+    <span class="eyebrow">Quick disambiguation</span>
+    <h2 class="title">Two kinds of «&nbsp;agents&nbsp;»<br/>in this story.</h2>
+
+    <div class="cols-2" style="margin-top:8px">
+      <div class="card" style="padding:24px">
+        <span class="eyebrow" style="display:inline-flex">Agent, in LOTUSim</span>
+        <h4 style="margin:12px 0 6px">A simulated platform</h4>
+        <p style="color:var(--ink);font-size:15px;line-height:1.6">
+          A physical entity in the sim: aerial drone, surface vessel, underwater vehicle. Behaviour, sensors, dynamics, environment.
+        </p>
+        <div style="margin-top:12px">
+          <span class="badge">Gazebo</span><span class="badge">ROS</span><span class="badge">Xdyn</span>
+        </div>
+      </div>
+      <div class="card" style="padding:24px">
+        <span class="eyebrow" style="display:inline-flex">Agent, in this talk</span>
+        <h4 style="margin:12px 0 6px">A model that <span class="hl">acts</span>, not just answers</h4>
+        <p style="color:var(--ink);font-size:15px;line-height:1.6">
+          A chatbot only talks. An agent is a large language model given <span class="hl">tools</span>: it reads the repo, edits files, runs commands (build, tests, git), sees the result, and tries again.
+        </p>
+        <div style="margin-top:12px">
+              <span class="badge">Claude Code</span>
+              <span class="badge">Codex</span>
+              <span class="badge">Openclaw</span>
+              <span class="badge">Hermes</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="footer-note" style="margin-top:auto;text-align:center;font-size:24px;letter-spacing:0;text-transform:none;color:var(--ink)"><span class="hl-2">The second kind</span> of agent helps you build <span class="hl">the first</span>.</p>
+  </section>
+
   <!-- 4. WHY NOW -->
   <section class="slide">
     <span class="eyebrow">Why now</span>
     <h2 class="title">AI agents crossed <em>the useful threshold.</em></h2>
-    <h3 class="sub">— not for demos. For production code.</h3>
+    <h3 class="sub">Not for demos. For production code.</h3>
 
     <div class="cols-2">
       <div class="stack">
         <p>Three things shifted <span class="hl">late 2025</span>:</p>
         <ul class="checks">
-          <li><span><span class="hl">Models good at tool calling.</span> <span class="dim">Opus 4.5, GPT-5.2</span> — multi-step tool chains finally stay on track.</span></li>
-          <li><span><span class="hl">Long context windows.</span> A full codebase + docs + conventions fits in one shot — no more lossy summaries.</span></li>
-          <li><span><span class="hl">Sustained autonomy.</span> What holds a task together over hours isn't a bigger prompt — it's the agentic loop: <span class="hl-2">map → build → run → test → review</span>, repeated until it's green.</span></li>
+          <li><span><span class="hl">Models good at tool calling.</span> With <span class="dim">Opus 4.5, GPT-5.2</span>, multi-step tool chains finally stay on track.</span></li>
+          <li><span><span class="hl">Long context windows.</span> A full codebase + docs + conventions fits in one shot, no more lossy summaries.</span></li>
+          <li><span><span class="hl">Sustained autonomy.</span> What holds a task together over hours isn't a bigger prompt. It's the agentic loop: <span class="hl-2">map → build → run → test → review</span>, repeated until it's green.</span></li>
         </ul>
       </div>
       <div class="term">
@@ -616,40 +591,38 @@
         <div class="c">  → readable first draft, ready to challenge</div>
       </div>
     </div>
+    <p class="footer-note">→ Which raises the real question: <span class="hl">how do we handle agent-assisted contributions, responsibly?</span> Two communities already answered.</p>
   </section>
 
   <!-- 5. LINUX KERNEL -->
   <section class="slide">
-    <span class="eyebrow">Industry signal · legitimacy</span>
-    <h2 class="title">The Linux kernel <em>made the call.</em></h2>
+    <span class="eyebrow">Industry signal · the Linux kernel</span>
+    <h2 class="title">The most conservative community<br/><em>took the time to answer.</em></h2>
 
     <div class="cols-2" style="margin-top:8px">
       <div class="stack">
-        <p>After months of heated debate, the kernel published its <span class="hl">first official policy</span> on AI-assisted contributions.</p>
+        <p>After months of debate, the <span class="hl">Linux kernel</span> published its first official policy on AI-assisted contributions, a document <span class="hl">addressed to the agents</span> and to the people who run them.</p>
         <ul class="checks">
-          <li>A dedicated document in <span class="dim">Documentation/process/coding-assistants.rst</span>.</li>
-          <li><span class="hl">AI is «&nbsp;just a tool&nbsp;»</span> — Torvalds' position, codified in the docs.</li>
-          <li>No ban. No evangelism. Full human responsibility.</li>
-          <li><span class="hl">Signed-off-by stays human</span> (DCO). The submitter owns the code, licence, and bugs.</li>
+          <li>A dedicated file, <span class="dim">Documentation/process/coding-assistants.rst</span>, written for AI tools, not just humans.</li>
+          <li>No ban, no hype. <span class="hl">AI is «&nbsp;just a tool&nbsp;»</span>.</li>
+          <li><span class="hl">«&nbsp;AI agents MUST NOT add Signed-off-by&nbsp;»</span>: only a human can certify the DCO.</li>
+          <li>The human reviews everything, signs, and owns the licence and the bugs.</li>
         </ul>
         <div class="pull" style="margin-top:24px">
-          The most conservative community in open source wrote the rules — rather than ban it.
+          Their answer: yes, under one condition. The human who signs answers for every line.
         </div>
       </div>
       <div class="term">
-        <div class="c"># new commit tag</div>
+        <div class="c"># linux/Documentation/process/coding-assistants.rst</div>
         <div class="s">Assisted-by: AGENT_NAME:MODEL_VERSION [TOOL1] [TOOL2]</div>
         <br/>
-        <div class="c"># verbatim example — linux/Documentation/process/coding-assistants.rst</div>
+        <div class="c"># verbatim example from the doc</div>
         <div class="s">Assisted-by: <span class="k">Claude:claude-3-opus</span> coccinelle sparse</div>
         <br/>
-        <div class="c"># what the tag declares</div>
-        <div class="c">  → which agent contributed</div>
-        <div class="c">  → which model version</div>
-        <div class="c">  → which specialised analysis tools (not git, gcc, make)</div>
-        <br/>
-        <div class="c"># what the tag does NOT remove</div>
-        <div><span class="k">→ human responsibility stays total.</span></div>
+        <div class="c"># the line that does NOT move</div>
+        <div><span class="k">→ AI agents MUST NOT add Signed-off-by</span></div>
+        <div class="c">  → only a human certifies the DCO</div>
+        <div class="c">  → the human reviews all AI code, and owns it</div>
       </div>
     </div>
 
@@ -662,31 +635,31 @@
 
   <!-- 6. OPENCLAW -->
   <section class="slide">
-    <span class="eyebrow">Industry signal · scale</span>
-    <h2 class="title">And the fastest-growing open<br/>source project <em>in GitHub history.</em></h2>
+    <span class="eyebrow">Industry signal · built on agents</span>
+    <h2 class="title">And the fastest-growing project<br/><em>wrote it all down.</em></h2>
 
     <div class="cols-2" style="margin-top:0">
       <div class="stack">
-        <p><span class="hl">OpenClaw</span> (Peter Steinberger, founder of PSPDFKit): a personal AI agent, built agent-first end to end — now a large, independent open project. Its creator has since been hired by OpenAI.</p>
+        <p><span class="hl">OpenClaw</span> (Peter Steinberger): built agent-first, end to end, and now the fastest-growing open-source project in GitHub history. It runs on what they <span class="hl">wrote down</span> for the agents:</p>
         <ul class="checks">
-          <li>Zero to <span class="hl">376,000+ stars</span> in 6 months — unprecedented on GitHub.</li>
-          <li>~2,300 contributors — in barely six months.</li>
-          <li><span class="hl-2">~100 agents in parallel</span>: they code, review each other's PRs, hunt security bugs, dedupe issues.</li>
-          <li>Guardrails stay human: every PR needs <span class="hl">real-behavior proof</span>, 28+ maintainers sign off.</li>
+          <li><span class="hl">VISION.md</span>: what to build, and what to refuse.</li>
+          <li><span class="hl">AGENTS.md</span>: how to map, build and test, right in the repo.</li>
+          <li>Every PR needs <span class="hl">real-behavior proof</span>; 28+ humans sign the merge.</li>
+          <li>Steinberger's conclusion today: <span class="hl-2">the human is still the bottleneck, on purpose.</span></li>
         </ul>
-        <p class="dim" style="margin-top:16px">The cost: <span class="hl-2">≈$1.3M of tokens in a single month</span> (April 2026) — Steinberger's agents alone, now funded by OpenAI as research. Flip side: <span class="hl-2">~600 published security advisories</span> in 6 months — the hidden cost of velocity. We'll come back to this.</p>
+        <p class="dim" style="margin-top:16px">To get there, Steinberger himself runs <span class="hl-2">~100 agents in parallel</span> (<span class="hl-2">≈$1.3M of tokens in one month</span>, OpenAI-funded; he was since hired by OpenAI). The lesson isn't the scale, it's the discipline: <span class="hl">an agent is only as good as the docs and rules you give it.</span></p>
       </div>
       <div class="stack" style="align-items:flex-start">
         <div>
           <div class="bignum-small"><span class="countup" data-target="376" data-suffix="k">0</span><span class="unit">stars</span></div>
-          <p class="dim" style="font-size:13px;margin-top:8px">in 6 months</p>
+          <p class="dim" style="font-size:13px;margin-top:8px">from zero, in months</p>
         </div>
         <div style="margin-top:12px">
           <div class="bignum-small" style="font-size:clamp(48px,6vw,80px)"><span class="countup" data-target="56098" data-format="comma">0</span><span class="unit">commits</span></div>
-          <p class="dim" style="font-size:13px;margin-top:8px">since November 2025</p>
+          <p class="dim" style="font-size:13px;margin-top:8px">in barely a year, mostly agent-written</p>
         </div>
         <div class="pull" style="margin-top:24px;max-width:32ch">
-          Close the loop — agents must be able to verify their own work.
+          Close the loop: agents must be able to verify their own work.
           <span class="attr">— P. Steinberger · Pragmatic Engineer, jan. 2026</span>
         </div>
       </div>
@@ -699,40 +672,7 @@
     </div>
   </section>
 
-  <!-- 7. DISTILLED PRINCIPLES -->
-  <section class="slide">
-    <span class="eyebrow">Industry signal · practice</span>
-    <h2 class="title">What the pioneers <em>learned.</em></h2>
-
-    <div class="filler"></div>
-    <div class="cols-3" style="grid-template-columns:repeat(4,1fr);margin-top:0">
-      <div class="card">
-        <span class="num">①</span>
-        <h4>Close the loop</h4>
-        <p>The agent must compile, run, and test its own work. Without a closed feedback loop, you're not doing serious work.</p>
-      </div>
-      <div class="card">
-        <span class="num">②</span>
-        <h4>Prompt &gt; pull request</h4>
-        <p>Steinberger reads the prompt more than the diff. The quality of the ask predicts the quality of the result better than the code does.</p>
-      </div>
-      <div class="card">
-        <span class="num">③</span>
-        <h4>Architecture &gt; code review</h4>
-        <p>The human debate moves up a level: we discuss decisions, not lines. Line-by-line review can be delegated.</p>
-      </div>
-      <div class="card">
-        <span class="num">④</span>
-        <h4>The human signs</h4>
-        <p>DCO is human-only. No blind auto-merge («&nbsp;dark factory&nbsp;»). Someone is on the hook for what ships.</p>
-      </div>
-    </div>
-    <div class="filler"></div>
-
-    <p class="footer-note">→ None of these is tied to a specific tool or vendor. <span class="hl">Portable.</span></p>
-  </section>
-
-  <!-- 8. SCENARIO -->
+  <!-- 7. SCENARIO -->
   <section class="slide">
     <span class="eyebrow">Back to LOTUSim · the scenario we'll walk through</span>
     <h2 class="title">Adding a <em>sonar sensor</em><br/>to an underwater platform.</h2>
@@ -744,11 +684,11 @@
           Enough to touch the whole stack:
         </p>
         <ul class="checks">
-          <li><span class="hl">physics/</span> — simplified acoustic propagation model,</li>
-          <li><span class="hl">systems/</span> — Gazebo plugin that publishes on ROS,</li>
-          <li><span class="hl">interfaces/</span> — a new <span class="dim">SonarPing.msg</span>,</li>
-          <li><span class="hl">launch/</span> — demo scenario with the equipped AUV,</li>
-          <li><span class="hl">docs/</span> — the spec page and usage example.</li>
+          <li><span class="hl">physics/</span>: simplified acoustic propagation model,</li>
+          <li><span class="hl">systems/</span>: Gazebo plugin that publishes on ROS,</li>
+          <li><span class="hl">interfaces/</span>: a new <span class="dim">SonarPing.msg</span>,</li>
+          <li><span class="hl">launch/</span>: demo scenario with the equipped AUV,</li>
+          <li><span class="hl">docs/</span>: the spec page and usage example.</li>
         </ul>
       </div>
       <div class="card" style="padding:32px">
@@ -762,13 +702,14 @@
         <p style="margin-top:16px"><span class="hl-2">No magic. Just method.</span></p>
       </div>
     </div>
+    <p class="footer-note">→ The agent wires the <span class="hl">structure</span>: plugin, message, a zero-stub so it compiles. The <span class="hl-2">acoustic model stays the engineer's</span>, plugged in and validated before merge.</p>
   </section>
 
-  <!-- 9. PIPELINE OVERVIEW -->
+  <!-- 8. PIPELINE OVERVIEW -->
   <section class="slide">
     <span class="eyebrow">The method at a glance</span>
     <h2 class="title">Five stages, <em>five agent roles.</em></h2>
-    <h3 class="sub" style="margin-top:-1.8em">— one possible breakdown, not a doctrine. Adapt to your project.</h3>
+    <h3 class="sub" style="margin-top:-1.8em">one possible breakdown, not a doctrine. Adapt it to your project.</h3>
 
     <div class="relay">
       <div class="agents">
@@ -800,210 +741,79 @@
           <div class="sprite-wrap"><div class="sprite" data-sprite="............|...XXXXXX...|..XXXXXXXX..|.X.XXXXXX.X.|XXXXXXXXXXXX|XX.XXXXXX.XX|XXXXXXXXXXXX|.XXX.XX.XXX.|X.X..XX..X.X|.X..XXXX..X."></div></div>
           <div class="role-name">Reviewer</div>
           <div class="verb">ships</div>
-          <div class="role-desc">PR — the human signs</div>
+          <div class="role-desc">PR, the human signs</div>
         </div>
       </div>
       <div class="baton" aria-hidden="true"></div>
     </div>
 
-    <p class="footer-note" style="margin-top:32px">→ Different agents. Different prompts. Different latitude. <span class="hl">Specialisation = quality.</span></p>
+    <p class="footer-note" style="margin-top:32px">→ <span class="hl">One agent, five hats.</span> Not a hundred in parallel. The craft is in the sequence.</p>
   </section>
 
-  <!-- 10. STEP 1 - MAP -->
+  <!-- 9. THE LOOP IN ACTION -->
   <section class="slide">
-    <span class="eyebrow">Stage 01 · MAP</span>
-    <h2 class="title">Understanding the codebase<br/>in <em>minutes</em>, not days.</h2>
+    <span class="eyebrow"><span class="loop-icon">↻</span>The method · from clone to PR in one session</span>
+    <h2 class="title">The loop, <em>on the sonar.</em></h2>
 
     <div class="cols-2">
       <div class="stack">
-        <p>What the agent does, concretely:</p>
         <ul class="checks">
-          <li>walks the tree, reads CMakeLists, follows <span class="dim">#include</span>s,</li>
-          <li>identifies where Gazebo plugins live and their lifecycle,</li>
-          <li>answers <span class="hl">«&nbsp;where is the AUV → ROS topic wiring defined?&nbsp;»</span> with files and lines,</li>
-          <li>produces a digest the next stages can reuse.</li>
+          <li><span class="lbl-col hl">Map</span><span class="desc-col">the agent reads the repo, finds the closest analog (a depth-camera plugin), answers with file:line, in minutes, not days.</span></li>
+          <li><span class="lbl-col hl">Plan</span><span class="desc-col">it proposes 2–3 strategies with trade-offs. <span class="hl-2">I choose.</span></span></li>
+          <li><span class="lbl-col hl">Build</span><span class="desc-col">it runs <span class="dim">colcon</span> + the sim, reads the failure, fixes, then <span class="hl-2">closes the loop</span> itself.</span></li>
+          <li><span class="lbl-col hl">Doc</span><span class="desc-col">it writes the docs page + a notebook example while the «&nbsp;why&nbsp;» is fresh.</span></li>
+          <li><span class="lbl-col hl">Ship</span><span class="desc-col">labelled issue → fork → PR, <span class="dim">Assisted-by:</span> + I sign.</span></li>
         </ul>
-        <p class="dim" style="margin-top:18px">Typical tools: <span class="hl">Claude Code</span>, up-to-date Gazebo/ROS docs via <span class="hl">context7</span>/MCP, <span class="dim">grep/clangd</span>.</p>
-      </div>
-      <div class="term">
-        <div class="c">// abbreviated session</div>
-        <div><span class="p">›</span> <span class="k">how</span> are Gazebo sensor plugins wired to ROS in this repo?</div>
-        <div class="c"># systems/sensors/&lt;type&gt;/ : plugin + ROS publisher</div>
-        <div class="c"># pattern: gz::sim::System + ros_gz_bridge config</div>
-        <br/>
-        <div><span class="p">›</span> <span class="k">show</span> the closest existing analog to a sonar</div>
-        <div class="c"># systems/sensors/depth_camera/ — same lifecycle,</div>
-        <div class="c"># different physics + different msg type</div>
-        <br/>
-        <div><span class="p">›</span> <span class="k">summarise</span> contribution conventions (CONTRIBUTING.md)</div>
-        <div class="s">→ issue → label → fork → PR → review (maintainers or committee)</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 11. STEP 2 - PLAN -->
-  <section class="slide">
-    <span class="eyebrow">Stage 02 · PLAN · this is where taste lives</span>
-    <h2 class="title">Where <em>taste</em><br/>shows up most.</h2>
-
-    <div class="cols-2">
-      <div class="stack">
-        <p>The architect agent doesn't write code. It <span class="hl">proposes</span>.</p>
-        <ul class="checks">
-          <li>2 to 3 distinct integration strategies,</li>
-          <li>impact on existing modules,</li>
-          <li>risks, potential debt, alternatives,</li>
-          <li>a step-by-step execution plan, calibrated for the PR.</li>
-        </ul>
-        <div class="pull" style="margin-top:22px">
+        <div class="pull" style="margin-top:18px;max-width:34ch">
           Taste and system design remain the ultimate moats.
           <span class="attr">— P. Steinberger · State of the Claw, 2026</span>
         </div>
-        <p style="margin-top:14px;font-size:15px">My human edge: <span class="hl-2">choosing</span>. Quickly. Wisely. <span class="dim">That's the part that doesn't transfer to the agent.</span></p>
-      </div>
-      <div class="card" style="padding:28px">
-        <span class="eyebrow" style="margin-bottom:14px;display:inline-flex">Expected output</span>
-        <div style="font-family:var(--mono);font-size:13px;line-height:1.8;color:var(--ink);margin-top:10px">
-          <span class="hl">Option A</span> — «&nbsp;ideal&nbsp;» analytical range-bearing sensor.<br/>
-          <span class="dim">+ simple, fast · − acoustically thin</span><br/><br/>
-          <span class="hl">Option B</span> — Gazebo ray-casting + tunable attenuation.<br/>
-          <span class="dim">+ realistic, extensible · − more code, more tests</span><br/><br/>
-          <span class="hl">Option C</span> — wrap a third-party acoustic plugin.<br/>
-          <span class="dim">+ state of the art · − external dep, licence check</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 12. STEP 3 - BUILD -->
-  <section class="slide">
-    <span class="eyebrow"><span class="loop-icon">↻</span>Stage 03 · BUILD · close the loop</span>
-    <h2 class="title">First draft of code,<br/>in <em>one flow.</em></h2>
-
-    <div class="cols-2">
-      <div class="stack">
-        <p>What really changes is not typing speed. It's the <span class="hl">cycle</span>:</p>
-        <ul class="checks">
-          <li>you describe intent and constraints,</li>
-          <li>the agent proposes plugin C++ + CMake + message + tests,</li>
-          <li>the agent runs <span class="dim">colcon build</span> and the sim, reads the output, fixes,</li>
-          <li>you steer by exception, not by dictation.</li>
-        </ul>
-        <p style="margin-top:18px"><span class="hl-2">Local CI &gt; remote CI</span> — the agent sees the failure in 12 seconds, not 10 minutes.</p>
       </div>
       <div class="term">
-        <div class="c"># the agent drives this loop — build, run, inspect, fix</div>
+        <div class="c"># the agent drives the loop: build, run, inspect, fix</div>
         <div><span class="p">$</span> colcon build --packages-select lotusim_sonar</div>
         <div class="c">Finished &lt;&lt;&lt; lotusim_sonar [12.4s]</div>
         <br/>
         <div><span class="p">$</span> ros2 launch lotusim auv_with_sonar.launch.py</div>
-        <div class="c">[INFO] sonar plugin loaded · publishing /auv/sonar @ 10 Hz</div>
+        <div class="c">[INFO] sonar plugin loaded · /auv/sonar @ 10 Hz</div>
         <br/>
         <div><span class="p">$</span> ros2 topic echo /auv/sonar --once</div>
         <div class="s">header: ...   ranges: [4.21, 4.18, ..., 7.92]</div>
         <br/>
         <div><span class="p">›</span> <span class="k">add</span> a unit test for the ray-cast fallback case</div>
-        <div class="s">→ targeted patch, follows repo style</div>
+        <div class="s">→ targeted patch, follows repo style · code you own and can read</div>
       </div>
     </div>
+
+    <p class="footer-note"><span class="hl-2">Local CI &gt; remote CI</span>: the agent sees the failure in 12 seconds, not 10 minutes. The two human moments: <span class="hl">choosing</span> (Plan) and <span class="hl">signing</span> (Ship).</p>
   </section>
 
-  <!-- 13. STEP 4 - DOC -->
-  <section class="slide">
-    <span class="eyebrow">Stage 04 · DOC</span>
-    <h2 class="title">Docs <em>while you still know</em><br/>why you did it.</h2>
-
-    <div class="cols-2">
-      <div class="stack">
-        <p>The classic trap: documenting <span class="strike">later</span> <span class="dim">= never</span>.</p>
-        <ul class="checks">
-          <li>the agent writes in the project's format (Markdown, <span class="dim">docs/</span> structure),</li>
-          <li>it picks up the decisions from the PLAN stage,</li>
-          <li>it generates a Jupyter example consistent with <span class="dim">examples/jupyter-python/</span>,</li>
-          <li>you read, refine, sign off.</li>
-        </ul>
-        <p class="dim" style="margin-top:18px">→ Docs become a <span class="hl">deliverable of the same session</span>, not debt.</p>
-      </div>
-      <div class="card">
-        <span class="eyebrow" style="margin-bottom:14px;display:inline-flex">Why it works now</span>
-        <div style="margin-top:10px">
-          <p style="font-size:15px;color:var(--ink);line-height:1.6">
-            Docs-as-code fits the agent flow perfectly:
-            same repo, same PR, same review. The agent sees the code,
-            the tests, the launch scenario. It has everything it needs
-            to write what you would have written yourself <span class="hl-2">if you'd had the time</span>.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 14. STEP 5 - SHIP -->
-  <section class="slide">
-    <span class="eyebrow">Stage 05 · SHIP · the human signs</span>
-    <h2 class="title">A PR <em>you'll want</em><br/>to review.</h2>
-
-    <div class="cols-2">
-      <div class="stack">
-        <p>LOTUSim's process is explicit: <span class="hl">labelled issue → fork → PR → review</span>. Agents execute it to the letter, I sign.</p>
-        <ul class="checks">
-          <li>issue with the right label (<span class="dim">new_model</span>, <span class="dim">new_feature</span>…),</li>
-          <li>clean commit message, transparent about AI assistance,</li>
-          <li>PR description: goals, roadmap fit, technical decisions,</li>
-          <li>first <span class="hl-2">honest</span> critical pass before the human maintainer.</li>
-        </ul>
-      </div>
-      <div class="term">
-        <div class="c">feat(systems): add sonar sensor for underwater platforms</div>
-        <br/>
-        <div class="s">Why</div>
-        <div class="c">  Closes #NNN. Adds a configurable sonar sensor to the AUV...</div>
-        <br/>
-        <div class="s">Design notes</div>
-        <div class="c">  Chose option B (ray-cast + attenuation) over A.</div>
-        <div class="c">  Rationale: acoustically defensible, no external dep.</div>
-        <br/>
-        <div><span class="k">Assisted-by:</span> Claude:claude-opus-4-8 clangd</div>
-        <div><span class="k">Signed-off-by:</span> Cyril &lt;...&gt;</div>
-        <div class="c">  ↳ format borrowed from the Linux kernel</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 15. DEMO / RECAP -->
+  <!-- 10. DEMO -->
   <section class="slide">
     <span class="eyebrow">Demonstration</span>
-    <h2 class="title">From cloned repo<br/>to PR <em>in one session.</em></h2>
+    <h2 class="title">From cloned repo to PR,<br/><em>see it run.</em></h2>
 
-    <div class="row" style="margin-top:24px;align-items:center">
-      <div class="bignum">≈<span class="reveal-num">3</span><span class="unit">hours</span></div>
+    <div class="row" style="margin-top:32px;align-items:center">
       <div class="stack" style="flex:1">
-        <p class="lead">
-          The real timeline:<br/>
-          <span class="dim">— 25 min MAP (understanding the repo)<br/>
-          — 20 min PLAN (3 options, reasoned choice)<br/>
-          — 70 min BUILD (C++ plugin + msg + green colcon)<br/>
-          — 25 min DOC (docs/ page + example notebook)<br/>
-          — 20 min SHIP (issue, PR, self-review)</span>
-        </p>
-        <p style="margin-top:14px"><span class="hl-2">And the code isn't disposable.</span> It's readable, tested, documented, and follows the repo's conventions.</p>
+        <p class="lead">A sped-up capture of the whole session: map the repo, choose a strategy, build &amp; close the loop, write the docs, open the PR.</p>
+        <p style="margin-top:14px"><span class="hl-2">The code isn't disposable.</span> It's readable, tested, documented, and follows the repo's conventions.</p>
       </div>
     </div>
 
-    <p class="footer-note">→ [Live demo here, or sped-up video capture.]</p>
+    <p class="footer-note">→ [Sped-up screen capture: the full session in ~2 minutes.]</p>
   </section>
 
-  <!-- 16. LIMITS / HONESTY -->
+  <!-- 11. LIMITS / HONESTY -->
   <section class="slide">
-    <span class="eyebrow">Honest limits — the price of velocity</span>
+    <span class="eyebrow">Honest limits: the price of velocity</span>
     <h2 class="title">What I'm <em>not</em> selling you.</h2>
 
     <div class="filler"></div>
     <div class="cols-3" style="grid-template-columns:repeat(4,1fr);margin-top:0">
       <div class="card warn">
         <span class="num">!</span>
-        <h4>Mind what's confidential</h4>
-        <p>Open-source LOTUSim is public — sharing it with an agent is fine. The caution is the day your work touches internal or classified material: then match the safeguard to the data (context separation, self-hosted models).</p>
+        <h4>Govern what the agent touches</h4>
+        <p>Open-source LOTUSim is public, so sharing it with an agent is fine. The real risk: without clear rules, an agent pulls in something that shouldn't land in a public repo. Match the guard to the data, and write the rules down.</p>
       </div>
       <div class="card warn">
         <span class="num">!</span>
@@ -1013,7 +823,7 @@
       <div class="card danger">
         <span class="num">×</span>
         <h4>Supervision is not optional</h4>
-        <p>No «&nbsp;dark factory&nbsp;» (Steinberger). An agent that can write and commit needs to be supervised like a junior dev — not as a metaphor.</p>
+        <p>No «&nbsp;dark factory&nbsp;» (Steinberger). An agent that can write and commit needs to be supervised like a junior dev, not as a metaphor.</p>
       </div>
       <div class="card danger">
         <span class="num">×</span>
@@ -1024,55 +834,64 @@
     <div class="filler"></div>
   </section>
 
-  <!-- 17. WHAT IT CHANGES -->
+  <!-- 12. LOTUSIM'S HOMEWORK -->
   <section class="slide">
-    <span class="eyebrow">What this changes for LOTUSim</span>
-    <h2 class="title">The entry barrier<br/>drops <em>an order of magnitude.</em></h2>
+    <span class="eyebrow">What this asks of the project</span>
+    <h2 class="title">An agent is only as good as<br/><em>the docs it can read.</em></h2>
 
     <div class="cols-2" style="margin-top:16px">
-      <div class="stack">
+      <div class="card" style="padding:28px">
+        <span class="eyebrow" style="display:inline-flex;margin-bottom:14px">LOTUSim today</span>
         <ul class="checks">
-          <li><span class="lbl-col hl">For a contributor</span><span class="desc-col">from «&nbsp;weeks before my first contribution&nbsp;» to «&nbsp;a useful PR in the first session&nbsp;».</span></li>
-          <li><span class="lbl-col hl">For the project</span><span class="desc-col">more, better-prepared PRs → less friction in review → shorter cycles.</span></li>
-          <li><span class="lbl-col hl">For the community</span><span class="desc-col">profiles who wouldn't have crossed the technical wall — researchers, integrators, partners.</span></li>
-          <li><span class="lbl-col hl">For maintainers</span><span class="desc-col">PRs arrive documented and self-reviewed — the debate moves to architecture, not line-by-line.</span></li>
+          <li><span class="dim">README.md</span>: one paragraph.</li>
+          <li><span class="dim">CONTRIBUTING.md</span>: written for humans.</li>
+          <li>Docs live in a wiki, not in the repo.</li>
+          <li>Testing guide: <span class="dim">«&nbsp;available soon&nbsp;»</span>.</li>
+          <li>Nothing addressed to the agents.</li>
         </ul>
       </div>
-      <div class="card" style="padding:32px">
-        <span class="eyebrow" style="display:inline-flex;margin-bottom:14px">The moment</span>
-        <p style="font-size:17px;line-height:1.6;color:var(--ink)">
-          LOTUSim has just gone open source and is publishing its first public roadmap in 2026.
-        </p>
-        <p style="font-size:17px;line-height:1.6;color:var(--ink);margin-top:14px">
-          And the agentic tooling to <span class="hl">contribute cleanly</span>
-          is mature today: Linux wrote the contract, OpenClaw proved the scale.
-        </p>
+      <div class="card" style="padding:28px">
+        <span class="eyebrow" style="display:inline-flex;margin-bottom:14px">Agent-ready: the homework</span>
+        <ul class="checks">
+          <li><span class="hl">AGENTS.md</span>: how to map, build, test, plus the conventions.</li>
+          <li><span class="hl">VISION.md</span> in the repo: the roadmap, and <span class="dim">what we won't merge</span>.</li>
+          <li><span class="hl">Docs-as-code</span>: same repo, same PR, same review.</li>
+          <li>A <span class="hl">test suite + local CI</span>, so the agent can close the loop itself.</li>
+          <li>An <span class="hl">AI-contribution policy</span> (<span class="dim">Assisted-by</span>, the human signs) with review guardrails.</li>
+        </ul>
       </div>
     </div>
+
+    <p class="footer-note">→ The wall from the start, <span class="hl">those implicit conventions</span>, is exactly what these files write down. Lower it for humans, and you lower it for agents too.</p>
   </section>
 
-  <!-- 18. CLOSE -->
+  <!-- 13. CLOSE -->
   <section class="slide">
-    <div class="endgrid">
-      <div>
-        <span class="eyebrow">Closing</span>
-        <h1 class="display" style="margin-top:24px">
-          An open<br/>
-          simulator.<br/>
-          An <em style="font-style:normal;color:var(--accent)">augmented</em><br/>
-          practice.
-        </h1>
+    <span class="eyebrow">Closing</span>
+    <h2 class="title">An open simulator.<br/>An <em>augmented</em> practice.</h2>
+
+    <div class="cols-2" style="margin-top:24px">
+      <div class="card" style="padding:28px">
+        <span class="eyebrow" style="display:inline-flex;margin-bottom:14px">If you contribute</span>
+        <ul class="checks">
+          <li>Clone the repo.</li>
+          <li>Ask an agent to map it.</li>
+          <li>Pick an issue, or open one.</li>
+          <li>Come back with a PR: <span class="dim">Assisted-by</span>, and <span class="hl">you sign</span>.</li>
+        </ul>
       </div>
-      <div class="stack" style="padding-bottom:8px">
-        <p class="lead">
-          LOTUSim is a technically rich project — and it has never been more accessible than today.
+      <div class="card" style="padding:28px">
+        <span class="eyebrow" style="display:inline-flex;margin-bottom:14px">The moment</span>
+        <p style="font-size:16px;line-height:1.6;color:var(--ink)">
+          LOTUSim just went open source, and the tooling to contribute cleanly is mature today: the kernel wrote the contract, OpenClaw showed it scales.
         </p>
-        <hr class="rule"/>
-        <p class="dim">— Clone the repo.<br/>— Ask an agent a question.<br/>— Pick an issue, or open one.<br/>— Come back with your first PR.</p>
-        <p style="margin-top:24px"><span class="hl">Thank you.</span> <span class="dim">· Questions?</span></p>
-        <p class="footer-note" style="margin-top:32px">Cyril Moron · Lead Developer, Naval Group · github.com/naval-group/LOTUSim</p>
+        <p style="font-size:16px;line-height:1.6;color:var(--ink);margin-top:14px">
+          The entry barrier has never been lower. The homework is known. Now it's on us to do it together.
+        </p>
       </div>
     </div>
+
+    <p class="footer-note" style="margin-top:auto"><span class="hl">Thank you.</span> <span class="dim">· Questions?</span>&nbsp;&nbsp;·&nbsp;&nbsp;Cyril Moron · Lead Developer, Naval Group · github.com/naval-group/LOTUSim</p>
   </section>
 
 </div>
@@ -1083,7 +902,7 @@
     <span>From idea → LOTUSim contribution</span>
   </div>
   <div class="right">
-    <span id="counter">01 / 19</span>
+    <span id="counter">01 / 13</span>
     <span>← → / space</span>
   </div>
 </div>

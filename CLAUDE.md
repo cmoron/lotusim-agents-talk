@@ -47,28 +47,39 @@ The talk references events from late 2025 / early-to-mid 2026 that moved fast an
 - **Model versions** — latest Claude as of mid-2026 is **Opus 4.8** (`claude-opus-4-8`, released 28 May 2026). Use it in the `Assisted-by:` example on slide 14. Exception: slide 5 keeps `Claude:claude-3-opus` on purpose — that's the *literal example from the kernel doc*, not a staleness bug, so don't "upgrade" it. Slide 4's `Opus 4.5 / GPT-5.2` are also intentional: they mark the late-2025 capability break that made agentic coding viable — keep them as the historical anchor even though newer versions exist.
 - **On-slide quotes** — verified 2026-06-01. The Torvalds *"The documentation is for good actors."* quote was **removed from slide 5** (2026-06-02): source fragile + his real tone was skeptical (Phoronix: *"the AI slop issue is NOT going to be solved with documentation"*). It was replaced by a non-attributed takeaway (*"the most conservative community in open source wrote the rules — rather than ban it"*). Steinberger's *"taste and system design remain the ultimate moats"* and *"close the loop…"* are corroborated. ⚠️ Gotcha: `mgrep --web` is **circular** for on-slide quotes — it matches our own `index.html` and reports it as a "source". Use the **`WebSearch`** tool for genuine external verification of anything already written in the deck.
 
-## Current state & open items (2026-06-02)
+## Current state & open items (2026-06-07)
 
-The deck is now **18 slides** (the old "first PR" hook was removed 2026-06-02; HTML `<!-- N. -->` comments + the slide-N references in this file were renumbered to match). Slide-by-slide review pass #2 (2026-06-02, not yet committed at time of writing):
-- **Slide 2** — agent defined as *"a large language model given tools: reads the repo, edits files, runs commands…"*; the Perceive→Decide→Act box was dropped (too early); closes on a centred takeaway *"the second kind of agent helps you build the first"*.
-- **Slide 4** (Why now) — title → "AI agents crossed the useful threshold"; METR reference replaced by the agentic-loop wording (*map → build → run → test → review*).
-- **Slide 5** (Linux kernel) — Torvalds quote removed (see Fact-checking); encart annotated as verbatim from `coding-assistants.rst`.
-- **Slide 6** (OpenClaw) — reworked to current reality: 56,098 commits shown big (project size), ≈100 agents + ≈$1.3M (April 2026, Steinberger alone) in the text, human guardrails (real-behavior proof, 28+ maintainers). **Cyril still wants to review this one closely.**
-- **Slide 9** (agent relay) — **restored Cyril's original pixel-sprite agent relay** (5 SVG agents lighting up in cascade as a baton passes) from git history (`05d4fbb`), after the clean-pipeline rewrite and an avatars+loop-ring variant were both rejected. Made the glows theme-aware. **Keep this design.**
-- **Slide 10** (Map) — "local RAG" → context7/MCP.
-- **Slide 12** (Build) — fixed so the **agent** (not the human) runs colcon/sim and closes the loop.
-- **Slide 16** (limits) — security card reframed: open-source is public, caution only for internal/classified work (don't scare external OSS contributors).
-- **Slide 17** (what changes) — bullets re-aligned into label|description columns; governance-committee point replaced by "for maintainers" + committee claim dropped.
-- **Slide 18** (close) — signature "Cyril Moron · Lead Developer, Naval Group" + repo `github.com/naval-group/LOTUSim`.
-- Dead CSS removed (`.loopflow`, `.timer-row`/`fillSlow`/`fillFast`, `blockquote`) along with the features that used them.
+**Major restructure (2026-06-07, multi-agent review + brainstorm): deck went 18 → 13 slides.** Thesis changed from a *survey* ("the industry legitimised AI agents") to a **concrete two-sided answer**: how to accelerate LOTUSim with agents = (1) the **contributor** adopts the agentic loop + responsibility (`Assisted-by`, the human signs), and (2) the **project/governance** makes LOTUSim *agent-ready* by writing the implicit down. Driving line: ***"an agent is only as good as the docs it can read."*** The 13 slides (HTML `<!-- N. -->` comments match):
 
-Earlier baseline (commit `582839f` + logo follow-up): Naval Group white theme (`t` / `?theme=ng`), real inline NG vector cover logo, slides 7 & 16 trimmed to 4 cards.
+1 Cover · 2 **The wall** (hook — implicit conventions, sets up the payoff) · 3 Two kinds of "agent" (mini, ~45s) · 4 Why now (closes on **the question**: *how do we handle agent-assisted contributions?* → bridges into Linux/OpenClaw as *answers*) · 5 Linux kernel · 6 OpenClaw · 7 Scenario (sonar) · 8 Pipeline relay · 9 The loop in action · 10 Demo · 11 Limits · 12 LOTUSim's homework · 13 Close.
+
+**Narrative arc (Arc A, chosen 2026-06-07 after a 2nd brainstorm; audience = mix incl. newcomers):** open on the **wall** (shared pain), then mini-definition, then *Why now* closing on **the question** ("how do we handle agent-assisted contributions, responsibly?") so the industry block reads as *answers*, not examples. Industry proof (Linux+OpenClaw) stays **before** the LOTUSim sonar block. **Arc A IS the TEDx-agent's recommended arc** (Problem → Proof → Method → Contract). The *alternative* (industry **after** the demo, bridging into the homework) came from the orchestrator's synthesis + the audience-proxy/grill-me agents — it was **not** chosen. One clean general→LOTUSim pivot after slide 6. **Oral (not on slide):** at slide 4, drop the local cautionary case — the ~13 PRs / ~300k lines that hit LOTUSim and weren't merged (no frame; some content that shouldn't have been public) — un-named; motivates the question.
+
+Key changes this pass:
+- **Slides 5 & 6 reframed around the real artifacts** (verified by fetching the repos): kernel `coding-assistants.rst` is *addressed to agents and their users*; the safe takeaway is *"yes, under one condition: the human who signs answers for every line"* (the doc literally says **"AI agents MUST NOT add Signed-off-by"**). Slide 5 names **"the Linux kernel"** explicitly (not just "kernel"). OpenClaw leads with *what they wrote down* as clean filename-led bullets: `VISION.md` (what to build / what to refuse) + `AGENTS.md` (how to build & test in-repo). Right-column numbers = **376k stars + 56,098 commits** (the 35 KB AGENTS.md figure was tried and dropped — low value). ⚠️ **`~100 agents` + `$1.3M` are attributed to Steinberger PERSONALLY, not "the project"** (don't conflate — earlier draft did).
+- **Em-dashes swept** from all visible slide text (Cyril's note: too many "—", not human). Replaced by commas/colons/periods. Kept only in CSS/JS comments, the `<title>`, and citation attributions (`— P. Steinberger`).
+- **Old "Distilled principles" slide cut** (folded into 5/6 + the loop).
+- **5 stage slides (MAP/PLAN/BUILD/DOC/SHIP) collapsed into ONE** slide 9 *"The loop, on the sonar"* — Cyril felt he had little to say per stage, and the **video demo is the detailed how**. Keeps two human accents: *taste* at Plan, *close-the-loop* at Build.
+- **Slide 7 (sonar) honesty fix:** the agent writes the *structure* (plugin/message/zero-stub); the **acoustic model stays the engineer's**, validated before merge. (Don't claim AI replaces acousticians — they don't code anyway; their knowledge is an input, or mocked by the contributor.)
+- **Slide 8 relay** kept (Cyril's sprites — untouched), footer now *"one agent, five hats — not a hundred in parallel"* (anti-FOMO; he wants to detension the parallel-agent-army hype).
+- **Slide 10 demo:** the invented **≈3h timeline was removed** (Cyril: "sorti du chapeau", bothered him). Now a placeholder for a **sped-up video** (he'll record it), no fabricated numbers.
+- **Slide 11 limits:** confidentiality card → *"Govern what the agent touches"* — carries an **allusion to the ~300k-line ungoverned AI PRs** that hit LOTUSim (closed unmerged; some data shouldn't have been public). Deliberately *not* named on slide; everyone gets it at half-word.
+- **Slide 12 NEW "LOTUSim's homework"** (replaces old "What it changes"): a *today vs agent-ready* gap (README 1 KB / docs in a wiki / nothing for agents → AGENTS.md, in-repo VISION, docs-as-code, AI policy, guardrails). The **governance contract**, carried by Cyril as lead dev.
+- **Slide 13 close:** two-column CTA — *If you contribute* / *What the project will do (my commitment)* + signature.
+- Dead CSS removed (`.bignum`, `.reveal-num`, `.endgrid` — the features that used them are gone).
+- Verified rendering via Playwright (13 slides, no JS errors). Speaker notes rewritten as an ESL near-script with per-slide **Say:** verbatim lines + timing budget.
+
+Earlier baseline (commit `582839f` + logo follow-up): Naval Group white theme (`t` / `?theme=ng`), real inline NG vector cover logo.
+
+**LOTUSim repo doc reality (inspected 2026-06-07, doc only):** `README.md` ~1 KB, decent human `CONTRIBUTING.md` (issue→label→fork→PR→review + governance committee, biannual roadmap), but **no `AGENTS.md`/`CLAUDE.md`/`VISION.md` in-repo, docs in a GitHub wiki, `docs/` holds only images, testing guide "available soon".** This gap *is* the slide-12 message.
 
 **Audience:** talk given at the LOTUSim technical conference (Naval Group — defence/naval; LOTUSim is a multi-agent *simulator*, MAS, not AI agents). **Most attendees are external partners who will contribute to the open-sourced LOTUSim** — keep jargon low; do **not** scare them into thinking they must self-host local models (the event is about the open-source part). Slides are **English**; chat with Cyril in **French** (his preference).
 
 **Preview:** open `index.html`, navigate `←/→`, toggle the Naval Group white theme with **`t`** (or `?theme=ng`).
 
 **Open items:**
-- **Slide 9** — Cyril may later want to *add* a loop illustration on top of the restored relay ("on itérera dessus pour illustrer la loop") — but the relay itself stays.
-- **Slide 15** — demo is a placeholder: **live demo vs sped-up video** still undecided (Cyril will do a video if he has time).
-- Not yet committed — propose a gitmoji commit when the pass is done.
+- **Slide 8 relay** — Cyril may still want to *add* a loop illustration on top of the sprites ("on itérera dessus pour illustrer la loop") — the relay itself stays.
+- **Slide 10 demo** — sped-up **video to be recorded** by Cyril; the slide is a placeholder until then.
+- **Slide 12 homework = a real commitment** — as lead dev, Cyril intends to actually add `AGENTS.md` / in-repo `VISION` / an AI-contribution policy to LOTUSim. Track as project work, not just a slide.
+- **Scenario-generation use case** (business/*métier* agents, not dev agents) is deliberately out of scope — one oral nod on the Close + a Q&A answer in speaker-notes; not a slide.
+- Not yet committed — propose a gitmoji commit when Cyril is happy.

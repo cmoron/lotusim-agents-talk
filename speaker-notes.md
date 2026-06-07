@@ -1,124 +1,118 @@
 # Speaker notes — *From idea to LOTUSim contribution, faster with AI agents*
 
 > Talk ~15 min · LOTUSim Technical Conference · Naval Group · 02/07/2026
-> Personal notes to keep in front of me during the talk. **Slides and notes both in English.**
-> ⚠️ Draft — to refine / tighten / time.
+> Notes to keep in front of me. **Slides and notes both in English.**
+> I'm not a native English speaker → these notes are a near-script. Short sentences. The **Say:** lines are meant to be spoken almost word for word.
 
-**Audience:** mostly external partners who will contribute to the **open-source** part of LOTUSim; many are **not** AI-agent experts.
-**Tone:** concrete, honest, zero hype. Low jargon. We're selling a method, not a product.
-**Through-line:** the entry barrier of a robotics simulator can drop by an order of magnitude — without sacrificing quality.
+**Audience:** external partners — many are **developers** (my community), some are simulation engineers. Few are AI-agent experts.
+**Tone:** concrete, honest, zero hype. We sell a **method** and name the **homework**, not a product.
+**Two targets, one through-line:** the *contributor* adopts the loop; the *project* makes itself agent-ready. An agent is only as good as the docs it can read.
 
-Budget ~15 min: intro 1' · context (3-7) 4' · method (8-14) 6' · demo 2' · limits/close 2'.
+**Budget (~15-16 min):**
+1 Cover 0:45 · 2 Wall 1:00 · 3 Agents 0:45 · 4 Why now 1:15 · 5 Linux 1:15 · 6 OpenClaw 1:30 · 7 Scenario 1:00 · 8 Relay 0:45 · 9 Loop 2:00 · 10 Demo 2:00 · 11 Limits 1:15 · 12 Homework 1:30 · 13 Close 1:00
+
+**Arc (Acte 1 problem → Acte 2 proof → Acte 3 method → Acte 4 contract):** open on the wall, drop the "plan" line on slide 4, keep the industry proof (Linux+OpenClaw) before the LOTUSim sonar block, finish on the two contracts.
 
 ---
 
-## 1 · Cover
-- Introduce myself in one line: Cyril, lead dev of LOTUSim.
-- The promise of the talk: *"how well-orchestrated AI agents bring down the entry barrier of a ROS / Gazebo / Xdyn simulator."*
-- Announce the format: 15 min, one method + one demo.
+## 1 · Cover  *(0:45)*
+- One line about me: *"I'm Cyril, lead developer of LOTUSim."*
+- **Say:** *"In the next fifteen minutes: how AI agents bring down the entry barrier of a ROS / Gazebo / Xdyn simulator — and what the project has to do in return."*
+- Announce: *"One method, one demo, and some homework — including mine."*
 
-## 2 · Two kinds of "agents"
-- Quick disambiguation, important for this room (MAS / robotics).
-- In **LOTUSim**: an agent = a simulated platform (drone, ship, submarine).
-- In **this talk**: an agent = *a large language model given tools* — it reads the repo, edits files, runs build/tests/git, sees the result, repeats.
-- Punchline: **"the second kind of agent helps you build the first."**
-
-## 3 · The wall
-- Contributing to a robotics simulator is a wall, along 3 axes:
-  - technical surface (C++, CMake, ROS, Gazebo, SDF/URDF, Xdyn),
+## 2 · The wall  *(1:00)* — open here, this is the hook
+- Opening beat. The wall is a *shared pain*: name it, let the room nod (insiders and newcomers alike).
+- **Say:** *"If you've ever contributed to a robotics simulator, you know this wall."*
+- Three axes:
+  - technical surface (C++, CMake, ROS, Gazebo, Xdyn),
   - physical coupling (one sensor = model + ROS message + plugin + scenario),
-  - implicit conventions never written down in the README.
-- Message: *"many good ideas die between 'I want to contribute' and 'my PR is ready'."*
+  - **implicit conventions, never written down.** ← remember this, it pays off on slide 12.
+- **Say:** *"Many good ideas die between 'I want to contribute' and 'my PR is ready'."*
 
-## 4 · Why now
-- Why *now* and not 18 months ago? 3 shifts in late 2025:
-  - models finally reliable at tool-calling (Opus 4.5, GPT-5.2),
-  - long contexts (the whole codebase + docs in one go),
-  - **autonomy held by the agentic loop**: *map → build → run → test → review*, looping until green.
-- Stress: what sustains a task over time is the loop, not a bigger prompt.
+## 3 · Two kinds of "agent"  *(0:45)* — keep it short
+- Quick disambiguation, important in this room. Under a minute.
+- In **LOTUSim**: an agent is a simulated platform, *an aerial drone, a surface ship, an underwater vehicle.* (our own README wording)
+- In **this talk**: an agent is *a large language model given tools*: it reads the repo, edits files, runs build / tests / git, sees the result, and tries again.
+- **Say (verbatim):** *"The second kind of agent helps you build the first."*
 
-## 5 · The Linux kernel made the call  *(signal #1: legitimacy)*
-- Even the Linux kernel — the most conservative community there is — **made the call** and published its first official AI policy (`coding-assistants.rst`).
-- No ban, no evangelism. **AI = just a tool**, **full** human responsibility, `Signed-off-by` stays human.
-- New `Assisted-by:` trailer (shows which agent / model / tools). Example taken verbatim from the kernel doc.
+## 4 · Why now  *(1:15)*
+- Why now and not 18 months ago? Three shifts, late 2025:
+  - models reliable at **tool-calling**,
+  - **long context**, the whole codebase fits,
+  - **the agentic loop**: map → build → run → test → review, until green.
+- **Say:** *"What holds a task together over hours is not a bigger prompt. It's the loop."*
+- Point at the terminal once, don't read it.
+- **Bridge to the industry block (verbatim):** *"Once an agent can write code, a question follows: how do we handle agent-assisted contributions, responsibly?"* → gives slides 5-6 a purpose (they're *answers*, not examples).
+- **Oral, place the local case HERE (do NOT put on slide):** mention the ~13 PRs / ~300k lines that landed on LOTUSim and were **not** merged — agent-assisted contributions with no frame, and some content that shouldn't have been public. Don't name anyone; the room will understand at half-word. *"We've already seen, here, what this looks like without a frame."* → that's exactly why the question matters for us, and it sets up Linux (the rules) + OpenClaw (the practice).
 
-## 6 · OpenClaw  *(signal #2: scale — KEY SLIDE, ~1.5 min)*
-- OpenClaw: the **fastest-growing** open-source project in GitHub history.
-- Size: **376k stars**, **56k commits** in 6 months.
-- Working mode: **~100 agents in parallel** that code **and review each other**, hunt for vulnerabilities, dedupe issues.
-- The cost, to spell out clearly: Steinberger **alone** burned **~$1.3M of tokens in one month (April 2026)** — funded by **OpenAI** as research.
-- Human guardrails: *real-behavior proof* on every PR, 28+ maintainers signing off.
-- The flip side, which we own: **~600 security advisories** in 6 months → *the hidden cost of speed* (back to it on slide 16).
+## 5 · The Linux kernel  *(1:15)* — the question got answered
+- Name it explicitly (not just "the kernel"): *"The Linux kernel, the most conservative community in open source, took the time to think, and answered."*
+- Key fact: the doc is **addressed to the agents and to the people who run them** (`coding-assistants.rst`).
+- The rule that does not move: **"AI agents MUST NOT add Signed-off-by"** — only a human certifies the DCO.
+- **Say (verbatim, safe):** *"Their answer was yes — under one condition: the human who signs answers for every line."*
+- ⚠️ Do NOT say "open source said yes to AI" flat — Torvalds himself said docs don't fix slop. Accountability does. If pushed, see Q&A.
 
-## 7 · What the pioneers learned
-- 4 **portable** principles, independent of tool/vendor:
-  - **Close the loop** — the agent compiles, runs, tests its own work.
-  - **Prompt > pull request** — the quality of the request predicts the quality of the result.
-  - **Architecture > code review** — the human debate moves up a level.
-  - **The human signs** — no "dark factory", someone is responsible.
+## 6 · OpenClaw  *(1:30)* — built on agents, wrote it all down
+- The other data point: **the fastest-growing open-source project in GitHub history**, built agent-first.
+- The real point FIRST: *"It runs on what they wrote down for the agents: a VISION file (what to build, what to refuse) and an AGENTS file (how to build and test in the repo)."*
+- Human guardrails: *"every PR needs real-behavior proof, and 28+ humans sign the merge."*
+- The scale, as an aside and **attributed to Steinberger personally** (NOT the project, don't conflate): *"Steinberger himself runs around a hundred agents in parallel, about 1.3 million dollars of tokens in one month, funded by OpenAI."*
+- **Say (verbatim, seed for slide 12):** *"An agent is only as good as the docs and the rules you give it."*
+- Conclusion: *"A hundred agents, and the human is still the bottleneck, on purpose."*
 
-## 8 · Scenario — sonar sensor
-- Concrete case we'll walk through: **adding a sonar sensor to an underwater platform**.
-- Deliberately non-trivial: touches **the whole stack** (physics / systems / interfaces / launch / docs).
-- Goal: from zero knowledge of the repo → a **PR ready to review**, in one session. *No magic, just method.*
+## 7 · Scenario — sonar sensor  *(1:00)*
+- The concrete case: **add a sonar sensor to an underwater platform.** Touches the whole stack.
+- **Be honest about the physics (important for the engineers in the room):**
+- **Say (verbatim):** *"The agent writes the skeleton, the ROS message, and a zero-stub so the sim compiles. The acoustic model stays yours — you plug it in, and it's validated before merge."*
+- Goal: from zero knowledge of the repo to a PR ready to review, in one session.
 
-## 9 · Five stages, five agent roles
-- My method: 5 stages, 5 **specialized** agent roles (Map · Plan · Build · Doc · Ship).
-- Point to the animation: one agent passes the baton to the next — *specialization = quality*.
-- Make clear: *"one possible decomposition, not a doctrine — adapt it to your project."*
+## 8 · Relay — five roles  *(0:45)*
+- Point at the animation, let it play. Don't over-explain.
+- **Say (verbatim, anti-FOMO):** *"This is one agent wearing five hats — not a hundred running in parallel. The craft is in the sequence."*
+- *"One possible breakdown — adapt it to your project."* Then move on quickly.
 
-## 10 · Map
-- Stage 1: understand the codebase in **minutes**, not days.
-- The agent walks the tree, follows the `#include`s, locates the Gazebo plugins, answers *"where is AUV → ROS topic wired?"* with file:line.
-- Tools: Claude Code, up-to-date Gazebo/ROS docs via context7/MCP.
+## 9 · The loop, on the sonar  *(2:00)* — main "how" slide
+- Walk the left column top to bottom, one short line each: Map · Plan · Build · Doc · Ship.
+- Land the **two human moments** clearly:
+  - at **Plan**: *"It proposes two or three options. I choose. That's the part that doesn't get delegated — taste and system design."*
+  - at **Build**: *"The agent runs colcon and the sim, reads the failure, fixes it. It closes the loop itself. Local CI beats remote CI — twelve seconds, not ten minutes."*
+- Point at the terminal during Build (it's the proof).
+- **Say (verbatim):** *"The code is yours — readable, and you can defend every line."*
 
-## 11 · Plan  *(where "taste" lives most)*
-- Stage 2: the architect **doesn't code**, it **proposes** 2-3 strategies with trade-offs, risks, debt.
-- Example on screen: option A (analytical) / B (ray-cast) / C (third-party plugin).
-- My human edge: **choosing** — fast, well. *That's the part that doesn't get delegated.*
+## 10 · Demo — video  *(2:00)*
+- This is my breather. Let the **sped-up video** play; say little.
+- Before: *"From a cloned repo to a pull request — let me show you the real thing, sped up."*
+- After: *"The code isn't disposable. It's readable, tested, documented, and it follows the repo's conventions."*
+- ⚠️ No invented numbers. The video is the evidence. (If the video isn't ready: say "a recorded session" and describe the five steps in one sentence each.)
 
-## 12 · Build  *(close the loop)*
-- Stage 3: what changes isn't typing speed, it's **the cycle**.
-- **The agent** (not me) runs `colcon build` + the sim, reads the failure, fixes it. I steer **by exception**.
-- **Local CI > remote CI**: the agent sees the failure in 12 s, not in 10 min.
+## 11 · Limits — what I'm not selling  *(1:15)*
+- Four honest cards. Go fast, one line each.
+- **Govern what the agent touches:** open-source LOTUSim is public — fine. The real risk: *"without clear rules, an agent can pull in something that shouldn't land in a public repo."* (everyone will understand the reference — leave it there, don't elaborate)
+- **Hallucinations:** *"it sometimes invents a Gazebo API that doesn't exist — build and tests are the safety net."*
+- **Supervision is not optional** — supervise it like a junior dev. No "dark factory".
+- **Not a substitute** — without a real C++/ROS/physics foundation, the agent just lets you hit the wall faster.
 
-## 13 · Doc
-- Stage 4: document **while we still know why** (documenting "later" = never).
-- Docs-as-code: same repo, same PR, same review; the agent picks up the decisions from Plan, generates a notebook example.
-- Docs become a **deliverable of the session**, not debt.
+## 12 · LOTUSim's homework  *(1:30)* — the governance message, I own this
+- This is the second target. Say it plainly: *"This isn't only on you. The project has homework too — and today it isn't done."*
+- Left = today (README is one paragraph; docs in a wiki; nothing for the agents). Right = the homework (AGENTS.md, in-repo VISION, docs-as-code, an AI-contribution policy, guardrails).
+- **Say (verbatim, ties back to slide 3):** *"The wall I started with — the implicit conventions — is exactly what these files write down. Lower it for humans, and you lower it for agents too."*
 
-## 14 · Ship  *(the human signs)*
-- Stage 5: explicit LOTUSim process — *labeled issue → fork → PR → review*. The agents execute it to the letter, **I sign**.
-- **Transparent** commit about the AI assistance: `Assisted-by:` + `Signed-off-by:` (format borrowed from the kernel).
-
-## 15 · Demo
-- From cloned repo to PR **in one session, ≈3 h** (real timings, estimated: 25 Map / 20 Plan / 70 Build / 25 Doc / 20 Ship).
-- [LIVE or sped-up video — to decide.]
-- Message: **the code is not throwaway** — readable, tested, documented, follows the repo's conventions.
-
-## 16 · What I'm not selling you  *(honesty)*
-- **Mind what's confidential** — open-source is public, sharing it with an agent is OK; caution kicks in the day the work touches **internal/classified** material → match the guard to the data. *(Don't scare anyone: no one here has to host local models to contribute to the open-source.)*
-- Hallucinations (made-up Gazebo APIs) → build + tests = mandatory safety net.
-- Supervision **not optional** (no "dark factory").
-- **Not a substitute**: without a C++/ROS/physics foundation, the agent just lets you hit the wall faster.
-
-## 17 · What it changes for LOTUSim
-- The entry barrier drops by **an order of magnitude**.
-- Contributor: *"weeks before my first contribution"* → *"a useful PR from the very first session"*.
-- Project: more, better-prepared PRs → less friction in review.
-- Community: profiles who wouldn't have made it over the wall (researchers, integrators, partners).
-- Maintainers: the debate rises to architecture, not line-by-line.
-
-## 18 · Close
-- *"An open simulator. An augmented practice."*
-- Call to action: **clone the repo · ask an agent a question · pick an issue · come back with your first PR.**
-- Thanks — questions?
+## 13 · Close  *(1:00)*
+- **Say (verbatim):** *"An open simulator. An augmented practice."*
+- Two columns: *"If you contribute"* (clone, ask an agent, pick an issue, PR with Assisted-by — you sign) / *"What the project will do"* (AGENTS.md, in-repo VISION, an AI policy — **my commitment, as lead dev**).
+- One forward nod for the obvious question: *"And yes — agents can also generate simulation scenarios. That's business-typed agents, a different talk. Happy to discuss it after."*
+- *"Thank you. Questions?"*
 
 ---
 
-## Prep Q&A (keep in mind, not on slide)
-- **Torvalds / kernel**: the quote was removed from the deck; his actual tone was more skeptical ("the AI slop issue is NOT going to be solved with documentation"). If someone cites the doc at me, own it: the doc is *"for good actors"*, it doesn't solve everything.
-- **OpenClaw security**: ~600 advisories = an argument *for* close-the-loop + review, not against the approach. Speed without guardrails = security debt.
-- **Defense confidentiality**: if pushed, clearly distinguish *contributing to the open-source* (OK) vs *working on internal material* (self-hosted models, context separation).
-- **"Will AI replace devs?"**: no — *taste & system design remain the ultimate moats* (Steinberger). The human chooses and signs.
-- **Repo**: github.com/naval-group/LOTUSim.
+## Prep Q&A — the hard ones (keep in mind, not on slide)
+- **"Cost / licence / can it even run behind the Naval Group proxy?"** → Honest: depends on your setup; the workflow is tool-agnostic. For open-source LOTUSim there's no requirement to self-host. Don't oversell.
+- **"Classified / sensitive data?"** → Clear line: contributing to the **open-source** part = fine. Internal/classified work = match the safeguard to the data (context separation, self-hosted models). This is exactly why the project needs written rules on what agents may touch.
+- **"Sovereignty — depending on a US model vendor, for defence?"** → Legitimate. The *method* (the loop, Assisted-by, the human signs, doc-as-code) is portable across vendors and works with self-hosted models. Name it openly.
+- **"Won't this flood maintainers with AI PRs?"** → That's the failure mode without governance. The guardrails are the answer: one PR = one topic, real-behavior proof, Assisted-by, a human signs the merge. Recipe from the kernel and OpenClaw, sized for LOTUSim.
+- **"The ~300k-line AI PRs that caused a mess here?"** → Don't name it. *"Exactly the kind of thing that happens without clear rules for agents — which is why the homework matters."*
+- **"Who's responsible if the agent's PR breaks prod?"** → The human who signed. DCO. No ambiguity.
+- **"Reproducibility — same prompt, different result?"** → True; that's why the loop ends on build + tests, not on the prompt. We review the result, not the run.
+- **"Is 'the human signs' a fiction if they don't understand the code?"** → The agent **accelerates** understanding, it doesn't replace it. You read everything, you sign what you can defend.
+- **"Will AI replace engineers?"** → No. *Taste and system design remain the moats* (Steinberger). The human chooses and signs.
+- **Repo:** github.com/naval-group/LOTUSim.
