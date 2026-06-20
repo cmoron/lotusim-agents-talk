@@ -245,6 +245,39 @@
   }
   .badge.hl{border-color:var(--accent);color:var(--accent)}
 
+  /* Demo slide (10) — video placeholder frame */
+  .videoframe{
+    border:1px solid var(--rule);border-radius:2px;overflow:hidden;
+    background:#08070a;box-shadow:inset 0 0 0 1px rgba(255,90,54,.04);
+  }
+  .vf-top{display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid var(--rule)}
+  .vf-dot{width:9px;height:9px;border-radius:50%;background:var(--rule)}
+  .vf-label{margin-left:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim)}
+  .vf-stage{
+    aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;
+    background:
+      repeating-linear-gradient(135deg, rgba(255,255,255,.02) 0 12px, transparent 12px 24px),
+      radial-gradient(120% 120% at 50% 42%, rgba(var(--glow),.12), transparent 60%);
+  }
+  .playbtn{
+    width:66px;height:66px;border-radius:50%;
+    border:1.5px solid var(--accent);position:relative;
+    box-shadow:0 0 22px rgba(var(--glow),.3);
+  }
+  .playbtn::after{
+    content:"";position:absolute;left:54%;top:50%;transform:translate(-50%,-50%);
+    border-style:solid;border-width:11px 0 11px 18px;
+    border-color:transparent transparent transparent var(--accent);
+  }
+  .vf-bar{height:4px;background:var(--rule);position:relative}
+  .vf-bar > i{position:absolute;left:0;top:0;height:100%;width:22%;background:var(--accent)}
+  .slide.is-active .playbtn{animation:playPulse 2.4s ease-in-out infinite}
+  @keyframes playPulse{
+    0%,100%{box-shadow:0 0 16px rgba(var(--glow),.22);transform:scale(1)}
+    50%    {box-shadow:0 0 34px rgba(var(--glow),.5);transform:scale(1.05)}
+  }
+  body.theme-ng .videoframe{background:#061835;border-color:#13294d;box-shadow:none}
+
   /* ─────────────────────────────────────────────────────────────────
      ANIMATIONS
      All animations are gated on .slide.is-active so they restart
@@ -307,19 +340,23 @@
   .slide.is-active .baton{
     animation:batonRelay 6s ease-in-out forwards;
   }
-  /* Horizontal-only glide; holds briefly at each agent (10/30/50/70/90%). */
+  /* Arcing toss: the orb hops up between agents and lands on each (10/30/50/70/90%). */
   @keyframes batonRelay{
-    0%   {left:10%;opacity:0}
+    0%   {left:10%;transform:translateX(-50%) translateY(0);opacity:0}
     3%   {opacity:1}
-    10%  {left:10%}
-    22%  {left:30%}
-    32%  {left:30%}
-    44%  {left:50%}
-    54%  {left:50%}
-    66%  {left:70%}
-    76%  {left:70%}
-    88%  {left:90%}
-    100% {left:90%;opacity:1}
+    10%  {left:10%;transform:translateX(-50%) translateY(0)}
+    16%  {transform:translateX(-50%) translateY(-32px)}
+    22%  {left:30%;transform:translateX(-50%) translateY(0)}
+    32%  {left:30%;transform:translateX(-50%) translateY(0)}
+    38%  {transform:translateX(-50%) translateY(-32px)}
+    44%  {left:50%;transform:translateX(-50%) translateY(0)}
+    54%  {left:50%;transform:translateX(-50%) translateY(0)}
+    60%  {transform:translateX(-50%) translateY(-32px)}
+    66%  {left:70%;transform:translateX(-50%) translateY(0)}
+    76%  {left:70%;transform:translateX(-50%) translateY(0)}
+    82%  {transform:translateX(-50%) translateY(-32px)}
+    88%  {left:90%;transform:translateX(-50%) translateY(0)}
+    100% {left:90%;transform:translateX(-50%) translateY(0);opacity:1}
   }
 
   /* Agents 1-4: light up when the baton arrives, then settle to "done" */
@@ -793,14 +830,26 @@
     <span class="eyebrow">Demonstration</span>
     <h2 class="title">From cloned repo to PR,<br/><em>see it run.</em></h2>
 
-    <div class="row" style="margin-top:32px;align-items:center">
-      <div class="stack" style="flex:1">
+    <div class="cols-2" style="margin-top:24px;align-items:center">
+      <div class="stack">
         <p class="lead">A sped-up capture of the whole session: map the repo, choose a strategy, build &amp; close the loop, write the docs, open the PR.</p>
         <p style="margin-top:14px"><span class="hl-2">The code isn't disposable.</span> It's readable, tested, documented, and follows the repo's conventions.</p>
+        <div style="margin-top:8px">
+          <span class="badge hl">map</span><span class="badge">plan</span><span class="badge">build</span><span class="badge">doc</span><span class="badge">ship</span>
+        </div>
+      </div>
+
+      <div class="videoframe">
+        <div class="vf-top">
+          <span class="vf-dot"></span><span class="vf-dot"></span><span class="vf-dot"></span>
+          <span class="vf-label">session.mp4 · sped-up</span>
+        </div>
+        <div class="vf-stage"><span class="playbtn" aria-hidden="true"></span></div>
+        <div class="vf-bar"><i></i></div>
       </div>
     </div>
 
-    <p class="footer-note">→ [Sped-up screen capture: the full session in ~2 minutes.]</p>
+    <p class="footer-note">→ Drop the sped-up screen capture here: the full session in ~2 minutes.</p>
   </section>
 
   <!-- 11. LIMITS / HONESTY -->
@@ -886,7 +935,7 @@
           LOTUSim just went open source, and the tooling to contribute cleanly is mature today: the kernel wrote the contract, OpenClaw showed it scales.
         </p>
         <p style="font-size:16px;line-height:1.6;color:var(--ink);margin-top:14px">
-          The entry barrier has never been lower. The homework is known. Now it's on us to do it together.
+          The entry barrier has never been lower. The homework is known. Let's make LOTUSim the project that does this right, together.
         </p>
       </div>
     </div>
@@ -1016,6 +1065,12 @@
   document.getElementById('deck').addEventListener('click', e=>{
     if(e.target.closest('a,button,input')) return;
     next();
+  });
+
+  // Deep-link / browser back-forward: respond to hash changes
+  window.addEventListener('hashchange', ()=>{
+    const n = parseInt((location.hash||'').replace('#',''),10);
+    if(!isNaN(n) && n>=1 && n<=slides.length && (n-1)!==i) go(n-1);
   });
 
   setupSprites();
