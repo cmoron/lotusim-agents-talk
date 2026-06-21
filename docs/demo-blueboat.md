@@ -63,11 +63,53 @@ the one known anchor (3 m/s top speed).
 
 ## Mesh decision
 
-**Agent generates a simple primitive mesh live** (boxes approximating the twin
-hulls + thruster pods), from published dimensions. Zero pre-staging, fully
-self-contained, license-clean, honest. Visually basic — acceptable for "spawn +
-structure". (`wamv` itself pairs a detailed visual `.dae` with a plain `cube.stl`
-for hydrostatics, so a primitive collision/visual is in keeping with the repo.)
+**Agent models a low-poly catamaran live via the Blender MCP**
+([`ahujasid/blender-mcp`](https://github.com/ahujasid/blender-mcp)): the agent
+drives a live Blender session over MCP (`bpy` API) to model fuselaged twin hulls +
+thruster pods from the published dimensions, then exports the mesh. Original work →
+license-clean under EPL-2.0; far better on screen than raw boxes.
+
+- **Use Blender 4.5 LTS** — Blender 5.0 removed the native COLLADA `.dae` exporter
+  (LOTUSim's format). Alternative: export GLB/glTF (supported by modern gz-sim).
+- Connection: the Blender addon listens on `localhost:9876`; the MCP server
+  (`uvx blender-mcp`, launched by Claude Code) connects to it. On a single box
+  (all in WSL2, or native Linux/macOS) this is just localhost, no networking
+  config. Cross-VM (Blender on Windows, Claude in WSL2 NAT mode) is the painful
+  case — avoided by keeping everything inside WSL2.
+- Trade-off: adds a live moving part (Blender window + MCP connection) to the
+  recording — include it in the dry-run.
+
+## Recording environment
+
+LOTUSim is a **Linux-only stack** (Ubuntu + ROS2 Humble + Gazebo, installed via
+`apt` in `launch/install_dep.sh`; entrypoint sources `/opt/ros/humble`). Rendering
+Gazebo needs Linux + a GPU. The demo splits in two:
+
+- **The agentic loop building the PR** (files, mesh via Blender MCP, SDF/YAML, git,
+  PR) — machine-agnostic; runs anywhere Claude Code + Blender run.
+- **The payoff: the boat spawning in Gazebo** — needs Linux + ROS2 + Gazebo +
+  **GPU**. This is the constraining half.
+
+**Target: Windows 11 desktop, everything inside WSL2 (Ubuntu) + WSLg.** The
+desktop GPU drives WSLg's hardware OpenGL, so Gazebo renders properly (unlike
+Docker-on-macOS, which is software-GL only). One Linux box holds LOTUSim
+(native apt install — *not* the Docker image, to keep WSLg rendering clean),
+ROS2 Humble + Gazebo, Blender 4.5 LTS, Claude Code, and the Blender MCP (localhost,
+no networking bridge). The MacBook Air M2 is used only for prep and dry-running the
+file-generation half.
+
+WSL2 setup notes:
+- Install the **Windows GPU "WSL" driver** (NVIDIA/AMD/Intel) so WSLg gets
+  hardware GL — verify `glxinfo | grep renderer` shows the real GPU, not
+  `llvmpipe`.
+- Native Ubuntu in WSL2 (not Docker) for clean WSLg rendering.
+- All components inside WSL2 → Blender socket is plain `localhost:9876`.
+
+> **Forward note — `VISION.md`/`AGENTS.md`:** LOTUSim has none in-repo yet (slide-12
+> homework). Cyril, as lead dev, intends to add them. If they exist at recording
+> time, the agent reads them first — which *reinforces* the demo ("an agent is only
+> as good as the docs it can read"). The frozen prompt assumes they may not be
+> there yet and points the agent at `CONTRIBUTING.md` + the `wamv` model instead.
 
 ## LOTUSim model anatomy (what the agent must mirror)
 
@@ -109,8 +151,9 @@ Paste this to kick off the loop on camera:
 >   layout), an AIS sensor like wamv
 > - `blueboat.yaml` — xdyn behaviour model: environment, rigid-body inertia, added
 >   mass, hydrodynamic forces, twin-propeller propulsion
-> - a **simple, original primitive mesh** (e.g. boxes approximating the twin hulls)
->   you generate from the published BlueBoat dimensions
+> - an **original low-poly mesh** you model via the Blender MCP (twin hulls +
+>   thruster pods) from the published BlueBoat dimensions, then export to the
+>   package
 >
 > Then register the BlueBoat in a world file so it spawns.
 >
@@ -135,8 +178,12 @@ Paste this to kick off the loop on camera:
 
 ## Pre-demo checklist / open items
 
-- [ ] Decide recording environment (local LOTUSim build that can spawn + render a
-      world — needed to capture the "it spawns" moment).
+- [x] Recording environment chosen: **Windows 11 desktop, WSL2 (Ubuntu) + WSLg**
+      (GPU render). M2 for prep only.
+- [ ] Set up the Windows desktop: WSL2 Ubuntu + GPU driver, build LOTUSim
+      (`install_dep.sh`), confirm a world spawns + renders in Gazebo via WSLg.
+- [ ] Install Blender 4.5 LTS + `blender-mcp` in WSL2; wire the MCP server into
+      Claude Code; confirm the addon connects on `localhost:9876`.
 - [ ] Dry-run the prompt once off-camera to confirm the loop produces a clean PR
       and the boat spawns; tune the prompt if it drifts.
 - [ ] Confirm whether the PR is opened against `naval-group/LOTUSim` for real
