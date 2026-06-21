@@ -19,6 +19,20 @@ real oracle ("did it move?"). Honesty preserved (slide-7): the agent produces
 *accuracy* of the hydrodynamics before merge. "Moves plausibly" ≠ "validated
 hydro" — say this out loud when narrating.
 
+## Positioning — accessible, not intimidating
+
+The wow must come from the *result* (a single agent, a simple loop, a boat that
+sails on a real contribution), never from elaborate tooling. No Linear/CI/
+multi-agent rig for the demo — the smallest loop that works. "Loop design" in the
+strong sense (agent ↔ Linear/GitHub Actions/PR-review bots/webhooks) is real but
+deliberately *out of scope* here: building it would cost authenticity and time.
+Audience = external partners who will contribute; they must leave thinking "I can
+do this on my PR", not "I'm outpaced". Deliberate counterpoint to the OpenClaw
+extreme (slide 6: ~100 agents, $1.3M/mo, sponsored tokens) and reinforcement of
+slide 8 ("one agent, five hats"). At the dry-run, when choosing how to materialize
+the loop, prefer the **most legible / audience-reproducible** option over the most
+technically impressive one.
+
 ## Why this makes a *better* demo than expected
 
 The licensing reality (below) forces the agent to **author the structure** while
@@ -282,3 +296,7 @@ Paste this to kick off the loop on camera:
       (Cyril is lead dev) or kept on a fork for the recording.
 - [ ] Speaker note: surface the GPL→EPL licensing beat (governance) and the
       estimated-coefficients beat (slide-7 honesty) when narrating the video.
+- [ ] Narration beat — **accessibility counterpoint**: explicitly frame the demo
+      as "one agent, a simple loop, what *one of us* can do on a real PR" against
+      the OpenClaw extreme (100 agents, $1.3M/mo, sponsored tokens). Goal: the
+      audience leaves empowered ("I can do this"), not outpaced.
