@@ -1,8 +1,44 @@
 # Demo PR prep — BlueBoat model for LOTUSim
 
 Feasibility recon and frozen demo prompt for the talk's slide-10 video.
-Date: 2026-06-21. Status: **feasible; loop-shaped prompt drafted; scope =
-floats + navigates; not yet recorded.**
+Date: 2026-06-21. Status: **dry-run #1 PASSED off-camera — BlueBoat floats + moves
+(16 m) + renders (sea / buoys / chase cam) on the demo box. Architecture corrections
+from the run (thrust via `vessel_cmd_array`, mesh fore-aft +y convention,
+`SceneBroadcaster` for gz render + pose) folded into the frozen prompt below and the
+`lotusim-developer` skill; full friction log in `log/dryrun-blueboat-friction.md`.
+Scope = floats + navigates; not yet recorded.**
+
+## Verified architecture (2026-06-21, hands-on on the demo box) — READ FIRST
+
+Earlier sections of this doc assumed the gz **buoyancy/hydrodynamics/thruster** plugin
+trio and a "boat spawning in Gazebo" render. **Both are wrong for LOTUSim.** Corrected
+and verified on the actual box (full knowledge captured in the `lotusim-developer`
+Claude skill):
+
+- **Physics = xdyn co-simulation, not gz plugins.** Each vessel's dynamics run in an
+  external `xdyn-for-cs` websocket server (prebuilt in `physics/`), one process per
+  vessel on a TCP port. The gz `physics_interface_plugin` is a *client* that connects
+  to `ws://127.0.0.1:<port>` (declared in the world's
+  `<lotus_param><physics_engine_interface>`). **`lotusim run` starts only gz — xdyn
+  must be launched separately** (`xdyn-for-cs <model>.yaml --address 127.0.0.1 --port
+  <port> --dt 0.2`). The BlueBoat dynamics live in a `blueboat.yaml` **xdyn** model
+  (inertia, added-mass, damping, twin-thruster propulsion), NOT in SDF plugins.
+- **Render = a gz `<visual>` mesh, not Unity** (decided 2026-06-21). LOTUSim's naval
+  models (wamv, dtmb_hull…) have **no `<visual>`** and render via Unity
+  (`render_plugin`→ROS2→HDRP prefab) — invisible in the gz GUI. For a self-contained,
+  audience-reproducible demo we give the BlueBoat a gz `<visual>` (the Blender mesh):
+  a **legitimate LOTUSim pattern** (cf. `fremm`, `commando`, which carry gz visuals).
+  No Unity stack; honest in narration ("a LOTUSim model renders in Gazebo *or* via a
+  Unity prefab — both exist").
+- **Stack on the box: Ubuntu 24.04 → ROS2 Jazzy + Gazebo Harmonic (`gz` prefix),**
+  not Humble/Fortress. Validated: `lotusim install` (native), `lotusim build` (14
+  packages), headless plugin load, xdyn physics connect (`physics in domain Surface
+  init completed`), GPU render via `GALLIUM_DRIVER=d3d12` (RTX 4090 / WSLg).
+- **Slide-10 honesty holds:** the `lotusim-developer` skill lives in the *operator's*
+  environment (`~/.claude/skills/`), the LOTUSim repo itself stays untouched.
+
+Sections below are kept for history; where they say "buoyancy/hydrodynamics/thruster
+plugins", read "**xdyn co-sim + a gz `<visual>`**" instead.
 
 ## Goal
 
@@ -86,7 +122,10 @@ be **good enough to float and move plausibly** — not validated.
 ([`ahujasid/blender-mcp`](https://github.com/ahujasid/blender-mcp)): the agent
 drives a live Blender session over MCP (`bpy` API) to model fuselaged twin hulls +
 thruster pods from the published dimensions, then exports the mesh. Original work →
-license-clean under EPL-2.0; far better on screen than raw boxes.
+license-clean under EPL-2.0; far better on screen than raw boxes. The mesh does
+**double duty**: a `.dae` (or `.glb`) for the gz `<visual>` (what's seen on screen,
+since we render in Gazebo not Unity) and a `.stl` for xdyn's hydrostatics
+(buoyancy/Froude-Krylov).
 
 - **Use Blender 4.5 LTS** — Blender 5.0 removed the native COLLADA `.dae` exporter
   (LOTUSim's format). Alternative: export GLB/glTF (supported by modern gz-sim).
@@ -100,8 +139,9 @@ license-clean under EPL-2.0; far better on screen than raw boxes.
 
 ## Recording environment
 
-LOTUSim is a **Linux-only stack** (Ubuntu + ROS2 Humble + Gazebo, installed via
-`apt` in `launch/install_dep.sh`; entrypoint sources `/opt/ros/humble`). Rendering
+LOTUSim is a **Linux-only stack** (Ubuntu + ROS2 + Gazebo, installed via `apt` in
+`launch/install_dep.sh`; on **24.04 → Jazzy + Harmonic**, on 22.04 → Humble). The
+box install + build are **validated** (see "Verified architecture" above). Rendering
 Gazebo needs Linux + a GPU. The demo splits in two:
 
 - **The agentic loop building the PR** (files, mesh via Blender MCP, SDF/YAML, git,
@@ -143,9 +183,11 @@ A vehicle lives in `assets/models/<name>/`:
 - `meshes/` — `.dae` / `.stl`.
 
 Spawned via an `<include>` block in a world file (`model://blueboat`, `name`,
-`pose`, `lotus_param` with `waypoint_follower` + `render_interface`), loaded by
-`entity_manager` (default `model.sdf`, overridable via the `sdf_file` MASCmd param
-from PR #8). Reference world: `assets/worlds/circling_ship_example.world`.
+`pose`, `lotus_param` with **`physics_engine_interface`** (xdyn uri + thrusters) +
+`waypoint_follower` + `render_interface`), loaded by `entity_manager` (default
+`model.sdf`, overridable via the `sdf_file` MASCmd param from PR #8). Reference
+worlds: `assets/worlds/xdyn_multithread_test.world` (xdyn physics wiring) and
+`circling_ship_example.world` (kinematic waypoint, no physics_engine_interface).
 
 Contribution workflow (`CONTRIBUTING.md`): issue (label `new_model`) → announce →
 fork → implement → test → PR referencing the issue.
@@ -201,26 +243,37 @@ The exit code + measured displacement *are* the feedback: SDF invalid → fix
 structure; `Failed to load system plugin` in the log → fix plugin filename;
 `dist ≈ 0` → it sank (no buoyancy) or didn't move (no thrust/hydro) → iterate.
 
-For "floats + moves" the boat needs the gz plugin trio:
-- **Buoyancy** (world-level; acts on **collision** geometry, not visuals — the hull
-  must have a real collision shape or it sinks),
-- **Hydrodynamics** (Fossen drag/added-mass; without it a thrust pulse accelerates
-  forever — non-physical),
-- **Thruster** (turns a `cmd_thrust` Double into propeller force).
+For "floats + moves" the boat's dynamics come from **xdyn** (NOT gz plugins): an
+`xdyn-for-cs` server reads `blueboat.yaml` (buoyancy from the hydrostatic `.stl`,
+hydrodynamic added-mass/damping, twin-thruster propulsion) and the gz
+`physics_interface_plugin` connects to it as a websocket client. So one iteration is:
 
-`waypoint_follower` is the natural in-sim thrust source (it already exists in the
-repo) → letting it drive a waypoint and asserting displacement is the cleanest
-closed loop.
+```
+launch xdyn-for-cs blueboat.yaml --port 12345 --dt 0.2   (server)
+gz sim -s -r world      → plugin connects → "physics in domain Surface init completed"
+waypoint_follower drives the vessel → read start/end pose → assert dist > threshold
+```
+
+Failure signals: `XdynWebsocket::onFail`/`unable to connect` → no xdyn server on the
+port or port/uri mismatch; `physics in domain Surface init completed` absent → bad
+`blueboat.yaml`; `dist ≈ 0` → sank (bad hydrostatics/inertia) or no thrust.
+
+**Thrust source (corrected by dry-run #1):** publish a `VesselCmdArray` on
+`/<world>/vessel_cmd_array`. The yaml `commands:` block and the `waypoint_follower` do
+NOT drive xdyn in co-sim (the latter is a separate kinematic mode). Asserting
+displacement from `dynamic_pose/info` under commanded thrust is the closed loop. The
+hull needs a real **collision** shape (xdyn hydrostatics use the `.stl`) plus a
+`<visual>` and a `SceneBroadcaster` to be seen in the gz GUI.
 
 **Two fragility flags:**
-- **Gazebo version / command prefix.** ROS2 Humble's default is **Fortress**
-  (`ign`, `ignition.msgs.*`), but LOTUSim's SDF is **1.10** → likely **Garden+**
-  (`gz`, `gz.msgs.*`). Confirm at setup: `which gz ign` / check the world's
-  existing plugins. Don't hardcode the prefix in the harness before confirming.
+- **Gazebo version / command prefix — RESOLVED.** Ubuntu 24.04 → ROS2 **Jazzy** +
+  Gazebo **Harmonic** (gz-sim 8) → the prefix is **`gz`** (`gz.msgs.*`), confirmed by
+  the `gz-sim-*-system` plugins in the worlds. Not Fortress/`ign`.
 - **`--headless-rendering` (EGL/OGRE2) is the weak link under WSL2.** Never gate
   pass/fail on rendering. The robust verification artifact is the **numeric
   displacement + a trajectory plot** (no GPU dependency); a rendered screenshot is
-  a nice-to-have, captured separately for the video.
+  a nice-to-have, captured separately for the video. (GPU GL on the box works via
+  `GALLIUM_DRIVER=d3d12` → RTX 4090; default WSLg falls back to software llvmpipe.)
 
 ## Frozen demo prompt
 
@@ -232,34 +285,58 @@ Paste this to kick off the loop on camera:
 > BlueBoat **spawns, floats, and moves on the water under thrust** in a LOTUSim
 > world, delivered as a clean PR.
 >
-> **First, map the repo — don't guess.** Read `CONTRIBUTING.md`; study how an
-> existing surface vehicle is modelled (`assets/models/wamv/`: `model.config`,
-> `model.sdf`, `wamv.yaml`) and how a vehicle is spawned and commanded
-> (`assets/worlds/circling_ship_example.world`). Detect the Gazebo version
-> (`which gz ign`, inspect existing world plugins) before writing any sim command.
+> **First, map the repo — don't guess.** Read `CONTRIBUTING.md`. Study: a surface
+> vehicle's structure (`assets/models/wamv/` and `assets/models/dtmb_hull/`:
+> `model.config`, `model.sdf`, the xdyn `*.yml` with its **named thrusters**); a
+> model that carries a gz `<visual>` (`assets/models/fremm/`, `commando/`); and how a
+> vehicle is wired to **xdyn + waypoint** in a world
+> (`assets/worlds/xdyn_multithread_test.world` shows
+> `<lotus_param><physics_engine_interface>` pointing at `ws://127.0.0.1:<port>` with
+> `<thrusters>`; `circling_ship_example.world` shows waypoint following). Stack is
+> ROS2 Jazzy + Gazebo Harmonic → use the `gz` CLI.
 >
-> **Build** a new `assets/models/blueboat/` package mirroring wamv:
-> - `model.config`, and `model.sdf` with twin-hull links carrying real
->   **collision** geometry, two thruster links/joints (differential layout), an
->   AIS sensor like wamv, and the **buoyancy + hydrodynamics + thruster** plugins
->   so it floats and moves
-> - `blueboat.yaml` — xdyn behaviour: environment, inertia, added mass, hydro
->   forces, twin-propeller propulsion
-> - an **original low-poly mesh** modelled via the Blender MCP from the published
->   dimensions
+> **Build** a new `assets/models/blueboat/` package (mirror wamv/dtmb_hull for
+> structure, fremm for the visual):
+> - `model.config` + `model.sdf` (SDF 1.10): a `base_link` with real **collision**
+>   geometry, a `<visual>` using your Blender mesh (so it renders in the gz GUI, like
+>   `fremm`), and an AIS sensor like wamv. **No gz buoyancy/hydrodynamics/thruster
+>   plugins — LOTUSim does dynamics in xdyn, not SDF plugins.**
+> - `blueboat.yaml` — the **xdyn** behaviour model: environment, rigid-body inertia,
+>   added mass, damping, and **twin-thruster propulsion with named thrusters** (e.g.
+>   `PSthruster`/`SBthruster`), plus the hydrostatic `.stl` reference.
+> - an **original low-poly mesh** via the Blender MCP (export `.dae` for the visual +
+>   `.stl` for xdyn hydrostatics). Author it **fore-aft on +y** (the LOTUSim mesh
+>   convention, cf. `fremm`); a bow on +x renders 90 deg off ("crab").
 >
-> Register it in a world so it spawns, wired to `waypoint_follower`.
+> Register it in a world: an `<include>` with `<lotus_param>` containing a
+> `<physics_engine_interface><surface>` (`<connection_type>XDynWebSocket`,
+> `<uri>ws://127.0.0.1:12345`, `<thrusters>` matching the yaml names). Add a
+> `gz-sim-scene-broadcaster-system` plugin to the world (LOTUSim worlds omit it: they
+> render in Unity) so the `<visual>` shows in the gz GUI and pose topics are published.
+> Do **not** use `<waypoint_follower>` for thrust: it is a separate KINEMATIC mode and
+> does not drive xdyn.
+>
+> **Run it WITH physics** (the key step — `lotusim run` alone does NOT start xdyn):
+> `xdyn-for-cs assets/models/blueboat/blueboat.yaml --address 127.0.0.1 --port 12345
+> --dt 0.2` (server), then `gz sim -s -r <world>`. **Thrust** is commanded by publishing
+> a `VesselCmdArray` on `/<world>/vessel_cmd_array` (the yaml `commands:` block is
+> ignored in co-sim) — a tiny rclpy node sending
+> `{"PSthruster(rpm)": 250, "SBthruster(rpm)": 250}`.
 >
 > **Acceptance criteria — verify, don't assume:**
-> 1. `gz sdf -k` (or `ign sdf -k`) validates the model and the world.
-> 2. Launched headless, the server loads with no `Failed to load system plugin`.
-> 3. Under thrust (via `waypoint_follower` or a `cmd_thrust`), the boat's
->    start→end displacement is **> 0.5 m** — it floats and moves, not sinks or
->    sits still. Capture a trajectory plot as proof.
+> 1. `gz sdf -k` validates the **model** (it can't resolve `model://` includes in a
+>    world — validate the world by spawning it).
+> 2. With the xdyn server up, the log shows `XdynWebsocket::onOpen` and
+>    `physics in domain Surface init completed` — no `onFail`/`unable to connect`,
+>    no `Failed to load system plugin`.
+> 3. Under commanded thrust (publish `vessel_cmd_array`), the boat's start→end
+>    displacement read from `/world/<world>/dynamic_pose/info` is **> 0.5 m** — it
+>    floats and moves, not sinks or sits still. Capture a trajectory plot as proof.
 >
-> Loop: build → validate → spawn headless → apply thrust → read start/end pose →
-> assert moved → fix, until all three pass. Then **self-review**: re-read this
-> spec and list any criterion not yet met before declaring done.
+> Loop: build → `gz sdf -k` (model only) → launch xdyn → spawn headless → publish
+> thrust → read start/end pose from `dynamic_pose/info` → assert moved → fix, until
+> all three pass. Then **self-review**:
+> re-read this spec and list any criterion not yet met before declaring done.
 >
 > **Hard constraints:**
 > - **Licensing:** EPL-2.0. Do **NOT** copy meshes, SDF, or coefficients from
@@ -279,15 +356,20 @@ Paste this to kick off the loop on camera:
 
 ## Pre-demo checklist / open items
 
-- [x] Recording environment chosen: **Windows 11 desktop, WSL2 (Ubuntu) + WSLg**
-      (GPU render). M2 for prep only.
-- [ ] Set up the Windows desktop: WSL2 Ubuntu + GPU driver, build LOTUSim
-      (`install_dep.sh`), confirm a world spawns + renders in Gazebo via WSLg.
-- [ ] Confirm Gazebo version / command prefix (`which gz ign`) — Fortress (`ign`)
-      vs Garden+ (`gz`); LOTUSim's SDF 1.10 suggests `gz`. Don't hardcode before
-      confirming.
+- [x] Recording environment chosen: **Windows 11 desktop `znDesktop2018`, WSL2
+      (Ubuntu 24.04) + WSLg + RTX 4090**. M2 for prep only.
+- [x] **Box set up + validated (2026-06-21):** native `lotusim install` (Jazzy +
+      Harmonic), `lotusim build` (14 packages), headless world spawn + plugins load,
+      xdyn physics connect, GPU render via `GALLIUM_DRIVER=d3d12`. Env captured in
+      `~/lotusim_ws/setup_env.sh`; physics-run helper `~/lotusim_ws/run_demo_world.sh`.
+- [x] **Gazebo version confirmed:** Harmonic → `gz` prefix (not Fortress/`ign`).
+- [x] **Fork ready:** `cmoron/LOTUSim` (origin) ← `naval-group/LOTUSim` (upstream);
+      the contribution is one repo (`assets/models/blueboat/`), no other fork needed.
+- [x] **LOTUSim dev knowledge captured** in the `lotusim-developer` Claude skill.
 - [ ] Install Blender 4.5 LTS + `blender-mcp` in WSL2; wire the MCP server into
-      Claude Code; confirm the addon connects on `localhost:9876`.
+      Claude Code; confirm the addon connects on `localhost:9876` (all in WSL2).
+- [ ] **xdyn orchestration in the loop:** the verify harness must launch
+      `xdyn-for-cs` per vessel before `gz` (see `run_demo_world.sh` / the skill).
 - [ ] Decide loop materialization at dry-run: full harness (SPEC.md + verify
       script: build→spawn headless→assert moved→plot) vs loop-shaped kickoff alone.
 - [ ] Dry-run the prompt once off-camera: confirm the loop produces a clean PR and
@@ -296,6 +378,9 @@ Paste this to kick off the loop on camera:
       (Cyril is lead dev) or kept on a fork for the recording.
 - [ ] Speaker note: surface the GPL→EPL licensing beat (governance) and the
       estimated-coefficients beat (slide-7 honesty) when narrating the video.
+- [ ] Speaker note (honesty): we render the BlueBoat in Gazebo via a `<visual>`
+      (a real LOTUSim pattern, cf. fremm/commando); production viz is Unity/HDRP
+      (a separate art asset). Don't imply the agent one-shot a Unity prefab.
 - [ ] Narration beat — **accessibility counterpoint**: explicitly frame the demo
       as "one agent, a simple loop, what *one of us* can do on a real PR" against
       the OpenClaw extreme (100 agents, $1.3M/mo, sponsored tokens). Goal: the
