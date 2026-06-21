@@ -1,7 +1,8 @@
 # Demo PR prep — BlueBoat model for LOTUSim
 
 Feasibility recon and frozen demo prompt for the talk's slide-10 video.
-Date: 2026-06-20. Status: **feasible, prompt frozen, not yet recorded.**
+Date: 2026-06-21. Status: **feasible; loop-shaped prompt drafted; scope =
+floats + navigates; not yet recorded.**
 
 ## Goal
 
@@ -10,10 +11,13 @@ camera. The contribution (asked for by the PO, Estelle): add a **Blue Robotics
 BlueBoat** vehicle, a 1.2 m catamaran autonomous surface vehicle (ASV) with twin
 differential thrusters, *with its behaviour model*.
 
-**Scope chosen: "spawn + structure".** The model is complete and correct (mesh,
-SDF, xdyn behaviour YAML) and spawns in a world. Fine hydrodynamic tuning is left
-to an engineer to validate before merge — this is the slide-7 honesty principle,
-made concrete.
+**Scope chosen: "floats + navigates".** The boat spawns, floats (buoyancy), and
+**moves on the water** under thrust (ideally following a waypoint) — the
+impressive payoff for the video, and the thing that gives the autonomous loop a
+real oracle ("did it move?"). Honesty preserved (slide-7): the agent produces
+*plausible* motion from estimated coefficients; an engineer still validates the
+*accuracy* of the hydrodynamics before merge. "Moves plausibly" ≠ "validated
+hydro" — say this out loud when narrating.
 
 ## Why this makes a *better* demo than expected
 
@@ -59,7 +63,8 @@ spacing ~0.59 m · water density 1025 kg/m³.
 **Estimated, must be flagged engineer-to-validate:** 6×6 added-mass matrix,
 linear + quadratic damping coefficients, exact CG / draft / trim. No published
 BlueBoat values exist; estimate from geometry + strip-theory, calibrated against
-the one known anchor (3 m/s top speed).
+the one known anchor (3 m/s top speed). For "navigates" scope these only need to
+be **good enough to float and move plausibly** — not validated.
 
 ## Mesh decision
 
@@ -131,45 +136,127 @@ from PR #8). Reference world: `assets/worlds/circling_ship_example.world`.
 Contribution workflow (`CONTRIBUTING.md`): issue (label `new_model`) → announce →
 fork → implement → test → PR referencing the issue.
 
+## Loop design (the 2026 meta) — "design loops, not prompts"
+
+The demo's effect comes from a *single* Claude running autonomously ~90 min and
+ending with a boat that sails — i.e. a well-designed loop, not a clever one-shot
+prompt. Both the Claude Code creator and the OpenClaw creator say the same thing:
+
+- **Boris Cherny:** *"I don't prompt Claude anymore. I have loops that are running.
+  […] My job is to write loops."* And the #1 lever: *"the most important thing… give
+  Claude a way to verify its work. That feedback loop will 2-3x the quality."*
+  ([YouTube](https://www.youtube.com/watch?v=SlGRN8jh2RI),
+  [howborisusesclaudecode.com](https://howborisusesclaudecode.com/))
+- **Peter Steinberger:** *"You shouldn't be prompting coding agents anymore. You
+  should be designing loops that prompt your agents."* Code is the ideal domain
+  *because the loop is closeable* — compile, run, test → an objective signal.
+  ([addyosmani.com](https://addyosmani.com/blog/loop-engineering/),
+  [steipete.me/posts/just-talk-to-it](https://steipete.me/posts/just-talk-to-it))
+
+> **Talk opportunity:** either quote would make a strong slide-9 ("the loop in
+> action") line. Deck edit is separate — not done here without Cyril's go-ahead.
+
+Distilled ingredients to bake into the demo (whether as a full harness or a
+loop-shaped kickoff — decided at dry-run):
+1. **Spec in a file, not the chat** — goal + constraints + acceptance criteria the
+   agent re-reads (Cherny's Goal/Constraints/Acceptance triple).
+2. **One machine-checkable verification command** the agent loops against (the
+   2-3x lever; Steinberger's closed loop).
+3. **Stop condition judged by something other than the builder** (a critic/`/goal`
+   evaluator) — prevents premature "done".
+4. **Real behavior proof** — run the actual artifact (spawn the boat, check it
+   moved), not a lint.
+5. **Self-review pass before done** — re-read spec, diff against plan, list unmet
+   criteria.
+6. **Externalize state + atomic commits** — resumable, so you can hit escape
+   mid-demo and resume (Steinberger: file changes are atomic).
+7. **Durable corrections** — slips get written to CLAUDE.md/a skill, not the chat.
+8. **Auto mode + budget guardrails** — uninterrupted, but a max turns/wall-clock so
+   it terminates instead of thrashing.
+
+## Closed verification loop (what makes "it sails" achievable autonomously)
+
+The oracle is **displacement in the sim**. One iteration the agent runs headlessly:
+
+```
+build → validate SDF (gz sdf -k) → spawn headless → apply thrust
+      → read start/end pose → assert moved (dist > threshold) → artifact (trajectory plot)
+```
+
+The exit code + measured displacement *are* the feedback: SDF invalid → fix
+structure; `Failed to load system plugin` in the log → fix plugin filename;
+`dist ≈ 0` → it sank (no buoyancy) or didn't move (no thrust/hydro) → iterate.
+
+For "floats + moves" the boat needs the gz plugin trio:
+- **Buoyancy** (world-level; acts on **collision** geometry, not visuals — the hull
+  must have a real collision shape or it sinks),
+- **Hydrodynamics** (Fossen drag/added-mass; without it a thrust pulse accelerates
+  forever — non-physical),
+- **Thruster** (turns a `cmd_thrust` Double into propeller force).
+
+`waypoint_follower` is the natural in-sim thrust source (it already exists in the
+repo) → letting it drive a waypoint and asserting displacement is the cleanest
+closed loop.
+
+**Two fragility flags:**
+- **Gazebo version / command prefix.** ROS2 Humble's default is **Fortress**
+  (`ign`, `ignition.msgs.*`), but LOTUSim's SDF is **1.10** → likely **Garden+**
+  (`gz`, `gz.msgs.*`). Confirm at setup: `which gz ign` / check the world's
+  existing plugins. Don't hardcode the prefix in the harness before confirming.
+- **`--headless-rendering` (EGL/OGRE2) is the weak link under WSL2.** Never gate
+  pass/fail on rendering. The robust verification artifact is the **numeric
+  displacement + a trajectory plot** (no GPU dependency); a rendered screenshot is
+  a nice-to-have, captured separately for the video.
+
 ## Frozen demo prompt
 
 Paste this to kick off the loop on camera:
 
-> **You are contributing to LOTUSim**, an open-source ROS2 + Gazebo maritime
-> multi-agent simulator (EPL-2.0). Add a new vehicle model for the Blue Robotics
-> **BlueBoat**: a 1.2 m catamaran autonomous surface vehicle with twin
-> differential thrusters.
+> **Goal.** Contribute a new vehicle model to LOTUSim (open-source ROS2 + Gazebo
+> maritime simulator, EPL-2.0): the Blue Robotics **BlueBoat**, a 1.2 m catamaran
+> autonomous surface vehicle with twin differential thrusters. Success = the
+> BlueBoat **spawns, floats, and moves on the water under thrust** in a LOTUSim
+> world, delivered as a clean PR.
 >
-> First, study the repo's own conventions and `CONTRIBUTING.md`. Look at how an
-> existing surface vehicle is modelled — `assets/models/wamv/` (`model.config`,
-> `model.sdf`, `wamv.yaml`) — and how a vehicle is spawned and commanded in
-> `assets/worlds/circling_ship_example.world`.
+> **First, map the repo — don't guess.** Read `CONTRIBUTING.md`; study how an
+> existing surface vehicle is modelled (`assets/models/wamv/`: `model.config`,
+> `model.sdf`, `wamv.yaml`) and how a vehicle is spawned and commanded
+> (`assets/worlds/circling_ship_example.world`). Detect the Gazebo version
+> (`which gz ign`, inspect existing world plugins) before writing any sim command.
 >
-> Deliver a new `assets/models/blueboat/` package mirroring that structure:
-> - `model.config` — Gazebo metadata
-> - `model.sdf` — twin-hull links, two thruster links/joints (differential
->   layout), an AIS sensor like wamv
-> - `blueboat.yaml` — xdyn behaviour model: environment, rigid-body inertia, added
->   mass, hydrodynamic forces, twin-propeller propulsion
-> - an **original low-poly mesh** you model via the Blender MCP (twin hulls +
->   thruster pods) from the published BlueBoat dimensions, then export to the
->   package
+> **Build** a new `assets/models/blueboat/` package mirroring wamv:
+> - `model.config`, and `model.sdf` with twin-hull links carrying real
+>   **collision** geometry, two thruster links/joints (differential layout), an
+>   AIS sensor like wamv, and the **buoyancy + hydrodynamics + thruster** plugins
+>   so it floats and moves
+> - `blueboat.yaml` — xdyn behaviour: environment, inertia, added mass, hydro
+>   forces, twin-propeller propulsion
+> - an **original low-poly mesh** modelled via the Blender MCP from the published
+>   dimensions
 >
-> Then register the BlueBoat in a world file so it spawns.
+> Register it in a world so it spawns, wired to `waypoint_follower`.
+>
+> **Acceptance criteria — verify, don't assume:**
+> 1. `gz sdf -k` (or `ign sdf -k`) validates the model and the world.
+> 2. Launched headless, the server loads with no `Failed to load system plugin`.
+> 3. Under thrust (via `waypoint_follower` or a `cmd_thrust`), the boat's
+>    start→end displacement is **> 0.5 m** — it floats and moves, not sinks or
+>    sits still. Capture a trajectory plot as proof.
+>
+> Loop: build → validate → spawn headless → apply thrust → read start/end pose →
+> assert moved → fix, until all three pass. Then **self-review**: re-read this
+> spec and list any criterion not yet met before declaring done.
 >
 > **Hard constraints:**
-> - **Licensing:** repo is EPL-2.0. Do **NOT** copy meshes, SDF, or coefficients
->   from ArduPilot SITL_Models (GPL-3.0) or from Blue Robotics CAD (no
->   redistribution license). Author the mesh yourself from published dimensions
->   only.
-> - **Ground what's published, flag what's not.** Geometry, mass, and the T200/M200
->   thrust curve come from the official datasheet. The **added-mass and damping
->   coefficients are not published** — estimate them and mark each one
->   `# ESTIMATED — pending engineer validation`.
-> - **Scope:** the model must spawn and float correctly. Fine hydrodynamic tuning
->   is out of scope (left to an engineer).
-> - Open a PR referencing a new issue, with a clear scope description and a
->   **"real behavior proof"** section.
+> - **Licensing:** EPL-2.0. Do **NOT** copy meshes, SDF, or coefficients from
+>   ArduPilot SITL_Models (GPL-3.0) or Blue Robotics CAD (no redistribution
+>   license). Author everything from published dimensions.
+> - **Honesty:** geometry, mass, and the T200/M200 thrust curve come from the
+>   datasheet. Added-mass and damping are **not published** — estimate them, tune
+>   only enough to float and move plausibly, and mark each
+>   `# ESTIMATED — pending engineer validation`. Do not claim validated hydro.
+> - Open a PR referencing a new issue, with a clear scope and a **"real behavior
+>   proof"** section (the headless run + trajectory plot).
 >
 > **Published reference data** (do not fetch GPL sources): LOA 1.20 m · beam
 > 0.93 m · dry mass 14.5 kg · payload 15 kg · max speed 3 m/s · twin M200 (T200
@@ -182,10 +269,15 @@ Paste this to kick off the loop on camera:
       (GPU render). M2 for prep only.
 - [ ] Set up the Windows desktop: WSL2 Ubuntu + GPU driver, build LOTUSim
       (`install_dep.sh`), confirm a world spawns + renders in Gazebo via WSLg.
+- [ ] Confirm Gazebo version / command prefix (`which gz ign`) — Fortress (`ign`)
+      vs Garden+ (`gz`); LOTUSim's SDF 1.10 suggests `gz`. Don't hardcode before
+      confirming.
 - [ ] Install Blender 4.5 LTS + `blender-mcp` in WSL2; wire the MCP server into
       Claude Code; confirm the addon connects on `localhost:9876`.
-- [ ] Dry-run the prompt once off-camera to confirm the loop produces a clean PR
-      and the boat spawns; tune the prompt if it drifts.
+- [ ] Decide loop materialization at dry-run: full harness (SPEC.md + verify
+      script: build→spawn headless→assert moved→plot) vs loop-shaped kickoff alone.
+- [ ] Dry-run the prompt once off-camera: confirm the loop produces a clean PR and
+      the boat **floats + moves** (displacement > 0.5 m); tune if it drifts.
 - [ ] Confirm whether the PR is opened against `naval-group/LOTUSim` for real
       (Cyril is lead dev) or kept on a fork for the recording.
 - [ ] Speaker note: surface the GPL→EPL licensing beat (governance) and the
