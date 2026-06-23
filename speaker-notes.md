@@ -1,6 +1,6 @@
 # Speaker notes — *From idea to LOTUSim contribution, faster with AI agents*
 
-> Talk ~15 min · LOTUSim Technical Conference · Naval Group · 02/07/2026
+> Talk ~15 min · LOTUSim Technical Conference · Naval Group · 2 July 2026
 > Notes to keep in front of me. **Slides and notes both in English.**
 > I'm not a native English speaker → these notes are a near-script. Short sentences. The **Say:** lines are meant to be spoken almost word for word.
 
@@ -50,15 +50,19 @@
 - Key fact: the doc is **addressed to the agents and to the people who run them** (`coding-assistants.rst`).
 - The rule that does not move: **"AI agents MUST NOT add Signed-off-by"** — only a human certifies the DCO.
 - **Say (verbatim, safe):** *"Their answer was yes — under one condition: the human who signs answers for every line."*
+- If the on-screen example looks old (`claude-3-opus`): it's the doc's own verbatim example. *"The format is what matters, not the model version."*
 - ⚠️ Do NOT say "open source said yes to AI" flat — Torvalds himself said docs don't fix slop. Accountability does. If pushed, see Q&A.
 
 ## 6 · OpenClaw  *(1:30)* — built on agents, wrote it all down
 - The other data point: **the fastest-growing open-source project in GitHub history**, built agent-first.
 - The real point FIRST: *"It runs on what they wrote down for the agents: a VISION file (what to build, what to refuse) and an AGENTS file (how to build and test in the repo)."*
-- Human guardrails: *"every PR needs real-behavior proof, and 28+ humans sign the merge."*
+- Human guardrails: *"every PR needs real-behavior proof, and one of about twenty-five human maintainers signs the merge."* (26 named in CONTRIBUTING.md as of 2026-06-09 — recount before the talk.)
 - The scale, as an aside and **attributed to Steinberger personally** (NOT the project, don't conflate): *"Steinberger himself runs around a hundred agents in parallel, about 1.3 million dollars of tokens in one month, funded by OpenAI."*
+- If asked about the $1.3M: that's "fast-mode" pricing; without it, closer to $300k. Still OpenAI-funded research.
+- Context (off-slide): Steinberger was acqui-hired by OpenAI (Feb 2026); OpenClaw now lives in a foundation OpenAI supports. See Q&A if challenged on neutrality.
 - **Say (verbatim, seed for slide 12):** *"An agent is only as good as the docs and the rules you give it."*
 - Conclusion: *"A hundred agents, and the human is still the bottleneck, on purpose."*
+- **Bridge to LOTUSim (verbatim):** *"These are not abstract examples. Let me show you the same discipline on a real LOTUSim feature."*
 
 ## 7 · Scenario — sonar sensor  *(1:00)*
 - The concrete case: **add a sonar sensor to an underwater platform.** Touches the whole stack.
@@ -77,13 +81,16 @@
   - at **Plan**: *"It proposes two or three options. I choose. That's the part that doesn't get delegated — taste and system design."*
   - at **Build**: *"The agent runs colcon and the sim, reads the failure, fixes it. It closes the loop itself. Local CI beats remote CI — twelve seconds, not ten minutes."*
 - Point at the terminal during Build (it's the proof).
+- The on-slide quote uses "moats" — rare word; gloss it if faces go blank: *"moats — the things a machine can't easily replace."*
 - **Say (verbatim):** *"The code is yours — readable, and you can defend every line."*
 
 ## 10 · Demo — video  *(2:00)*
 - This is my breather. Let the **sped-up video** play; say little.
 - Before: *"From a cloned repo to a pull request — let me show you the real thing, sped up."*
+- **Say (verbatim, before the video — this is the credibility beat):** *"This was recorded on LOTUSim exactly as it is today. No AGENTS.md, no prepared context. Keep that in mind for the homework slide."*
 - After: *"The code isn't disposable. It's readable, tested, documented, and it follows the repo's conventions."*
 - ⚠️ No invented numbers. The video is the evidence. (If the video isn't ready: say "a recorded session" and describe the five steps in one sentence each.)
+- ⚠️ PREP CHECK: record the video on the **unmodified** repo (that's now claimed on the slide), by 27 June at the latest; then remove the brackets from the slide footer.
 
 ## 11 · Limits — what I'm not selling  *(1:15)*
 - Four honest cards. Go fast, one line each.
@@ -94,7 +101,8 @@
 
 ## 12 · LOTUSim's homework  *(1:30)* — the governance message, I own this
 - This is the second target. Say it plainly: *"This isn't only on you. The project has homework too — and today it isn't done."*
-- Left = today (README is one paragraph; docs in a wiki; nothing for the agents). Right = the homework (AGENTS.md, in-repo VISION, docs-as-code, an AI-contribution policy, guardrails).
+- Left = today (README is one paragraph; docs in a wiki; nothing for the agents). Right = the homework (AGENTS.md, in-repo VISION, docs-as-code, test suite + local CI, SECURITY.md, an AI-contribution policy).
+- On SECURITY.md, one line, no dwelling: *"And a clear way to report vulnerabilities — set up before the volume arrives, not after. That's the one lesson OpenClaw learned the hard way."*
 - **Say (verbatim, ties back to slide 3):** *"The wall I started with — the implicit conventions — is exactly what these files write down. Lower it for humans, and you lower it for agents too."*
 
 ## 13 · Close  *(1:00)*
@@ -115,4 +123,8 @@
 - **"Reproducibility — same prompt, different result?"** → True; that's why the loop ends on build + tests, not on the prompt. We review the result, not the run.
 - **"Is 'the human signs' a fiction if they don't understand the code?"** → The agent **accelerates** understanding, it doesn't replace it. You read everything, you sign what you can defend.
 - **"Will AI replace engineers?"** → No. *Taste and system design remain the moats* (Steinberger). The human chooses and signs.
+- **"Was the demo on a prepped repo?"** → No. *"The repo exactly as it is today — no AGENTS.md, no prepared context. With the homework done, the same session gets faster and safer. That's the point."*
+- **"OpenClaw belongs to OpenAI now — is it a neutral example?"** → Acqui-hire, Feb 2026; the project lives in a foundation OpenAI supports. The governance artifacts (VISION.md, AGENTS.md, real-behavior proof) are public, verifiable, and predate the deal. The lesson stands.
+- **"OpenClaw's security record? (150+ CVEs in months)"** → Yes, and that's the cautionary half of the lesson: governance must precede scale, not chase it. It's exactly why SECURITY.md is on our homework list before the agents arrive.
+- **"Does the agent set up my ROS/Gazebo environment too?"** → No. The agent writes and verifies code; the environment is yours to install. A reproducible dev setup (container) is part of making the repo agent-ready — fair candidate for the homework list.
 - **Repo:** github.com/naval-group/LOTUSim.
