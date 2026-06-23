@@ -1,1090 +1,2579 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>From idea to LOTUSim contribution — faster with AI agents</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet" />
-<style>
-  :root{
-    --bg:#0e0c0d;
-    --bg-2:#171314;
-    --ink:#ece6d8;
-    --ink-dim:#9a9486;
-    --rule:#2a2122;
-    --accent:#FF5A36;
-    --accent-light:#FF8A6B;
-    --accent-deep:#C73E1F;
-    --danger:#ff5a5a;
-    --glow:255,90,54;     /* accent as r,g,b — for glow shadows */
-    --display:"Instrument Serif", "Times New Roman", serif;
-    --mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--mono);font-weight:400;font-size:16px;overflow:hidden}
-  body{
-    background-image:
-      radial-gradient(1200px 600px at 80% -10%, rgba(255,90,54,.07), transparent 60%),
-      radial-gradient(900px 500px at -10% 110%, rgba(255,138,107,.04), transparent 60%);
-  }
-  body::before{
-    content:"";position:fixed;inset:0;pointer-events:none;z-index:2;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-    mix-blend-mode:overlay;opacity:.5;
-  }
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>From idea to LOTUSim contribution — faster with AI agents</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0e0c0d;
+        --bg-2: #171314;
+        --ink: #ece6d8;
+        --ink-dim: #9a9486;
+        --rule: #2a2122;
+        --accent: #ff5a36;
+        --accent-light: #ff8a6b;
+        --accent-deep: #c73e1f;
+        --danger: #ff5a5a;
+        --glow: 255, 90, 54; /* accent as r,g,b — for glow shadows */
+        --display: "Instrument Serif", "Times New Roman", serif;
+        --mono:
+          "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background: #000;
+        color: var(--ink);
+        font-family: var(--mono);
+        font-weight: 400;
+        font-size: 16px;
+        overflow: hidden;
+      }
+      .deck::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 2;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+        mix-blend-mode: overlay;
+        opacity: 0.5;
+      }
 
-  .deck{position:relative;height:100vh;width:100vw}
-  .slide{
-    position:absolute;inset:0;
-    padding:6vh 7vw 8vh;
-    display:none;
-    flex-direction:column;
-    animation:slideIn .45s cubic-bezier(.2,.7,.2,1);
-  }
-  .slide.is-active{display:flex}
-  @keyframes slideIn{
-    from{opacity:0;transform:translateY(8px)}
-    to{opacity:1;transform:none}
-  }
+      .deck {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 1920px;
+        height: 1080px;
+        transform: translate(-50%, -50%) scale(var(--scale, 1));
+        transform-origin: center center;
+        overflow: hidden;
+        background: var(--bg);
+        background-image:
+          radial-gradient(
+            1200px 600px at 80% -10%,
+            rgba(255, 90, 54, 0.07),
+            transparent 60%
+          ),
+          radial-gradient(
+            900px 500px at -10% 110%,
+            rgba(255, 138, 107, 0.04),
+            transparent 60%
+          );
+      }
+      .slide {
+        position: absolute;
+        inset: 0;
+        padding: 56px 120px 72px;
+        display: none;
+        flex-direction: column;
+        animation: slideIn 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+      }
+      .slide.is-active {
+        display: flex;
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
 
-  .hud{
-    position:fixed;left:0;right:0;bottom:0;z-index:5;
-    display:flex;justify-content:space-between;align-items:center;
-    padding:14px 28px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;
-    color:var(--ink-dim);text-transform:uppercase;
-    border-top:1px solid var(--rule);
-    background:linear-gradient(180deg,transparent,rgba(0,0,0,.4));
-  }
-  .hud .left{display:flex;gap:18px;align-items:center}
-  .hud .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent);animation:pulse 2.4s ease-in-out infinite}
-  @keyframes pulse{
-    0%,100%{opacity:.7;box-shadow:0 0 8px var(--accent)}
-    50%{opacity:1;box-shadow:0 0 18px var(--accent)}
-  }
-  .hud .right{display:flex;gap:14px}
-  .progress{position:fixed;left:0;right:0;bottom:0;height:2px;background:var(--rule);z-index:6}
-  .progress > i{display:block;height:100%;background:var(--accent);width:0;transition:width .35s ease}
+      .hud {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 5;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 28px;
+        font-family: var(--mono);
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        color: var(--ink-dim);
+        text-transform: uppercase;
+        border-top: 1px solid var(--rule);
+        background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.4));
+      }
+      .hud .left {
+        display: flex;
+        gap: 18px;
+        align-items: center;
+      }
+      .hud .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 12px var(--accent);
+        animation: pulse 2.4s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.7;
+          box-shadow: 0 0 8px var(--accent);
+        }
+        50% {
+          opacity: 1;
+          box-shadow: 0 0 18px var(--accent);
+        }
+      }
+      .hud .right {
+        display: flex;
+        gap: 14px;
+      }
+      .progress {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 2px;
+        background: var(--rule);
+        z-index: 6;
+      }
+      .progress > i {
+        display: block;
+        height: 100%;
+        background: var(--accent);
+        width: 0;
+        transition: width 0.35s ease;
+      }
 
-  .eyebrow{
-    font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;
-    color:var(--ink-dim);display:inline-flex;gap:10px;align-items:center;
-  }
-  .eyebrow::before{
-    content:"⟩";color:var(--accent);font-family:var(--mono);
-    font-weight:700;font-size:14px;
-  }
-  h1,h2,h3{margin:0;font-weight:400}
-  h1.display{
-    font-family:var(--display);font-style:italic;
-    font-size:clamp(48px,7.4vw,120px);line-height:.95;letter-spacing:-.01em;
-  }
-  h2.title{
-    font-family:var(--display);font-style:italic;
-    font-size:clamp(40px,5.2vw,80px);line-height:1;letter-spacing:-.01em;
-    margin-bottom:.4em;
-  }
-  h2.title em{font-style:normal;color:var(--accent)}
-  h3.sub{
-    font-family:var(--mono);font-size:13px;letter-spacing:.18em;text-transform:uppercase;
-    color:var(--ink-dim);margin-bottom:2.2em;
-  }
-  p,li{font-family:var(--mono);font-size:17px;line-height:1.55;color:var(--ink)}
-  .lead{font-size:20px;color:var(--ink);max-width:62ch}
-  .dim{color:var(--ink-dim)}
-  .hl{color:var(--accent)}
-  .hl-2{color:var(--accent-light)}
-  .strike{text-decoration:line-through;color:var(--ink-dim)}
+      .eyebrow {
+        font-family: var(--mono);
+        font-size: 14px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+        display: inline-flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .eyebrow::before {
+        content: "⟩";
+        color: var(--accent);
+        font-family: var(--mono);
+        font-weight: 700;
+        font-size: 16px;
+      }
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        font-weight: 400;
+      }
+      h1.display {
+        font-family: var(--display);
+        font-style: italic;
+        font-size: 112px;
+        line-height: 0.95;
+        letter-spacing: -0.01em;
+      }
+      h2.title {
+        font-family: var(--display);
+        font-style: italic;
+        font-size: 76px;
+        line-height: 1;
+        letter-spacing: -0.01em;
+        margin-bottom: 0.4em;
+      }
+      h2.title em {
+        font-style: normal;
+        color: var(--accent);
+      }
+      h3.sub {
+        font-family: var(--mono);
+        font-size: 15px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+        margin-bottom: 2.2em;
+      }
+      p,
+      li {
+        font-family: var(--mono);
+        font-size: 22px;
+        line-height: 1.55;
+        color: var(--ink);
+      }
+      .lead {
+        font-size: 26px;
+        color: var(--ink);
+        max-width: 62ch;
+      }
+      .dim {
+        color: var(--ink-dim);
+      }
+      .hl {
+        color: var(--accent);
+      }
+      .hl-2 {
+        color: var(--accent-light);
+      }
+      .strike {
+        text-decoration: line-through;
+        color: var(--ink-dim);
+      }
 
-  .stack > * + *{margin-top:18px}
-  .cols-2{display:grid;grid-template-columns:1.1fr .9fr;gap:6vw;align-items:start}
-  .cols-3{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
-  .row{display:flex;gap:32px;align-items:flex-start}
-  .grow{flex:1}
-  .spacer{flex:1}
+      .stack > * + * {
+        margin-top: 18px;
+      }
+      .cols-2 {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 96px;
+        align-items: start;
+      }
+      .cols-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 32px;
+      }
+      .row {
+        display: flex;
+        gap: 32px;
+        align-items: flex-start;
+      }
+      .grow {
+        flex: 1;
+      }
+      .spacer {
+        flex: 1;
+      }
 
-  .card{
-    border:1px solid var(--rule);background:var(--bg-2);
-    padding:22px 22px 20px;border-radius:2px;
-    position:relative;overflow:hidden;
-  }
-  .card .num{
-    font-family:var(--display);font-style:italic;font-size:44px;line-height:1;
-    color:var(--accent);margin-bottom:14px;display:block;
-  }
-  .card h4{margin:0 0 8px;font-family:var(--mono);font-size:14px;letter-spacing:.1em;text-transform:uppercase}
-  .card p{font-size:14px;color:var(--ink-dim);line-height:1.5;margin:0}
-  .card.warn .num{color:var(--accent-light)}
-  .card.danger .num{color:var(--danger)}
+      .card {
+        border: 1px solid var(--rule);
+        background: var(--bg-2);
+        padding: 22px 22px 20px;
+        border-radius: 2px;
+        position: relative;
+        overflow: hidden;
+      }
+      .card .num {
+        font-family: var(--display);
+        font-style: italic;
+        font-size: 44px;
+        line-height: 1;
+        color: var(--accent);
+        margin-bottom: 14px;
+        display: block;
+      }
+      .card h4 {
+        margin: 0 0 8px;
+        font-family: var(--mono);
+        font-size: 16px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      .card p {
+        font-size: 18px;
+        color: var(--ink-dim);
+        line-height: 1.5;
+        margin: 0;
+      }
+      .card.warn .num {
+        color: var(--accent-light);
+      }
+      .card.danger .num {
+        color: var(--danger);
+      }
 
-  .term{
-    background:#08070a;border:1px solid var(--rule);border-radius:2px;
-    padding:18px 20px;font-family:var(--mono);font-size:13px;line-height:1.7;
-    color:var(--ink);
-    box-shadow:inset 0 0 0 1px rgba(255,90,54,.04);
-    position:relative;
-  }
-  /* Blinking cursor at the bottom of the terminal */
-  .term::after{
-    content:"▊";
-    color:var(--accent);
-    margin-left:2px;
-    animation:cursor 1.1s steps(2) infinite;
-    display:inline-block;
-  }
-  @keyframes cursor{
-    0%,50%{opacity:1}
-    51%,100%{opacity:0}
-  }
-  .term .p{color:var(--accent)}
-  .term .c{color:var(--ink-dim)}
-  .term .k{color:var(--accent-light)}
-  .term .s{color:#cdd1d8}
+      .term {
+        background: #08070a;
+        border: 1px solid var(--rule);
+        border-radius: 2px;
+        padding: 18px 20px;
+        font-family: var(--mono);
+        font-size: 16px;
+        line-height: 1.7;
+        color: var(--ink);
+        box-shadow: inset 0 0 0 1px rgba(255, 90, 54, 0.04);
+        position: relative;
+      }
+      /* Blinking cursor at the bottom of the terminal */
+      .term::after {
+        content: "▊";
+        color: var(--accent);
+        margin-left: 2px;
+        animation: cursor 1.1s steps(2) infinite;
+        display: inline-block;
+      }
+      @keyframes cursor {
+        0%,
+        50% {
+          opacity: 1;
+        }
+        51%,
+        100% {
+          opacity: 0;
+        }
+      }
+      .term .p {
+        color: var(--accent);
+      }
+      .term .c {
+        color: var(--ink-dim);
+      }
+      .term .k {
+        color: var(--accent-light);
+      }
+      .term .s {
+        color: #cdd1d8;
+      }
 
-  /* Agent relay (slide 9) — pixel-sprite agents pass a glowing baton */
-  .relay{position:relative;padding-bottom:64px;margin-top:8px}
-  .agents{display:flex;justify-content:space-around;align-items:flex-end;gap:8px}
-  .agent{
-    display:flex;flex-direction:column;align-items:center;gap:9px;
-    width:150px;text-align:center;position:relative;
-  }
-  .sprite-wrap{
-    width:96px;height:80px;
-    display:flex;align-items:center;justify-content:center;
-    position:relative;
-  }
-  .sprite{
-    width:100%;height:100%;
-    color:var(--ink-dim);
-    transition:color .3s ease,filter .3s ease,transform .3s ease;
-  }
-  .sprite svg{display:block;width:100%;height:100%}
-  .role-name{
-    font-family:var(--mono);font-size:11px;letter-spacing:.22em;
-    color:var(--ink-dim);text-transform:uppercase;
-  }
-  .verb{
-    font-family:var(--display);font-style:italic;font-size:20px;
-    color:var(--ink);line-height:1;
-  }
-  .role-desc{
-    font-family:var(--mono);font-size:11px;line-height:1.45;
-    color:var(--ink-dim);margin-top:2px;
-  }
+      /* Agent relay (slide 9) — pixel-sprite agents pass a glowing baton */
+      .relay {
+        position: relative;
+        padding-bottom: 64px;
+        margin-top: 8px;
+      }
+      .agents {
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-end;
+        gap: 8px;
+      }
+      .agent {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 9px;
+        width: 150px;
+        text-align: center;
+        position: relative;
+      }
+      .sprite-wrap {
+        width: 96px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+      .sprite {
+        width: 100%;
+        height: 100%;
+        color: var(--ink-dim);
+        transition:
+          color 0.3s ease,
+          filter 0.3s ease,
+          transform 0.3s ease;
+      }
+      .sprite svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .role-name {
+        font-family: var(--mono);
+        font-size: 13px;
+        letter-spacing: 0.22em;
+        color: var(--ink-dim);
+        text-transform: uppercase;
+      }
+      .verb {
+        font-family: var(--display);
+        font-style: italic;
+        font-size: 22px;
+        color: var(--ink);
+        line-height: 1;
+      }
+      .role-desc {
+        font-family: var(--mono);
+        font-size: 14px;
+        line-height: 1.45;
+        color: var(--ink-dim);
+        margin-top: 2px;
+      }
 
-  /* Baton — a glowing orange orb that arcs between agents */
-  .baton{
-    position:absolute;
-    bottom:14px;left:10%;
-    width:14px;height:14px;
-    border-radius:50%;
-    background:var(--accent);
-    box-shadow:
-      0 0 10px var(--accent),
-      0 0 24px rgba(var(--glow),.55),
-      0 0 48px rgba(var(--glow),.25);
-    transform:translateX(-50%) translateY(0);
-    opacity:0;
-    pointer-events:none;
-  }
+      /* Slide 3 — type pictos in the slide-8 pixel style.
+         Three platform sprites (drone / vessel / AUV) + one AI-agent sprite. */
+      .pictos {
+        display: flex;
+        gap: 26px;
+        align-items: flex-end;
+        margin: 20px 0 6px;
+      }
+      .picto {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        width: 78px;
+      }
+      .picto .sprite {
+        width: 66px;
+        height: 56px;
+      }
+      .picto-label {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+      }
+      .picto.platform .sprite {
+        color: var(--ink);
+      }
+      .picto.ai {
+        width: auto;
+      }
+      .picto.ai .sprite {
+        width: 84px;
+        height: 70px;
+        color: var(--accent);
+        filter: drop-shadow(0 0 16px rgba(var(--glow), 0.4));
+      }
 
-  ul.checks{list-style:none;padding:0;margin:0}
-  ul.checks li{padding:10px 0;border-bottom:1px dashed var(--rule);display:flex;gap:14px;align-items:baseline}
-  ul.checks li::before{content:"›";color:var(--accent);font-family:var(--mono);width:14px;flex:0 0 14px}
-  ul.checks.warn li::before{content:"!";color:var(--accent-light)}
-  /* two-column rows: fixed label column + description column (slide 18) */
-  ul.checks li .lbl-col{flex:0 0 11.5em}
-  ul.checks li .desc-col{flex:1 1 0}
+      /* Baton — a glowing orange orb that arcs between agents */
+      .baton {
+        position: absolute;
+        bottom: 14px;
+        left: 10%;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow:
+          0 0 10px var(--accent),
+          0 0 24px rgba(var(--glow), 0.55),
+          0 0 48px rgba(var(--glow), 0.25);
+        transform: translateX(-50%) translateY(0);
+        opacity: 0;
+        pointer-events: none;
+      }
 
-  .cover{display:flex;flex-direction:column;justify-content:space-between;height:100%}
-  .cover .top,.cover .bottom{display:flex;justify-content:space-between;align-items:center}
-  .cover .meta{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim)}
-  .cover h1.display{max-width:18ch}
-  .cover .tag{
-    display:inline-block;border:1px solid var(--accent);color:var(--accent);
-    padding:6px 12px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;
-  }
+      ul.checks {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      ul.checks li {
+        padding: 10px 0;
+        border-bottom: 1px dashed var(--rule);
+        display: flex;
+        gap: 14px;
+        align-items: baseline;
+      }
+      ul.checks li::before {
+        content: "›";
+        color: var(--accent);
+        font-family: var(--mono);
+        width: 14px;
+        flex: 0 0 14px;
+      }
+      ul.checks.warn li::before {
+        content: "!";
+        color: var(--accent-light);
+      }
+      /* two-column rows: fixed label column + description column (slide 18) */
+      ul.checks li .lbl-col {
+        flex: 0 0 11.5em;
+      }
+      ul.checks li .desc-col {
+        flex: 1 1 0;
+      }
 
-  .bignum-small{
-    font-family:var(--display);font-style:italic;
-    font-size:clamp(72px,9vw,128px);line-height:.95;color:var(--ink);letter-spacing:-.03em;
-  }
-  .bignum-small .unit{font-size:.22em;color:var(--ink-dim);font-style:normal;font-family:var(--mono);letter-spacing:.1em;vertical-align:top;margin-left:8px;text-transform:uppercase}
+      .cover {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+      }
+      .cover .top,
+      .cover .bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .cover .meta {
+        font-size: 13px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+      }
+      .cover h1.display {
+        max-width: 18ch;
+      }
+      .cover .tag {
+        display: inline-block;
+        border: 1px solid var(--accent);
+        color: var(--accent);
+        padding: 6px 12px;
+        font-size: 12px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+      }
 
-  .pull{
-    border-left:2px solid var(--accent);
-    padding:6px 0 6px 22px;
-    font-family:var(--display);font-style:italic;
-    font-size:clamp(22px,2.4vw,32px);line-height:1.25;
-    color:var(--ink);max-width:30ch;
-  }
-  .pull .attr{
-    display:block;font-family:var(--mono);font-style:normal;
-    font-size:11px;letter-spacing:.16em;color:var(--ink-dim);
-    text-transform:uppercase;margin-top:14px;
-  }
+      .bignum-small {
+        font-family: var(--display);
+        font-style: italic;
+        font-size: 120px;
+        line-height: 0.95;
+        color: var(--ink);
+        letter-spacing: -0.03em;
+      }
+      .bignum-small .unit {
+        font-size: 0.22em;
+        color: var(--ink-dim);
+        font-style: normal;
+        font-family: var(--mono);
+        letter-spacing: 0.1em;
+        vertical-align: top;
+        margin-left: 8px;
+        text-transform: uppercase;
+      }
 
-  .sources{
-    margin-top:auto;padding-top:24px;border-top:1px solid var(--rule);
-    font-family:var(--mono);font-size:10px;letter-spacing:.08em;
-    color:var(--ink-dim);text-transform:uppercase;
-    display:flex;gap:24px;flex-wrap:wrap;
-  }
-  .sources b{color:var(--ink);font-weight:400;letter-spacing:.18em;margin-right:8px}
+      .pull {
+        border-left: 2px solid var(--accent);
+        padding: 6px 0 6px 22px;
+        font-family: var(--display);
+        font-style: italic;
+        font-size: 30px;
+        line-height: 1.25;
+        color: var(--ink);
+        max-width: 30ch;
+      }
+      .pull .attr {
+        display: block;
+        font-family: var(--mono);
+        font-style: normal;
+        font-size: 13px;
+        letter-spacing: 0.16em;
+        color: var(--ink-dim);
+        text-transform: uppercase;
+        margin-top: 14px;
+      }
 
+      .sources {
+        margin-top: auto;
+        padding-top: 24px;
+        border-top: 1px solid var(--rule);
+        font-family: var(--mono);
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        color: var(--ink-dim);
+        text-transform: uppercase;
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+      }
+      .sources b {
+        color: var(--ink);
+        font-weight: 400;
+        letter-spacing: 0.18em;
+        margin-right: 8px;
+      }
 
-  .filler{flex:1}
-  .footer-note{margin-top:auto;font-size:12px;color:var(--ink-dim);letter-spacing:.1em;text-transform:uppercase}
-  hr.rule{border:none;border-top:1px solid var(--rule);margin:32px 0}
+      /* Merged industry slide — two answers (kernel + OpenClaw) side by side */
+      .answers {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 48px;
+        margin-top: 22px;
+        align-items: stretch;
+      }
+      .answer {
+        border: 1px solid var(--rule);
+        background: var(--bg-2);
+        border-radius: 2px;
+        padding: 30px 32px;
+        display: flex;
+        flex-direction: column;
+      }
+      .answer-head {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+      .logo-mark {
+        width: 64px;
+        height: 64px;
+        flex: 0 0 64px;
+        display: block;
+      }
+      .logo-mark svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .answer-name {
+        display: block;
+        font-family: var(--display);
+        font-style: italic;
+        font-size: 36px;
+        color: var(--ink);
+        line-height: 1;
+      }
+      .answer-tag {
+        display: block;
+        font-family: var(--mono);
+        font-size: 13px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+        margin-top: 7px;
+      }
+      .answer .takeaway {
+        margin-top: auto;
+        padding-top: 18px;
+        font-family: var(--display);
+        font-style: italic;
+        font-size: 26px;
+        color: var(--accent);
+        line-height: 1.2;
+      }
 
-  .badge{
-    display:inline-block;padding:3px 8px;border:1px solid var(--rule);border-radius:2px;
-    font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim);
-    margin-right:6px;margin-bottom:6px;
-  }
-  .badge.hl{border-color:var(--accent);color:var(--accent)}
+      .filler {
+        flex: 1;
+      }
+      .footer-note {
+        margin-top: auto;
+        font-size: 15px;
+        color: var(--ink-dim);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      hr.rule {
+        border: none;
+        border-top: 1px solid var(--rule);
+        margin: 32px 0;
+      }
 
-  /* Demo slide (10) — video placeholder frame */
-  .videoframe{
-    border:1px solid var(--rule);border-radius:2px;overflow:hidden;
-    background:#08070a;box-shadow:inset 0 0 0 1px rgba(255,90,54,.04);
-  }
-  .vf-top{display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid var(--rule)}
-  .vf-dot{width:9px;height:9px;border-radius:50%;background:var(--rule)}
-  .vf-label{margin-left:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim)}
-  .vf-stage{
-    aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;
-    background:
-      repeating-linear-gradient(135deg, rgba(255,255,255,.02) 0 12px, transparent 12px 24px),
-      radial-gradient(120% 120% at 50% 42%, rgba(var(--glow),.12), transparent 60%);
-  }
-  .playbtn{
-    width:66px;height:66px;border-radius:50%;
-    border:1.5px solid var(--accent);position:relative;
-    box-shadow:0 0 22px rgba(var(--glow),.3);
-  }
-  .playbtn::after{
-    content:"";position:absolute;left:54%;top:50%;transform:translate(-50%,-50%);
-    border-style:solid;border-width:11px 0 11px 18px;
-    border-color:transparent transparent transparent var(--accent);
-  }
-  .vf-bar{height:4px;background:var(--rule);position:relative}
-  .vf-bar > i{position:absolute;left:0;top:0;height:100%;width:22%;background:var(--accent)}
-  .slide.is-active .playbtn{animation:playPulse 2.4s ease-in-out infinite}
-  @keyframes playPulse{
-    0%,100%{box-shadow:0 0 16px rgba(var(--glow),.22);transform:scale(1)}
-    50%    {box-shadow:0 0 34px rgba(var(--glow),.5);transform:scale(1.05)}
-  }
-  body.theme-ng .videoframe{background:#061835;border-color:#13294d;box-shadow:none}
+      .badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border: 1px solid var(--rule);
+        border-radius: 2px;
+        font-size: 14px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+        margin-right: 6px;
+        margin-bottom: 6px;
+      }
+      .badge.hl {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
 
-  /* ─────────────────────────────────────────────────────────────────
+      /* Demo slide (10) — video placeholder frame */
+      .videoframe {
+        border: 1px solid var(--rule);
+        border-radius: 2px;
+        overflow: hidden;
+        background: #08070a;
+        box-shadow: inset 0 0 0 1px rgba(255, 90, 54, 0.04);
+      }
+      .vf-top {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 16px;
+        border-bottom: 1px solid var(--rule);
+      }
+      .vf-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--rule);
+      }
+      .vf-label {
+        margin-left: 8px;
+        font-family: var(--mono);
+        font-size: 13px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--ink-dim);
+      }
+      .vf-stage {
+        aspect-ratio: 16/9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background:
+          repeating-linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.02) 0 12px,
+            transparent 12px 24px
+          ),
+          radial-gradient(
+            120% 120% at 50% 42%,
+            rgba(var(--glow), 0.12),
+            transparent 60%
+          );
+      }
+      .playbtn {
+        width: 66px;
+        height: 66px;
+        border-radius: 50%;
+        border: 1.5px solid var(--accent);
+        position: relative;
+        box-shadow: 0 0 22px rgba(var(--glow), 0.3);
+      }
+      .playbtn::after {
+        content: "";
+        position: absolute;
+        left: 54%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        border-style: solid;
+        border-width: 11px 0 11px 18px;
+        border-color: transparent transparent transparent var(--accent);
+      }
+      .vf-bar {
+        height: 4px;
+        background: var(--rule);
+        position: relative;
+      }
+      .vf-bar > i {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 22%;
+        background: var(--accent);
+      }
+      .slide.is-active .playbtn {
+        animation: playPulse 2.4s ease-in-out infinite;
+      }
+      @keyframes playPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 16px rgba(var(--glow), 0.22);
+          transform: scale(1);
+        }
+        50% {
+          box-shadow: 0 0 34px rgba(var(--glow), 0.5);
+          transform: scale(1.05);
+        }
+      }
+      body.theme-ng .videoframe {
+        background: #061835;
+        border-color: #13294d;
+        box-shadow: none;
+      }
+
+      /* ─────────────────────────────────────────────────────────────────
      ANIMATIONS
      All animations are gated on .slide.is-active so they restart
      each time you navigate to the slide (display:none → display:flex
      resets CSS animations natively).
   */
 
-  /* 1) Cards stagger entrance */
-  .card{opacity:0;transform:translateY(12px)}
-  .slide.is-active .card{
-    animation:cardIn .55s cubic-bezier(.2,.7,.2,1) forwards;
-    animation-delay:var(--card-delay,.15s);
-  }
-  @keyframes cardIn{
-    to{opacity:1;transform:none}
-  }
+      /* 1) Cards stagger entrance */
+      .card {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      .slide.is-active .card {
+        animation: cardIn 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+        animation-delay: var(--card-delay, 0.15s);
+      }
+      @keyframes cardIn {
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
 
-  /* 2) Terminal lines cascade */
-  .term > *{opacity:0}
-  .slide.is-active .term > *{
-    animation:termLineIn .28s ease forwards;
-  }
-  /* per-line delays — covers up to 28 children per terminal */
-  .slide.is-active .term > *:nth-child(1) {animation-delay:.12s}
-  .slide.is-active .term > *:nth-child(2) {animation-delay:.16s}
-  .slide.is-active .term > *:nth-child(3) {animation-delay:.20s}
-  .slide.is-active .term > *:nth-child(4) {animation-delay:.24s}
-  .slide.is-active .term > *:nth-child(5) {animation-delay:.28s}
-  .slide.is-active .term > *:nth-child(6) {animation-delay:.32s}
-  .slide.is-active .term > *:nth-child(7) {animation-delay:.36s}
-  .slide.is-active .term > *:nth-child(8) {animation-delay:.40s}
-  .slide.is-active .term > *:nth-child(9) {animation-delay:.44s}
-  .slide.is-active .term > *:nth-child(10){animation-delay:.48s}
-  .slide.is-active .term > *:nth-child(11){animation-delay:.52s}
-  .slide.is-active .term > *:nth-child(12){animation-delay:.56s}
-  .slide.is-active .term > *:nth-child(13){animation-delay:.60s}
-  .slide.is-active .term > *:nth-child(14){animation-delay:.64s}
-  .slide.is-active .term > *:nth-child(15){animation-delay:.68s}
-  .slide.is-active .term > *:nth-child(16){animation-delay:.72s}
-  .slide.is-active .term > *:nth-child(17){animation-delay:.76s}
-  .slide.is-active .term > *:nth-child(18){animation-delay:.80s}
-  .slide.is-active .term > *:nth-child(19){animation-delay:.84s}
-  .slide.is-active .term > *:nth-child(20){animation-delay:.88s}
-  .slide.is-active .term > *:nth-child(21){animation-delay:.92s}
-  .slide.is-active .term > *:nth-child(22){animation-delay:.96s}
-  .slide.is-active .term > *:nth-child(23){animation-delay:1.00s}
-  .slide.is-active .term > *:nth-child(24){animation-delay:1.04s}
-  .slide.is-active .term > *:nth-child(25){animation-delay:1.08s}
-  .slide.is-active .term > *:nth-child(26){animation-delay:1.12s}
-  .slide.is-active .term > *:nth-child(27){animation-delay:1.16s}
-  .slide.is-active .term > *:nth-child(28){animation-delay:1.20s}
-  @keyframes termLineIn{
-    from{opacity:0;transform:translateX(-4px)}
-    to{opacity:1;transform:none}
-  }
+      /* 2) Terminal lines cascade */
+      .term > * {
+        opacity: 0;
+      }
+      .slide.is-active .term > * {
+        animation: termLineIn 0.28s ease forwards;
+      }
+      /* per-line delays — covers up to 28 children per terminal */
+      .slide.is-active .term > *:nth-child(1) {
+        animation-delay: 0.12s;
+      }
+      .slide.is-active .term > *:nth-child(2) {
+        animation-delay: 0.16s;
+      }
+      .slide.is-active .term > *:nth-child(3) {
+        animation-delay: 0.2s;
+      }
+      .slide.is-active .term > *:nth-child(4) {
+        animation-delay: 0.24s;
+      }
+      .slide.is-active .term > *:nth-child(5) {
+        animation-delay: 0.28s;
+      }
+      .slide.is-active .term > *:nth-child(6) {
+        animation-delay: 0.32s;
+      }
+      .slide.is-active .term > *:nth-child(7) {
+        animation-delay: 0.36s;
+      }
+      .slide.is-active .term > *:nth-child(8) {
+        animation-delay: 0.4s;
+      }
+      .slide.is-active .term > *:nth-child(9) {
+        animation-delay: 0.44s;
+      }
+      .slide.is-active .term > *:nth-child(10) {
+        animation-delay: 0.48s;
+      }
+      .slide.is-active .term > *:nth-child(11) {
+        animation-delay: 0.52s;
+      }
+      .slide.is-active .term > *:nth-child(12) {
+        animation-delay: 0.56s;
+      }
+      .slide.is-active .term > *:nth-child(13) {
+        animation-delay: 0.6s;
+      }
+      .slide.is-active .term > *:nth-child(14) {
+        animation-delay: 0.64s;
+      }
+      .slide.is-active .term > *:nth-child(15) {
+        animation-delay: 0.68s;
+      }
+      .slide.is-active .term > *:nth-child(16) {
+        animation-delay: 0.72s;
+      }
+      .slide.is-active .term > *:nth-child(17) {
+        animation-delay: 0.76s;
+      }
+      .slide.is-active .term > *:nth-child(18) {
+        animation-delay: 0.8s;
+      }
+      .slide.is-active .term > *:nth-child(19) {
+        animation-delay: 0.84s;
+      }
+      .slide.is-active .term > *:nth-child(20) {
+        animation-delay: 0.88s;
+      }
+      .slide.is-active .term > *:nth-child(21) {
+        animation-delay: 0.92s;
+      }
+      .slide.is-active .term > *:nth-child(22) {
+        animation-delay: 0.96s;
+      }
+      .slide.is-active .term > *:nth-child(23) {
+        animation-delay: 1s;
+      }
+      .slide.is-active .term > *:nth-child(24) {
+        animation-delay: 1.04s;
+      }
+      .slide.is-active .term > *:nth-child(25) {
+        animation-delay: 1.08s;
+      }
+      .slide.is-active .term > *:nth-child(26) {
+        animation-delay: 1.12s;
+      }
+      .slide.is-active .term > *:nth-child(27) {
+        animation-delay: 1.16s;
+      }
+      .slide.is-active .term > *:nth-child(28) {
+        animation-delay: 1.2s;
+      }
+      @keyframes termLineIn {
+        from {
+          opacity: 0;
+          transform: translateX(-4px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
 
-  /* 3) Agent relay — pixel agents pass a glowing baton.
+      /* 3) Agent relay — pixel agents pass a glowing baton.
         Total cycle: 6s. Each agent lights up when the baton is at them.
         The last agent (Reviewer) stays lit at the end. */
-  .slide.is-active .baton{
-    animation:batonRelay 6s ease-in-out forwards;
-  }
-  /* Arcing toss: the orb hops up between agents and lands on each (10/30/50/70/90%). */
-  @keyframes batonRelay{
-    0%   {left:10%;transform:translateX(-50%) translateY(0);opacity:0}
-    3%   {opacity:1}
-    10%  {left:10%;transform:translateX(-50%) translateY(0)}
-    16%  {transform:translateX(-50%) translateY(-32px)}
-    22%  {left:30%;transform:translateX(-50%) translateY(0)}
-    32%  {left:30%;transform:translateX(-50%) translateY(0)}
-    38%  {transform:translateX(-50%) translateY(-32px)}
-    44%  {left:50%;transform:translateX(-50%) translateY(0)}
-    54%  {left:50%;transform:translateX(-50%) translateY(0)}
-    60%  {transform:translateX(-50%) translateY(-32px)}
-    66%  {left:70%;transform:translateX(-50%) translateY(0)}
-    76%  {left:70%;transform:translateX(-50%) translateY(0)}
-    82%  {transform:translateX(-50%) translateY(-32px)}
-    88%  {left:90%;transform:translateX(-50%) translateY(0)}
-    100% {left:90%;transform:translateX(-50%) translateY(0);opacity:1}
-  }
+      .slide.is-active .baton {
+        animation: batonRelay 6s ease-in-out forwards;
+      }
+      /* Arcing toss: the orb hops up between agents and lands on each (10/30/50/70/90%). */
+      @keyframes batonRelay {
+        0% {
+          left: 10%;
+          transform: translateX(-50%) translateY(0);
+          opacity: 0;
+        }
+        3% {
+          opacity: 1;
+        }
+        10% {
+          left: 10%;
+          transform: translateX(-50%) translateY(0);
+        }
+        16% {
+          transform: translateX(-50%) translateY(-32px);
+        }
+        22% {
+          left: 30%;
+          transform: translateX(-50%) translateY(0);
+        }
+        32% {
+          left: 30%;
+          transform: translateX(-50%) translateY(0);
+        }
+        38% {
+          transform: translateX(-50%) translateY(-32px);
+        }
+        44% {
+          left: 50%;
+          transform: translateX(-50%) translateY(0);
+        }
+        54% {
+          left: 50%;
+          transform: translateX(-50%) translateY(0);
+        }
+        60% {
+          transform: translateX(-50%) translateY(-32px);
+        }
+        66% {
+          left: 70%;
+          transform: translateX(-50%) translateY(0);
+        }
+        76% {
+          left: 70%;
+          transform: translateX(-50%) translateY(0);
+        }
+        82% {
+          transform: translateX(-50%) translateY(-32px);
+        }
+        88% {
+          left: 90%;
+          transform: translateX(-50%) translateY(0);
+        }
+        100% {
+          left: 90%;
+          transform: translateX(-50%) translateY(0);
+          opacity: 1;
+        }
+      }
 
-  /* Agents 1-4: light up when the baton arrives, then settle to "done" */
-  .slide.is-active .agent .sprite{
-    animation:agentLight 1s ease forwards;
-  }
-  /* Agent 5: light up and STAY fully lit at the end */
-  .slide.is-active .agent:nth-child(5) .sprite{
-    animation:agentLightFinal 1s ease forwards;
-  }
-  /* Delays: roughly when the baton lands on each agent */
-  .slide.is-active .agent:nth-child(1) .sprite{animation-delay:.2s}
-  .slide.is-active .agent:nth-child(2) .sprite{animation-delay:1.5s}
-  .slide.is-active .agent:nth-child(3) .sprite{animation-delay:2.8s}
-  .slide.is-active .agent:nth-child(4) .sprite{animation-delay:4.1s}
-  .slide.is-active .agent:nth-child(5) .sprite{animation-delay:5.4s}
+      /* Agents 1-4: light up when the baton arrives, then settle to "done" */
+      .slide.is-active .agent .sprite {
+        animation: agentLight 1s ease forwards;
+      }
+      /* Agent 5: light up and STAY fully lit at the end */
+      .slide.is-active .agent:nth-child(5) .sprite {
+        animation: agentLightFinal 1s ease forwards;
+      }
+      /* Delays: roughly when the baton lands on each agent */
+      .slide.is-active .agent:nth-child(1) .sprite {
+        animation-delay: 0.2s;
+      }
+      .slide.is-active .agent:nth-child(2) .sprite {
+        animation-delay: 1.5s;
+      }
+      .slide.is-active .agent:nth-child(3) .sprite {
+        animation-delay: 2.8s;
+      }
+      .slide.is-active .agent:nth-child(4) .sprite {
+        animation-delay: 4.1s;
+      }
+      .slide.is-active .agent:nth-child(5) .sprite {
+        animation-delay: 5.4s;
+      }
 
-  @keyframes agentLight{
-    0%   {color:var(--ink-dim);filter:none;transform:scale(1)}
-    30%  {color:var(--accent);filter:drop-shadow(0 0 14px rgba(var(--glow),.7));transform:scale(1.08)}
-    70%  {color:var(--accent);filter:drop-shadow(0 0 14px rgba(var(--glow),.7));transform:scale(1.08)}
-    100% {color:var(--accent);filter:drop-shadow(0 0 4px rgba(var(--glow),.25));transform:scale(1);opacity:.55}
-  }
-  @keyframes agentLightFinal{
-    0%   {color:var(--ink-dim);filter:none;transform:scale(1)}
-    100% {color:var(--accent);filter:drop-shadow(0 0 16px rgba(var(--glow),.75));transform:scale(1.08)}
-  }
+      @keyframes agentLight {
+        0% {
+          color: var(--ink-dim);
+          filter: none;
+          transform: scale(1);
+        }
+        30% {
+          color: var(--accent);
+          filter: drop-shadow(0 0 14px rgba(var(--glow), 0.7));
+          transform: scale(1.08);
+        }
+        70% {
+          color: var(--accent);
+          filter: drop-shadow(0 0 14px rgba(var(--glow), 0.7));
+          transform: scale(1.08);
+        }
+        100% {
+          color: var(--accent);
+          filter: drop-shadow(0 0 4px rgba(var(--glow), 0.25));
+          transform: scale(1);
+          opacity: 0.55;
+        }
+      }
+      @keyframes agentLightFinal {
+        0% {
+          color: var(--ink-dim);
+          filter: none;
+          transform: scale(1);
+        }
+        100% {
+          color: var(--accent);
+          filter: drop-shadow(0 0 16px rgba(var(--glow), 0.75));
+          transform: scale(1.08);
+        }
+      }
 
-  /* Agent role-name and verb shift subtly when their agent is active */
-  .slide.is-active .agent .role-name,
-  .slide.is-active .agent .verb{
-    animation:labelLight 1s ease forwards;
-  }
-  .slide.is-active .agent:nth-child(5) .role-name,
-  .slide.is-active .agent:nth-child(5) .verb{
-    animation:labelLightFinal 1s ease forwards;
-  }
-  .slide.is-active .agent:nth-child(1) .role-name,
-  .slide.is-active .agent:nth-child(1) .verb{animation-delay:.2s}
-  .slide.is-active .agent:nth-child(2) .role-name,
-  .slide.is-active .agent:nth-child(2) .verb{animation-delay:1.5s}
-  .slide.is-active .agent:nth-child(3) .role-name,
-  .slide.is-active .agent:nth-child(3) .verb{animation-delay:2.8s}
-  .slide.is-active .agent:nth-child(4) .role-name,
-  .slide.is-active .agent:nth-child(4) .verb{animation-delay:4.1s}
-  .slide.is-active .agent:nth-child(5) .role-name,
-  .slide.is-active .agent:nth-child(5) .verb{animation-delay:5.4s}
+      /* Agent role-name and verb shift subtly when their agent is active */
+      .slide.is-active .agent .role-name,
+      .slide.is-active .agent .verb {
+        animation: labelLight 1s ease forwards;
+      }
+      .slide.is-active .agent:nth-child(5) .role-name,
+      .slide.is-active .agent:nth-child(5) .verb {
+        animation: labelLightFinal 1s ease forwards;
+      }
+      .slide.is-active .agent:nth-child(1) .role-name,
+      .slide.is-active .agent:nth-child(1) .verb {
+        animation-delay: 0.2s;
+      }
+      .slide.is-active .agent:nth-child(2) .role-name,
+      .slide.is-active .agent:nth-child(2) .verb {
+        animation-delay: 1.5s;
+      }
+      .slide.is-active .agent:nth-child(3) .role-name,
+      .slide.is-active .agent:nth-child(3) .verb {
+        animation-delay: 2.8s;
+      }
+      .slide.is-active .agent:nth-child(4) .role-name,
+      .slide.is-active .agent:nth-child(4) .verb {
+        animation-delay: 4.1s;
+      }
+      .slide.is-active .agent:nth-child(5) .role-name,
+      .slide.is-active .agent:nth-child(5) .verb {
+        animation-delay: 5.4s;
+      }
 
-  @keyframes labelLight{
-    0%, 30%  {color:var(--ink-dim)}
-    50%, 70% {color:var(--accent)}
-    100%     {color:var(--ink-dim);opacity:.7}
-  }
-  @keyframes labelLightFinal{
-    0%   {color:var(--ink-dim)}
-    100% {color:var(--accent)}
-  }
+      @keyframes labelLight {
+        0%,
+        30% {
+          color: var(--ink-dim);
+        }
+        50%,
+        70% {
+          color: var(--accent);
+        }
+        100% {
+          color: var(--ink-dim);
+          opacity: 0.7;
+        }
+      }
+      @keyframes labelLightFinal {
+        0% {
+          color: var(--ink-dim);
+        }
+        100% {
+          color: var(--accent);
+        }
+      }
 
-  @keyframes spin{
-    to{transform:rotate(360deg)}
-  }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
 
-  /* 4) Loop icon — used to illustrate "close the loop" */
-  .loop-icon{
-    display:inline-block;
-    color:var(--accent);
-    animation:spin 3s linear infinite;
-    margin-right:4px;
-    font-size:1.1em;
-    transform-origin:center;
-  }
-  @keyframes rotate{to{transform:rotate(360deg)}}  /* alias kept for safety */
+      /* 4) Loop icon — used to illustrate "close the loop" */
+      .loop-icon {
+        display: inline-block;
+        color: var(--accent);
+        animation: spin 3s linear infinite;
+        margin-right: 4px;
+        font-size: 1.1em;
+        transform-origin: center;
+      }
+      @keyframes rotate {
+        to {
+          transform: rotate(360deg);
+        }
+      } /* alias kept for safety */
 
-  /* 6) Subtle highlight pulse on accent words at slide entrance */
-  /* (kept off by default — only on .hl-pulse class) */
-  .slide.is-active .hl-pulse{
-    animation:highlight 1.2s ease forwards;
-    animation-delay:.4s;
-  }
-  @keyframes highlight{
-    0%{color:var(--ink)}
-    40%{color:var(--accent);text-shadow:0 0 12px rgba(255,90,54,.5)}
-    100%{color:var(--accent);text-shadow:none}
-  }
+      /* 6) Subtle highlight pulse on accent words at slide entrance */
+      /* (kept off by default — only on .hl-pulse class) */
+      .slide.is-active .hl-pulse {
+        animation: highlight 1.2s ease forwards;
+        animation-delay: 0.4s;
+      }
+      @keyframes highlight {
+        0% {
+          color: var(--ink);
+        }
+        40% {
+          color: var(--accent);
+          text-shadow: 0 0 12px rgba(255, 90, 54, 0.5);
+        }
+        100% {
+          color: var(--accent);
+          text-shadow: none;
+        }
+      }
 
-  @media (max-width:900px){
-    .cols-2,.cols-3{grid-template-columns:1fr;gap:24px}
-    .agents{flex-direction:column;align-items:center;gap:20px}
-  }
+      @media (max-width: 900px) {
+        .cols-2,
+        .cols-3 {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+        .agents {
+          flex-direction: column;
+          align-items: center;
+          gap: 20px;
+        }
+      }
 
-  @media print{
-    html,body{overflow:visible;background:#fff;color:#000}
-    .hud,.progress{display:none}
-    .slide{display:flex !important;page-break-after:always;position:relative;height:100vh;min-height:100vh}
-    .card,.sprite,.term > *{opacity:1 !important;transform:none !important}
-    .term::after,.loop-icon,.hud .dot{animation:none !important}
-    .baton{display:none !important}
-  }
-  @media (prefers-reduced-motion:reduce){
-    *,*::before,*::after{
-      animation-duration:.01s !important;
-      animation-iteration-count:1 !important;
-      transition-duration:.01s !important;
-    }
-  }
+      @media print {
+        html,
+        body {
+          overflow: visible;
+          background: #fff;
+          color: #000;
+        }
+        .hud,
+        .progress {
+          display: none;
+        }
+        .slide {
+          display: flex !important;
+          page-break-after: always;
+          position: relative;
+          height: 100vh;
+          min-height: 100vh;
+        }
+        .card,
+        .sprite,
+        .term > * {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+        .term::after,
+        .loop-icon,
+        .hud .dot {
+          animation: none !important;
+        }
+        .baton {
+          display: none !important;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01s !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01s !important;
+        }
+      }
 
-  /* Naval Group logo on cover slide — discreet white-on-dark */
-  .cover .bottom-left{
-    display:flex;flex-direction:column;align-items:flex-start;gap:12px;
-  }
-  .ng-logo{height:60px;width:auto;display:block;opacity:.92}
-  .ng-logo .lg-primary{fill:#ffffff}     /* white wordmark — dark theme */
-  .ng-logo .lg-secondary{fill:#ed051d}   /* red accent — both themes */
+      /* Naval Group logo on cover slide — discreet white-on-dark */
+      .cover .bottom-left {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .ng-logo {
+        height: 60px;
+        width: auto;
+        display: block;
+        opacity: 0.92;
+      }
+      .ng-logo .lg-primary {
+        fill: #ffffff;
+      } /* white wordmark — dark theme */
+      .ng-logo .lg-secondary {
+        fill: #ed051d;
+      } /* red accent — both themes */
 
-  /* ───────────────────────────────────────────────────────────────
+      /* ───────────────────────────────────────────────────────────────
      NAVAL GROUP — white-background theme.
      Toggle at runtime: press "t", or open with ?theme=ng in the URL.
      Palette pulled from naval-group.com brand tokens.
   */
-  body.theme-ng{
-    --bg:#ffffff;
-    --bg-2:#f2f5fb;
-    --ink:#061835;        /* deep navy */
-    --ink-dim:#5b6b86;
-    --rule:#d3dce9;
-    --accent:#164194;     /* Naval Group blue */
-    --accent-light:#3d6ec2;
-    --accent-deep:#061835;
-    --danger:#ed051d;     /* Naval Group red */
-    --glow:22,65,148;     /* brand-blue glow */
-    background-image:none;
-  }
-  body.theme-ng::before{opacity:0}                         /* drop the dark film-grain overlay */
-  body.theme-ng .hud{
-    background:linear-gradient(180deg,transparent,rgba(6,24,53,.05));
-    border-top-color:var(--rule);
-  }
-  /* Terminals become a sharp deep-navy block on white — on-brand, high contrast */
-  body.theme-ng .term{
-    background:#061835;border-color:#13294d;color:#e7ecf6;box-shadow:none;
-  }
-  body.theme-ng .term .p{color:#78c8f5}
-  body.theme-ng .term .c{color:#8aa0c4}
-  body.theme-ng .term .k{color:#ffc851}
-  body.theme-ng .term .s{color:#dbe3f2}
-  body.theme-ng .term::after{color:#78c8f5}
-  /* Cover logo: switch the wordmark to Naval Group blue on white (accent stays red) */
-  body.theme-ng .ng-logo{opacity:1}
-  body.theme-ng .ng-logo .lg-primary{fill:#164194}
+      body.theme-ng {
+        --bg: #ffffff;
+        --bg-2: #f2f5fb;
+        --ink: #061835; /* deep navy */
+        --ink-dim: #5b6b86;
+        --rule: #d3dce9;
+        --accent: #164194; /* Naval Group blue */
+        --accent-light: #3d6ec2;
+        --accent-deep: #061835;
+        --danger: #ed051d; /* Naval Group red */
+        --glow: 22, 65, 148; /* brand-blue glow */
+      }
+      body.theme-ng .deck {
+        background-image: none;
+      }
+      body.theme-ng .deck::before {
+        opacity: 0;
+      } /* drop the dark film-grain overlay */
+      body.theme-ng .hud {
+        background: linear-gradient(180deg, transparent, rgba(6, 24, 53, 0.05));
+        border-top-color: var(--rule);
+      }
+      /* Terminals become a sharp deep-navy block on white — on-brand, high contrast */
+      body.theme-ng .term {
+        background: #061835;
+        border-color: #13294d;
+        color: #e7ecf6;
+        box-shadow: none;
+      }
+      body.theme-ng .term .p {
+        color: #78c8f5;
+      }
+      body.theme-ng .term .c {
+        color: #8aa0c4;
+      }
+      body.theme-ng .term .k {
+        color: #ffc851;
+      }
+      body.theme-ng .term .s {
+        color: #dbe3f2;
+      }
+      body.theme-ng .term::after {
+        color: #78c8f5;
+      }
+      /* Cover logo: switch the wordmark to Naval Group blue on white (accent stays red) */
+      body.theme-ng .ng-logo {
+        opacity: 1;
+      }
+      body.theme-ng .ng-logo .lg-primary {
+        fill: #164194;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="deck" id="deck">
+      <!-- 1. COVER -->
+      <section class="slide is-active">
+        <div class="cover">
+          <div class="top">
+            <span class="meta">⌘ Talk · 15 min</span>
+            <span class="tag">LOTUSim × AI agents</span>
+          </div>
 
-</style>
-</head>
-<body>
+          <div class="stack">
+            <span class="eyebrow">From idea → contribution</span>
+            <h1 class="display">
+              LOTUSim,<br />
+              <em style="font-style: normal; color: var(--accent)"
+                >accelerated</em
+              ><br />
+              by AI agents.
+            </h1>
+            <p class="lead dim" style="max-width: 54ch; margin-top: 32px">
+              How well-orchestrated agents collapse the entry barrier of a
+              ROS&nbsp;/&nbsp;Gazebo&nbsp;/&nbsp;Xdyn simulator.
+            </p>
+          </div>
 
-<div class="deck" id="deck">
-
-  <!-- 1. COVER -->
-  <section class="slide is-active">
-    <div class="cover">
-      <div class="top">
-        <span class="meta">⌘ Talk · 15 min</span>
-        <span class="tag">LOTUSim × AI agents</span>
-      </div>
-
-      <div class="stack">
-        <span class="eyebrow">From idea → contribution</span>
-        <h1 class="display">
-          LOTUSim,<br/>
-          <em style="font-style:normal;color:var(--accent)">accelerated</em><br/>
-          by AI agents.
-        </h1>
-        <p class="lead dim" style="max-width:54ch;margin-top:32px">
-          How well-orchestrated agents collapse the entry barrier of a ROS&nbsp;/&nbsp;Gazebo&nbsp;/&nbsp;Xdyn simulator.
-        </p>
-      </div>
-
-      <div class="bottom">
-        <div class="bottom-left">
-          <svg class="ng-logo" viewBox="0 0 145 41" role="img" aria-label="Naval Group" xmlns="http://www.w3.org/2000/svg"><path class="lg-primary" d="M21.417 0v12.934L7.325 0H0v23.587h7.764v-12.55l14.03 12.55h7.38V0M122.376 0v23.587h19.219L145 18.02h-14.86V0M61.774 0l14.413 23.587 4.828-7.877L71.499 0h-9.725Z"/><path class="lg-primary" d="m100.074 0-14.26 23.587h8.672l7.722-13.011 3.07 5.88h-3.369l-3.182 5.219h9.955l1.179 1.912h8.679L104.127 0M47.278 0l-14.26 23.587h8.672l7.716-13.011 3.076 5.88h-3.376l-3.175 5.219h9.956l1.172 1.912h8.678L51.324 0M43.587 36.067c0-2.79 2.386-4.702 5.706-4.702 2.226 0 3.942.935 4.744 2.581l-2.818.754c-.433-.607-1.095-.893-1.926-.893-1.688 0-2.546.99-2.546 2.267s.858 2.295 2.546 2.295c.991 0 1.675-.188 2.163-.446v-.419H49.19l1.304-2.044h3.872v3.837c-1.5 1.005-3.32 1.514-5.023 1.514-3.041 0-5.755-1.59-5.755-4.73M56.472 31.47h5.797c2.686 0 3.886 1.618 3.886 3.334 0 1.263-.907 2.658-2.31 3.07l2.359 2.818h-3.837l-1.953-2.595v-2.19h1.38c.754 0 1.117-.552 1.117-1.11s-.37-1.095-1.116-1.095h-2.177v6.983h-3.16M67.202 36.067c0-2.79 2.386-4.702 5.707-4.702 3.32 0 5.72 1.912 5.72 4.702s-2.316 4.73-5.72 4.73c-3.405 0-5.707-1.94-5.707-4.73Zm8.197 0c0-1.353-1.004-2.267-2.49-2.267-1.486 0-2.477.907-2.477 2.267 0 1.36.99 2.281 2.477 2.281 1.486 0 2.49-.907 2.49-2.281ZM80.275 36.855V31.47h3.16v5.162c0 1.011.551 1.723 1.618 1.723 1.068 0 1.605-.712 1.605-1.723V31.47h3.16v5.385c0 2.665-2.309 3.942-4.772 3.942-2.462 0-4.785-1.277-4.785-3.942M92.204 31.47H97.2c2.804 0 4.214 1.66 4.214 3.306 0 1.647-1.41 3.32-4.214 3.32h-1.04v-2.19h.893c.768 0 1.13-.55 1.13-1.109 0-.558-.369-1.095-1.13-1.095h-1.688v6.983h-3.16"/><path class="lg-secondary" d="m78.19 0 6.18 10.171L90.593 0"/></svg>
-          <span class="meta">Cyril Moron · Lead Developer</span>
+          <div class="bottom">
+            <div class="bottom-left">
+              <svg
+                class="ng-logo"
+                viewBox="0 0 145 41"
+                role="img"
+                aria-label="Naval Group"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  class="lg-primary"
+                  d="M21.417 0v12.934L7.325 0H0v23.587h7.764v-12.55l14.03 12.55h7.38V0M122.376 0v23.587h19.219L145 18.02h-14.86V0M61.774 0l14.413 23.587 4.828-7.877L71.499 0h-9.725Z"
+                />
+                <path
+                  class="lg-primary"
+                  d="m100.074 0-14.26 23.587h8.672l7.722-13.011 3.07 5.88h-3.369l-3.182 5.219h9.955l1.179 1.912h8.679L104.127 0M47.278 0l-14.26 23.587h8.672l7.716-13.011 3.076 5.88h-3.376l-3.175 5.219h9.956l1.172 1.912h8.678L51.324 0M43.587 36.067c0-2.79 2.386-4.702 5.706-4.702 2.226 0 3.942.935 4.744 2.581l-2.818.754c-.433-.607-1.095-.893-1.926-.893-1.688 0-2.546.99-2.546 2.267s.858 2.295 2.546 2.295c.991 0 1.675-.188 2.163-.446v-.419H49.19l1.304-2.044h3.872v3.837c-1.5 1.005-3.32 1.514-5.023 1.514-3.041 0-5.755-1.59-5.755-4.73M56.472 31.47h5.797c2.686 0 3.886 1.618 3.886 3.334 0 1.263-.907 2.658-2.31 3.07l2.359 2.818h-3.837l-1.953-2.595v-2.19h1.38c.754 0 1.117-.552 1.117-1.11s-.37-1.095-1.116-1.095h-2.177v6.983h-3.16M67.202 36.067c0-2.79 2.386-4.702 5.707-4.702 3.32 0 5.72 1.912 5.72 4.702s-2.316 4.73-5.72 4.73c-3.405 0-5.707-1.94-5.707-4.73Zm8.197 0c0-1.353-1.004-2.267-2.49-2.267-1.486 0-2.477.907-2.477 2.267 0 1.36.99 2.281 2.477 2.281 1.486 0 2.49-.907 2.49-2.281ZM80.275 36.855V31.47h3.16v5.162c0 1.011.551 1.723 1.618 1.723 1.068 0 1.605-.712 1.605-1.723V31.47h3.16v5.385c0 2.665-2.309 3.942-4.772 3.942-2.462 0-4.785-1.277-4.785-3.942M92.204 31.47H97.2c2.804 0 4.214 1.66 4.214 3.306 0 1.647-1.41 3.32-4.214 3.32h-1.04v-2.19h.893c.768 0 1.13-.55 1.13-1.109 0-.558-.369-1.095-1.13-1.095h-1.688v6.983h-3.16"
+                />
+                <path class="lg-secondary" d="m78.19 0 6.18 10.171L90.593 0" />
+              </svg>
+              <span class="meta">Cyril Moron · Lead Developer</span>
+            </div>
+            <span class="meta">02/07/2026 · LOTUSim Technical Conference</span>
+          </div>
         </div>
-        <span class="meta">02/07/2026 · LOTUSim Technical Conference</span>
-      </div>
-    </div>
-  </section>
+      </section>
 
-  <!-- 2. THE WALL -->
-  <section class="slide">
-    <span class="eyebrow">Where we stand</span>
-    <h2 class="title">Contributing to a robotics sim<br/><em>is a wall.</em></h2>
-    <div class="cols-3" style="margin-top:24px">
-      <div class="card">
-        <span class="num">01</span>
-        <h4>Technical surface</h4>
-        <p>Modern C++, CMake, ROS, Gazebo plugins, SDF/URDF, Xdyn. Every brick has its idioms. The learning curve is real.</p>
-      </div>
-      <div class="card">
-        <span class="num">02</span>
-        <h4>Physical coupling</h4>
-        <p>A sensor isn't just a class: it's a physical model, a ROS message, a Gazebo plugin, and a launch scenario integration.</p>
-      </div>
-      <div class="card">
-        <span class="num">03</span>
-        <h4>Implicit conventions</h4>
-        <p>Topic naming, plugin structure, C++ style, launchfile format. All the things never written in the README.</p>
-      </div>
-    </div>
-    <p class="footer-note">→ Many good ideas die between <span class="hl">«&nbsp;I want to contribute&nbsp;»</span> and <span class="hl">«&nbsp;my PR is ready&nbsp;»</span>.</p>
-  </section>
-
-  <!-- 3. DISAMBIGUATION -->
-  <section class="slide">
-    <span class="eyebrow">Quick disambiguation</span>
-    <h2 class="title">Two kinds of «&nbsp;agents&nbsp;»<br/>in this story.</h2>
-
-    <div class="cols-2" style="margin-top:8px">
-      <div class="card" style="padding:24px">
-        <span class="eyebrow" style="display:inline-flex">Agent, in LOTUSim</span>
-        <h4 style="margin:12px 0 6px">A simulated platform</h4>
-        <p style="color:var(--ink);font-size:15px;line-height:1.6">
-          A physical entity in the sim: aerial drone, surface vessel, underwater vehicle. Behaviour, sensors, dynamics, environment.
-        </p>
-        <div style="margin-top:12px">
-          <span class="badge">Gazebo</span><span class="badge">ROS</span><span class="badge">Xdyn</span>
+      <!-- 2. THE WALL -->
+      <section class="slide">
+        <span class="eyebrow">Where we stand</span>
+        <h2 class="title">
+          Contributing to a robotics sim<br /><em>is a wall.</em>
+        </h2>
+        <div class="cols-3" style="margin-top: 24px">
+          <div class="card">
+            <span class="num">01</span>
+            <h4>Technical surface</h4>
+            <p>
+              Modern C++, CMake, ROS, Gazebo plugins, SDF/URDF, Xdyn. Every
+              brick has its idioms. The learning curve is real.
+            </p>
+          </div>
+          <div class="card">
+            <span class="num">02</span>
+            <h4>Physical coupling</h4>
+            <p>
+              A sensor isn't just a class: it's a physical model, a ROS message,
+              a Gazebo plugin, and a launch scenario integration.
+            </p>
+          </div>
+          <div class="card">
+            <span class="num">03</span>
+            <h4>Implicit conventions</h4>
+            <p>
+              Topic naming, plugin structure, C++ style, launchfile format. All
+              the things never written in the README.
+            </p>
+          </div>
         </div>
-      </div>
-      <div class="card" style="padding:24px">
-        <span class="eyebrow" style="display:inline-flex">Agent, in this talk</span>
-        <h4 style="margin:12px 0 6px">A model that <span class="hl">acts</span>, not just answers</h4>
-        <p style="color:var(--ink);font-size:15px;line-height:1.6">
-          A chatbot only talks. An agent is a large language model given <span class="hl">tools</span>: it reads the repo, edits files, runs commands (build, tests, git), sees the result, and tries again.
+        <p class="footer-note">
+          → Many good ideas die between
+          <span class="hl">«&nbsp;I want to contribute&nbsp;»</span> and
+          <span class="hl">«&nbsp;my PR is ready&nbsp;»</span>.
         </p>
-        <div style="margin-top:12px">
+      </section>
+
+      <!-- 3. DISAMBIGUATION -->
+      <section class="slide">
+        <span class="eyebrow">Quick disambiguation</span>
+        <h2 class="title">
+          Two kinds of «&nbsp;agents&nbsp;»<br />in this story.
+        </h2>
+
+        <div class="cols-2" style="margin-top: 8px">
+          <div class="card" style="padding: 24px">
+            <span class="eyebrow" style="display: inline-flex"
+              >Agent, in LOTUSim</span
+            >
+            <h4 style="margin: 12px 0 6px">A simulated platform</h4>
+            <div class="pictos">
+              <div class="picto platform">
+                <div
+                  class="sprite"
+                  data-sprite="XXX......XXX|.X........X.|.XX......XX.|..XX....XX..|...XXXXXX...|...XXXXXX...|....XXXX....|...X....X...|..X......X..|..X......X.."
+                ></div>
+                <span class="picto-label">drone</span>
+              </div>
+              <div class="picto platform">
+                <div
+                  class="sprite"
+                  data-sprite="......X.....|....XXXX....|...XXXXXX...|XXXXXXXXXXXX|XXXXXXXXXXXX|.XXXXXXXXXX.|..XXXXXXXX..|............|X.X.X.X.X.X.|.X.X.X.X.X.X"
+                ></div>
+                <span class="picto-label">vessel</span>
+              </div>
+              <div class="picto platform">
+                <div
+                  class="sprite"
+                  data-sprite=".....X......|....XXX.....|....XXX.....|.XXXXXXXXXX.|XXXXXXXXXXXX|XXXXXXXXXXXX|.XXXXXXXXXX.|............|X.X.X.X.X.X.|.X.X.X.X.X.X"
+                ></div>
+                <span class="picto-label">AUV</span>
+              </div>
+            </div>
+            <p
+              style="color: var(--ink-dim); line-height: 1.55; margin-top: 8px"
+            >
+              A physical entity: behaviour, sensors, dynamics, environment.
+            </p>
+            <div style="margin-top: 12px">
+              <span class="badge">Gazebo</span><span class="badge">ROS</span
+              ><span class="badge">Xdyn</span>
+            </div>
+          </div>
+          <div class="card" style="padding: 24px">
+            <span class="eyebrow" style="display: inline-flex"
+              >Agent, in this talk</span
+            >
+            <h4 style="margin: 12px 0 6px">
+              A model that <span class="hl">acts</span>, not just answers
+            </h4>
+            <div class="pictos">
+              <div class="picto ai">
+                <div
+                  class="sprite"
+                  data-sprite="............|...X....X...|...X....X...|..XXXXXXXX..|.XXXXXXXXXX.|XX.XXXXXX.XX|XXXXXXXXXXXX|.XX.XXXX.XX.|X.X......X.X|.X........X."
+                ></div>
+                <span class="picto-label">AI agent</span>
+              </div>
+            </div>
+            <p
+              style="color: var(--ink-dim); line-height: 1.55; margin-top: 8px"
+            >
+              A model given <span class="hl">tools</span>: it reads the repo,
+              edits files, runs build / tests / git, sees the result, tries
+              again.
+            </p>
+            <div style="margin-top: 12px">
               <span class="badge">Claude Code</span>
               <span class="badge">Codex</span>
               <span class="badge">Openclaw</span>
               <span class="badge">Hermes</span>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <p class="footer-note" style="margin-top:auto;text-align:center;font-size:24px;letter-spacing:0;text-transform:none;color:var(--ink)"><span class="hl-2">The second kind</span> of agent helps you build <span class="hl">the first</span>.</p>
-  </section>
-
-  <!-- 4. WHY NOW -->
-  <section class="slide">
-    <span class="eyebrow">Why now</span>
-    <h2 class="title">AI agents crossed <em>the useful threshold.</em></h2>
-    <h3 class="sub">Not for demos. For production code.</h3>
-
-    <div class="cols-2">
-      <div class="stack">
-        <p>Three things shifted <span class="hl">late 2025</span>:</p>
-        <ul class="checks">
-          <li><span><span class="hl">Models good at tool calling.</span> With <span class="dim">Opus 4.5, GPT-5.2</span>, multi-step tool chains finally stay on track.</span></li>
-          <li><span><span class="hl">Long context windows.</span> A full codebase + docs + conventions fits in one shot, no more lossy summaries.</span></li>
-          <li><span><span class="hl">Sustained autonomy.</span> What holds a task together over hours isn't a bigger prompt. It's the agentic loop: <span class="hl-2">map → build → run → test → review</span>, repeated until it's green.</span></li>
-        </ul>
-      </div>
-      <div class="term">
-        <div class="c"># what wasn't true 18 months ago</div>
-        <div><span class="p">$</span> claude <span class="k">"explain the Gazebo plugin → ROS topic pipeline in systems/"</span></div>
-        <div class="c">  → answer in 30 s, with file:line pointers</div>
-        <br/>
-        <div><span class="p">$</span> claude <span class="k">"propose 2 ways to add a sonar to the AUV"</span></div>
-        <div class="c">  → two strategies, explicit trade-offs</div>
-        <br/>
-        <div><span class="p">$</span> claude <span class="k">"implement option B + tests + doc"</span></div>
-        <div class="c">  → readable first draft, ready to challenge</div>
-      </div>
-    </div>
-    <p class="footer-note">→ Which raises the real question: <span class="hl">how do we handle agent-assisted contributions, responsibly?</span> Two communities already answered.</p>
-  </section>
-
-  <!-- 5. LINUX KERNEL -->
-  <section class="slide">
-    <span class="eyebrow">Industry signal · the Linux kernel</span>
-    <h2 class="title">The most conservative community<br/><em>took the time to answer.</em></h2>
-
-    <div class="cols-2" style="margin-top:8px">
-      <div class="stack">
-        <p>After months of debate, the <span class="hl">Linux kernel</span> published its first official policy on AI-assisted contributions, a document <span class="hl">addressed to the agents</span> and to the people who run them.</p>
-        <ul class="checks">
-          <li>A dedicated file, <span class="dim">Documentation/process/coding-assistants.rst</span>, written for AI tools, not just humans.</li>
-          <li>No ban, no hype. <span class="hl">AI is «&nbsp;just a tool&nbsp;»</span>.</li>
-          <li><span class="hl">«&nbsp;AI agents MUST NOT add Signed-off-by&nbsp;»</span>: only a human can certify the DCO.</li>
-          <li>The human reviews everything, signs, and owns the licence and the bugs.</li>
-        </ul>
-        <div class="pull" style="margin-top:24px">
-          Their answer: yes, under one condition. The human who signs answers for every line.
-        </div>
-      </div>
-      <div class="term">
-        <div class="c"># linux/Documentation/process/coding-assistants.rst</div>
-        <div class="s">Assisted-by: AGENT_NAME:MODEL_VERSION [TOOL1] [TOOL2]</div>
-        <br/>
-        <div class="c"># verbatim example from the doc</div>
-        <div class="s">Assisted-by: <span class="k">Claude:claude-3-opus</span> coccinelle sparse</div>
-        <br/>
-        <div class="c"># the line that does NOT move</div>
-        <div><span class="k">→ AI agents MUST NOT add Signed-off-by</span></div>
-        <div class="c">  → only a human certifies the DCO</div>
-        <div class="c">  → the human reviews all AI code, and owns it</div>
-      </div>
-    </div>
-
-    <div class="sources">
-      <span><b>Sources</b> docs.kernel.org/process/coding-assistants.html</span>
-      <span>zdnet.com · jan. 2026</span>
-      <span>phoronix.com · jan. 2026</span>
-    </div>
-  </section>
-
-  <!-- 6. OPENCLAW -->
-  <section class="slide">
-    <span class="eyebrow">Industry signal · built on agents</span>
-    <h2 class="title">And the fastest-growing project<br/><em>wrote it all down.</em></h2>
-
-    <div class="cols-2" style="margin-top:0">
-      <div class="stack">
-        <p><span class="hl">OpenClaw</span> (Peter Steinberger): built agent-first, end to end, and now the fastest-growing open-source project in GitHub history. It runs on what they <span class="hl">wrote down</span> for the agents:</p>
-        <ul class="checks">
-          <li><span class="hl">VISION.md</span>: what to build, and what to refuse.</li>
-          <li><span class="hl">AGENTS.md</span>: how to map, build and test, right in the repo.</li>
-          <li>Every PR needs <span class="hl">real-behavior proof</span>; 28+ humans sign the merge.</li>
-          <li>Steinberger's conclusion today: <span class="hl-2">the human is still the bottleneck, on purpose.</span></li>
-        </ul>
-        <p class="dim" style="margin-top:16px">To get there, Steinberger himself runs <span class="hl-2">~100 agents in parallel</span> (<span class="hl-2">≈$1.3M of tokens in one month</span>, OpenAI-funded; he was since hired by OpenAI). The lesson isn't the scale, it's the discipline: <span class="hl">an agent is only as good as the docs and rules you give it.</span></p>
-      </div>
-      <div class="stack" style="align-items:flex-start">
-        <div>
-          <div class="bignum-small"><span class="countup" data-target="376" data-suffix="k">0</span><span class="unit">stars</span></div>
-          <p class="dim" style="font-size:13px;margin-top:8px">from zero, in months</p>
-        </div>
-        <div style="margin-top:12px">
-          <div class="bignum-small" style="font-size:clamp(48px,6vw,80px)"><span class="countup" data-target="56098" data-format="comma">0</span><span class="unit">commits</span></div>
-          <p class="dim" style="font-size:13px;margin-top:8px">in barely a year, mostly agent-written</p>
-        </div>
-        <div class="pull" style="margin-top:24px;max-width:32ch">
-          Close the loop: agents must be able to verify their own work.
-          <span class="attr">— P. Steinberger · Pragmatic Engineer, jan. 2026</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="sources">
-      <span><b>Sources</b> github.com/openclaw/openclaw · sampled 2026-06-01</span>
-      <span>newsletter.pragmaticengineer.com · «&nbsp;The creator of Clawd&nbsp;»</span>
-      <span>the-decoder.com · «&nbsp;$1.3M/month, 100 agents&nbsp;»</span>
-    </div>
-  </section>
-
-  <!-- 7. SCENARIO -->
-  <section class="slide">
-    <span class="eyebrow">Back to LOTUSim · the scenario we'll walk through</span>
-    <h2 class="title">Adding a <em>sonar sensor</em><br/>to an underwater platform.</h2>
-
-    <div class="cols-2" style="margin-top:16px">
-      <div class="stack">
-        <p class="lead">
-          Credible case. Deliberately non-trivial.<br/>
-          Enough to touch the whole stack:
+        <p
+          class="footer-note"
+          style="
+            margin-top: auto;
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: 0;
+            text-transform: none;
+            color: var(--ink);
+          "
+        >
+          <span class="hl-2">The second kind</span> of agent helps you build
+          <span class="hl">the first</span>.
         </p>
-        <ul class="checks">
-          <li><span class="hl">physics/</span>: simplified acoustic propagation model,</li>
-          <li><span class="hl">systems/</span>: Gazebo plugin that publishes on ROS,</li>
-          <li><span class="hl">interfaces/</span>: a new <span class="dim">SonarPing.msg</span>,</li>
-          <li><span class="hl">launch/</span>: demo scenario with the equipped AUV,</li>
-          <li><span class="hl">docs/</span>: the spec page and usage example.</li>
-        </ul>
-      </div>
-      <div class="card" style="padding:32px">
-        <span class="num">↳</span>
-        <h4>Stated objective</h4>
-        <p style="font-size:16px;color:var(--ink);line-height:1.6;margin-top:10px">
-          From zero knowledge of the repo,<br/>
-          to a <span class="hl">PR ready for review</span>,<br/>
-          in a single work session.
+      </section>
+
+      <!-- 4. WHY NOW -->
+      <section class="slide">
+        <span class="eyebrow">Why now</span>
+        <h2 class="title">AI agents crossed <em>the useful threshold.</em></h2>
+        <h3 class="sub">Not for demos. For production code.</h3>
+
+        <div class="cols-2">
+          <div class="stack">
+            <p>Three things shifted <span class="hl">late 2025</span>:</p>
+            <ul class="checks">
+              <li>
+                <span
+                  ><span class="hl">Models good at tool calling.</span> With
+                  <span class="dim">Opus 4.5, GPT-5.2</span>, multi-step tool
+                  chains finally stay on track.</span
+                >
+              </li>
+              <li>
+                <span
+                  ><span class="hl">Long context windows.</span> A full codebase
+                  + docs + conventions fits in one shot, no more lossy
+                  summaries.</span
+                >
+              </li>
+              <li>
+                <span
+                  ><span class="hl">Sustained autonomy.</span> What holds a task
+                  together over hours isn't a bigger prompt. It's the agentic
+                  loop:
+                  <span class="hl-2">map → build → run → test → review</span>,
+                  repeated until it's green.</span
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="term">
+            <div class="c"># what wasn't true 18 months ago</div>
+            <div>
+              <span class="p">$</span> claude
+              <span class="k"
+                >"explain the Gazebo plugin → ROS topic pipeline in
+                systems/"</span
+              >
+            </div>
+            <div class="c">→ answer in 30 s, with file:line pointers</div>
+            <br />
+            <div>
+              <span class="p">$</span> claude
+              <span class="k">"propose 2 ways to add a sonar to the AUV"</span>
+            </div>
+            <div class="c">→ two strategies, explicit trade-offs</div>
+            <br />
+            <div>
+              <span class="p">$</span> claude
+              <span class="k">"implement option B + tests + doc"</span>
+            </div>
+            <div class="c">→ readable first draft, ready to challenge</div>
+          </div>
+        </div>
+        <p
+          class="footer-note"
+          style="
+            margin-top: auto;
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: 0;
+            text-transform: none;
+            color: var(--ink);
+          "
+        >
+          An agent can write code. So:
+          <span class="hl"
+            >how do we handle agent-assisted contributions, responsibly?</span
+          >
         </p>
-        <p style="margin-top:16px"><span class="hl-2">No magic. Just method.</span></p>
-      </div>
-    </div>
-    <p class="footer-note">→ The agent wires the <span class="hl">structure</span>: plugin, message, a zero-stub so it compiles. The <span class="hl-2">acoustic model stays the engineer's</span>, plugged in and validated before merge.</p>
-  </section>
-
-  <!-- 8. PIPELINE OVERVIEW -->
-  <section class="slide">
-    <span class="eyebrow">The method at a glance</span>
-    <h2 class="title">Five stages, <em>five agent roles.</em></h2>
-    <h3 class="sub" style="margin-top:-1.8em">one possible breakdown, not a doctrine. Adapt it to your project.</h3>
-
-    <div class="relay">
-      <div class="agents">
-        <div class="agent">
-          <div class="sprite-wrap"><div class="sprite" data-sprite="............|...X....X...|...X....X...|..XXXXXXXX..|.XXXXXXXXXX.|XX.XXXXXX.XX|XXXXXXXXXXXX|.XX.XXXX.XX.|X.X......X.X|.X........X."></div></div>
-          <div class="role-name">Cartographer</div>
-          <div class="verb">maps</div>
-          <div class="role-desc">understands the repo</div>
-        </div>
-        <div class="agent">
-          <div class="sprite-wrap"><div class="sprite" data-sprite="............|.....XX.....|....XXXX....|...XXXXXX...|..XXXXXXXX..|.XX.XXXX.XX.|XX.XXXXXX.XX|.XX.XXXX.XX.|X.X.XXXX.X.X|.X.X....X.X."></div></div>
-          <div class="role-name">Architect</div>
-          <div class="verb">plans</div>
-          <div class="role-desc">weighs 2–3 options</div>
-        </div>
-        <div class="agent">
-          <div class="sprite-wrap"><div class="sprite" data-sprite="X.X......X.X|.XX......XX.|..XXXXXXXX..|.XX.XXXX.XX.|XXXXXXXXXXXX|XX.XXXXXX.XX|XXXXXXXXXXXX|.XX.XXXX.XX.|X.X......X.X|.X........X."></div></div>
-          <div class="role-name">Companion</div>
-          <div class="verb">builds</div>
-          <div class="role-desc">code + tests + review, closes the loop</div>
-        </div>
-        <div class="agent">
-          <div class="sprite-wrap"><div class="sprite" data-sprite="............|.XX......XX.|.XXXXXXXXXX.|XX.XXXXXX.XX|XX.XXXXXX.XX|XXXXXXXXXXXX|XX.XXXXXX.XX|XX.XXXXXX.XX|.XXXXXXXXXX.|.X.X....X.X."></div></div>
-          <div class="role-name">Writer</div>
-          <div class="verb">writes docs</div>
-          <div class="role-desc">while it's still fresh</div>
-        </div>
-        <div class="agent">
-          <div class="sprite-wrap"><div class="sprite" data-sprite="............|...XXXXXX...|..XXXXXXXX..|.X.XXXXXX.X.|XXXXXXXXXXXX|XX.XXXXXX.XX|XXXXXXXXXXXX|.XXX.XX.XXX.|X.X..XX..X.X|.X..XXXX..X."></div></div>
-          <div class="role-name">Reviewer</div>
-          <div class="verb">ships</div>
-          <div class="role-desc">PR, the human signs</div>
-        </div>
-      </div>
-      <div class="baton" aria-hidden="true"></div>
-    </div>
-
-    <p class="footer-note" style="margin-top:32px">→ <span class="hl">One agent, five hats.</span> Not a hundred in parallel. The craft is in the sequence.</p>
-  </section>
-
-  <!-- 9. THE LOOP IN ACTION -->
-  <section class="slide">
-    <span class="eyebrow"><span class="loop-icon">↻</span>The method · from clone to PR in one session</span>
-    <h2 class="title">The loop, <em>on the sonar.</em></h2>
-
-    <div class="cols-2">
-      <div class="stack">
-        <ul class="checks">
-          <li><span class="lbl-col hl">Map</span><span class="desc-col">the agent reads the repo, finds the closest analog (a depth-camera plugin), answers with file:line, in minutes, not days.</span></li>
-          <li><span class="lbl-col hl">Plan</span><span class="desc-col">it proposes 2–3 strategies with trade-offs. <span class="hl-2">I choose.</span></span></li>
-          <li><span class="lbl-col hl">Build</span><span class="desc-col">it runs <span class="dim">colcon</span> + the sim, reads the failure, fixes, then <span class="hl-2">closes the loop</span> itself.</span></li>
-          <li><span class="lbl-col hl">Doc</span><span class="desc-col">it writes the docs page + a notebook example while the «&nbsp;why&nbsp;» is fresh.</span></li>
-          <li><span class="lbl-col hl">Ship</span><span class="desc-col">labelled issue → fork → PR, <span class="dim">Assisted-by:</span> + I sign.</span></li>
-        </ul>
-        <div class="pull" style="margin-top:18px;max-width:34ch">
-          Taste and system design remain the ultimate moats.
-          <span class="attr">— P. Steinberger · State of the Claw, 2026</span>
-        </div>
-      </div>
-      <div class="term">
-        <div class="c"># the agent drives the loop: build, run, inspect, fix</div>
-        <div><span class="p">$</span> colcon build --packages-select lotusim_sonar</div>
-        <div class="c">Finished &lt;&lt;&lt; lotusim_sonar [12.4s]</div>
-        <br/>
-        <div><span class="p">$</span> ros2 launch lotusim auv_with_sonar.launch.py</div>
-        <div class="c">[INFO] sonar plugin loaded · /auv/sonar @ 10 Hz</div>
-        <br/>
-        <div><span class="p">$</span> ros2 topic echo /auv/sonar --once</div>
-        <div class="s">header: ...   ranges: [4.21, 4.18, ..., 7.92]</div>
-        <br/>
-        <div><span class="p">›</span> <span class="k">add</span> a unit test for the ray-cast fallback case</div>
-        <div class="s">→ targeted patch, follows repo style · code you own and can read</div>
-      </div>
-    </div>
-
-    <p class="footer-note"><span class="hl-2">Local CI &gt; remote CI</span>: the agent sees the failure in 12 seconds, not 10 minutes. The two human moments: <span class="hl">choosing</span> (Plan) and <span class="hl">signing</span> (Ship).</p>
-  </section>
-
-  <!-- 10. DEMO -->
-  <section class="slide">
-    <span class="eyebrow">Demonstration</span>
-    <h2 class="title">From cloned repo to PR,<br/><em>see it run.</em></h2>
-
-    <div class="cols-2" style="margin-top:24px;align-items:center">
-      <div class="stack">
-        <p class="lead">A sped-up capture of the whole session: map the repo, choose a strategy, build &amp; close the loop, write the docs, open the PR.</p>
-        <p style="margin-top:14px"><span class="hl-2">The code isn't disposable.</span> It's readable, tested, documented, and follows the repo's conventions.</p>
-        <div style="margin-top:8px">
-          <span class="badge hl">map</span><span class="badge">plan</span><span class="badge">build</span><span class="badge">doc</span><span class="badge">ship</span>
-        </div>
-      </div>
-
-      <div class="videoframe">
-        <div class="vf-top">
-          <span class="vf-dot"></span><span class="vf-dot"></span><span class="vf-dot"></span>
-          <span class="vf-label">session.mp4 · sped-up</span>
-        </div>
-        <div class="vf-stage"><span class="playbtn" aria-hidden="true"></span></div>
-        <div class="vf-bar"><i></i></div>
-      </div>
-    </div>
-
-    <p class="footer-note">→ Drop the sped-up screen capture here: the full session in ~2 minutes.</p>
-  </section>
-
-  <!-- 11. LIMITS / HONESTY -->
-  <section class="slide">
-    <span class="eyebrow">Honest limits: the price of velocity</span>
-    <h2 class="title">What I'm <em>not</em> selling you.</h2>
-
-    <div class="filler"></div>
-    <div class="cols-3" style="grid-template-columns:repeat(4,1fr);margin-top:0">
-      <div class="card warn">
-        <span class="num">!</span>
-        <h4>Govern what the agent touches</h4>
-        <p>Open-source LOTUSim is public, so sharing it with an agent is fine. The real risk: without clear rules, an agent pulls in something that shouldn't land in a public repo. Match the guard to the data, and write the rules down.</p>
-      </div>
-      <div class="card warn">
-        <span class="num">!</span>
-        <h4>Hallucinations</h4>
-        <p>In C++/ROS/Gazebo, the agent sometimes invents Gazebo APIs that no longer exist, or confuses versions. Build + tests = mandatory safety net.</p>
-      </div>
-      <div class="card danger">
-        <span class="num">×</span>
-        <h4>Supervision is not optional</h4>
-        <p>No «&nbsp;dark factory&nbsp;» (Steinberger). An agent that can write and commit needs to be supervised like a junior dev, not as a metaphor.</p>
-      </div>
-      <div class="card danger">
-        <span class="num">×</span>
-        <h4>Not a substitute</h4>
-        <p>AI is «&nbsp;just a tool&nbsp;» (Torvalds). Without a real foundation in C++/ROS/physics, the agent helps you hit the wall faster.</p>
-      </div>
-    </div>
-    <div class="filler"></div>
-  </section>
-
-  <!-- 12. LOTUSIM'S HOMEWORK -->
-  <section class="slide">
-    <span class="eyebrow">What this asks of the project</span>
-    <h2 class="title">An agent is only as good as<br/><em>the docs it can read.</em></h2>
-
-    <div class="cols-2" style="margin-top:16px">
-      <div class="card" style="padding:28px">
-        <span class="eyebrow" style="display:inline-flex;margin-bottom:14px">LOTUSim today</span>
-        <ul class="checks">
-          <li><span class="dim">README.md</span>: one paragraph.</li>
-          <li><span class="dim">CONTRIBUTING.md</span>: written for humans.</li>
-          <li>Docs live in a wiki, not in the repo.</li>
-          <li>Testing guide: <span class="dim">«&nbsp;available soon&nbsp;»</span>.</li>
-          <li>Nothing addressed to the agents.</li>
-        </ul>
-      </div>
-      <div class="card" style="padding:28px">
-        <span class="eyebrow" style="display:inline-flex;margin-bottom:14px">Agent-ready: the homework</span>
-        <ul class="checks">
-          <li><span class="hl">AGENTS.md</span>: how to map, build, test, plus the conventions.</li>
-          <li><span class="hl">VISION.md</span> in the repo: the roadmap, and <span class="dim">what we won't merge</span>.</li>
-          <li><span class="hl">Docs-as-code</span>: same repo, same PR, same review.</li>
-          <li>A <span class="hl">test suite + local CI</span>, so the agent can close the loop itself.</li>
-          <li>An <span class="hl">AI-contribution policy</span> (<span class="dim">Assisted-by</span>, the human signs) with review guardrails.</li>
-        </ul>
-      </div>
-    </div>
-
-    <p class="footer-note">→ The wall from the start, <span class="hl">those implicit conventions</span>, is exactly what these files write down. Lower it for humans, and you lower it for agents too.</p>
-  </section>
-
-  <!-- 13. CLOSE -->
-  <section class="slide">
-    <span class="eyebrow">Closing</span>
-    <h2 class="title">An open simulator.<br/>An <em>augmented</em> practice.</h2>
-
-    <div class="cols-2" style="margin-top:24px">
-      <div class="card" style="padding:28px">
-        <span class="eyebrow" style="display:inline-flex;margin-bottom:14px">If you contribute</span>
-        <ul class="checks">
-          <li>Clone the repo.</li>
-          <li>Ask an agent to map it.</li>
-          <li>Pick an issue, or open one.</li>
-          <li>Come back with a PR: <span class="dim">Assisted-by</span>, and <span class="hl">you sign</span>.</li>
-        </ul>
-      </div>
-      <div class="card" style="padding:28px">
-        <span class="eyebrow" style="display:inline-flex;margin-bottom:14px">The moment</span>
-        <p style="font-size:16px;line-height:1.6;color:var(--ink)">
-          LOTUSim just went open source, and the tooling to contribute cleanly is mature today: the kernel wrote the contract, OpenClaw showed it scales.
+        <p class="footer-note" style="margin-top: 12px; text-align: center">
+          → Two communities already answered.
         </p>
-        <p style="font-size:16px;line-height:1.6;color:var(--ink);margin-top:14px">
-          The entry barrier has never been lower. The homework is known. Let's make LOTUSim the project that does this right, together.
+      </section>
+
+      <!-- 5. INDUSTRY · TWO ANSWERS -->
+      <section class="slide">
+        <span class="eyebrow">Industry signal · the question got answered</span>
+        <h2 class="title">Two communities, <em>one answer.</em></h2>
+
+        <div class="answers">
+          <div class="answer">
+            <div class="answer-head">
+              <span class="logo-mark"
+                ><svg
+                  width="800px"
+                  height="800px"
+                  viewBox="0 0 32 32"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M30 16C30 23.728 23.735 30 16 30C8.265 30 2 23.728 2 16C2 8.265 8.265 2 16 2C23.735 2 30 8.265 30 16Z"
+                    fill="white"
+                  />
+                  <path
+                    d="M11.3063 21.91C11.181 21.7232 11.0714 21.4713 10.9824 21.1699C9.37571 19.358 10.6169 16.6916 11.8446 14.881C11.9623 14.6874 12.0905 14.5004 12.2299 14.3215C13.1666 13.1577 13.4089 12.3478 13.481 11.2521C13.4896 11.0481 13.4727 10.7781 13.4533 10.4678C13.3542 8.8837 13.1895 6.25174 16.0159 6.0184C19.5489 5.72669 19.2611 8.97105 19.235 10.8732C19.2339 10.9519 19.2328 11.0285 19.2321 11.1024C19.2225 12.249 19.8209 13.0341 20.4455 13.8535C20.6736 14.1528 20.9052 14.4566 21.112 14.7843C21.1181 14.794 21.1242 14.8038 21.1303 14.8135C22.2218 16.3877 23.2994 18.737 21.7995 20.9653C21.5887 21.7259 21.2695 22.424 20.8434 22.9921C19.3136 25.0052 17.9539 24.8008 16.892 24.6412C16.5717 24.5931 16.2785 24.549 16.0159 24.5711C15.5797 24.5977 15.2301 24.6682 14.9281 24.7292C13.7608 24.9648 13.3046 25.0569 11.3063 21.91Z"
+                    fill="#000000"
+                  />
+                  <path
+                    d="M18.0139 7.79452C17.9811 8.72691 16.9921 9.53681 15.8065 9.61167C14.6209 9.68654 13.6907 8.97873 13.7235 8.04633C13.7562 7.11393 14.7453 6.30404 15.9309 6.22917C17.1165 6.16112 18.0466 6.86212 18.0139 7.79452Z"
+                    fill="url(#paint0_linear_87_7435)"
+                  />
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M15.8656 10.0609C15.8751 10.5679 16.1073 11.0002 16.4334 11.1955C15.3695 11.1002 14.0512 11.4891 14.0512 12.2252C14.0348 13.4703 13.3418 15.0195 12.8429 16.1346C12.7447 16.3543 12.654 16.5571 12.5774 16.7374C12.2686 17.5021 12.0833 18.32 12.0614 19.1221C11.2435 17.9947 11.8378 16.5484 12.1582 15.9207C12.5846 15.0947 12.5764 14.9916 12.4108 15.1852C11.7759 16.2648 10.5803 18.4333 12.0775 19.736C12.125 20.3177 12.2667 20.8813 12.5185 21.3994C14.5228 25.4421 18.2761 23.7815 19.5141 21.6853C19.6788 21.3872 19.812 21.0989 19.9177 20.8203C19.9797 20.8593 20.0461 20.8895 20.1167 20.9094C20.739 21.0932 21.6691 20.3922 21.8918 19.9566C22.1604 19.3781 21.8853 18.9833 20.9683 18.5137C20.9215 18.4906 20.8753 18.4688 20.8297 18.4485C21.1814 16.9676 20.2122 15.4276 19.52 14.7743C19.3909 14.7424 19.3727 14.8156 19.5731 15.0155C20.009 15.4333 20.9572 16.9228 20.4442 18.3091C20.3597 18.2864 20.2784 18.2704 20.2009 18.2616C20.0433 17.3158 19.6231 16.58 19.3294 16.0658C19.2629 15.9493 19.2029 15.8442 19.1538 15.7506C19.055 15.5617 18.9368 15.3661 18.8114 15.1587C18.3283 14.3594 17.739 13.3843 17.739 11.9393C17.6651 11.6214 17.3651 11.4094 16.9658 11.2923C17.4293 11.1988 17.7772 10.6573 17.7652 10.0065C17.7521 9.30545 17.3132 8.74737 16.7892 8.76099C16.2652 8.7746 15.846 9.3599 15.8656 10.0609ZM16.2979 10.2174C16.2914 10.6054 16.4748 10.9184 16.7172 10.9184C16.953 10.9184 17.156 10.6054 17.1626 10.2242C17.1691 9.83631 16.9857 9.52324 16.7434 9.52324C16.501 9.52324 16.3045 9.83631 16.2979 10.2174Z"
+                    fill="url(#paint1_linear_87_7435)"
+                  />
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M14.5556 11.1498C14.9355 11.1294 15.2106 10.619 15.1779 10.0133C15.1451 9.40754 14.8111 8.93794 14.4311 8.95835C14.0512 8.97877 13.7761 9.48921 13.8089 10.0949C13.8416 10.7006 14.1757 11.1702 14.5556 11.1498ZM14.7848 10.2242C14.8176 10.5441 14.6997 10.8163 14.5294 10.8436C14.3591 10.864 14.1953 10.6258 14.1626 10.3059C14.1298 9.98604 14.2477 9.7138 14.418 9.68658C14.5883 9.66616 14.7521 9.90436 14.7848 10.2242Z"
+                    fill="url(#paint2_linear_87_7435)"
+                  />
+                  <path
+                    d="M16.3961 9.99963C16.3764 10.2174 16.4747 10.3944 16.6122 10.408C16.7498 10.4216 16.8808 10.2514 16.9004 10.0405C16.9201 9.82267 16.8218 9.64572 16.6843 9.63211C16.5467 9.6185 16.4157 9.78865 16.3961 9.99963Z"
+                    fill="url(#paint3_linear_87_7435)"
+                  />
+                  <path
+                    d="M14.641 10.0542C14.6606 10.2312 14.5886 10.3877 14.4838 10.4013C14.379 10.4149 14.2807 10.2788 14.261 10.0951C14.2414 9.91811 14.3134 9.76158 14.4183 9.74797C14.5231 9.73436 14.6213 9.87728 14.641 10.0542Z"
+                    fill="url(#paint4_linear_87_7435)"
+                  />
+                  <path
+                    d="M18.669 17.1525C18.669 18.3503 17.562 19.9021 15.6625 19.8885C13.7039 19.9021 12.8721 18.3503 12.8721 17.1525C12.8721 15.9547 14.169 14.9814 15.7673 14.9814C17.3721 14.9883 18.669 15.9547 18.669 17.1525Z"
+                    fill="url(#paint5_linear_87_7435)"
+                  />
+                  <path
+                    d="M17.6346 13.3892C17.615 14.6279 16.8355 14.9205 15.8529 14.9205C14.8704 14.9205 14.1564 14.7367 14.0713 13.3892C14.0713 12.5453 14.8704 12.0552 15.8529 12.0552C16.8355 12.0484 17.6346 12.5385 17.6346 13.3892Z"
+                    fill="url(#paint6_linear_87_7435)"
+                  />
+                  <path
+                    d="M11.6936 15.2947C12.3356 14.2807 13.6914 12.7221 11.9491 15.5125C10.5342 17.8129 11.4251 19.2898 11.8836 19.6981C13.2067 20.9232 13.1543 21.7467 12.1128 21.1001C9.87922 19.7185 10.3443 17.3909 11.6936 15.2947Z"
+                    fill="url(#paint7_linear_87_7435)"
+                  />
+                  <path
+                    d="M20.9881 15.71C20.4314 14.519 18.6628 11.4972 21.0733 15.009C23.2676 18.1873 21.7283 20.3992 21.4532 20.617C21.1781 20.8348 20.2545 21.2771 20.5231 20.5081C20.7982 19.739 22.1606 18.2826 20.9881 15.71Z"
+                    fill="url(#paint8_linear_87_7435)"
+                  />
+                  <path
+                    d="M11.2089 25.1021C9.74165 24.2922 7.61283 25.2586 8.38575 23.0671C8.54296 22.5703 8.15649 21.8217 8.4054 21.3384C8.70016 20.7463 9.33553 20.8756 9.71544 20.4809C10.0888 20.0726 10.3246 19.3648 11.0255 19.4736C11.7198 19.5825 12.1849 20.4673 12.6696 21.5562C13.0299 22.3321 14.3006 23.4278 14.2154 24.299C14.1106 25.6329 12.6499 25.8847 11.2089 25.1021Z"
+                    fill="url(#paint9_linear_87_7435)"
+                  />
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M9.87664 20.6404C9.51984 21.0307 8.86452 20.9371 8.60152 21.4477C8.43261 21.7756 8.61716 22.2796 8.64206 22.6387C8.67282 23.0824 8.30503 23.711 8.49233 24.0899C8.70268 24.5154 9.65296 24.4602 10.0707 24.5213C11.1019 24.6719 12.8063 26.0065 13.7388 24.9414C14.6504 23.9002 12.8982 22.5825 12.4684 21.6569C12.1889 21.0289 11.7706 19.825 10.992 19.7027C10.4431 19.6175 10.1931 20.2943 9.87664 20.6404ZM11.0583 19.2446C12.0278 19.3967 12.5129 20.6535 12.8707 21.4572C13.4138 22.6227 15.2747 23.8755 14.0686 25.2531C12.9732 26.5043 11.2438 25.1604 10.0086 24.98C9.39166 24.8898 8.41858 24.9546 8.09576 24.3015C7.81821 23.7401 8.2362 23.2316 8.1974 22.672C8.16434 22.1952 7.97565 21.6832 8.2077 21.2306C8.52537 20.5945 9.13864 20.7485 9.55546 20.3192C9.99809 19.8328 10.2634 19.1211 11.0583 19.2446Z"
+                    fill="#E68C3F"
+                  />
+                  <path
+                    d="M21.3814 24.7278C22.4556 23.3735 24.8464 23.6525 23.2351 21.7945C22.8945 21.393 22.9993 20.5354 22.5801 20.1679C22.0888 19.7187 21.5451 20.0862 21.0473 19.8548C20.5495 19.603 20.0255 19.1198 19.4163 19.4601C18.8071 19.8072 18.7416 20.7056 18.6827 21.8898C18.6303 22.7405 17.8836 24.1629 18.2831 24.9456C18.8596 26.157 20.3596 25.9937 21.3814 24.7278Z"
+                    fill="url(#paint10_linear_87_7435)"
+                  />
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M21.8097 19.6982C22.0851 19.6909 22.415 19.7102 22.7248 19.9925C23.1101 20.3322 23.1139 20.8867 23.2592 21.351C23.4312 21.9008 24.0341 22.2149 23.998 22.8597C23.9391 23.9136 22.1138 24.1675 21.552 24.8759C21.0121 25.5447 20.3297 25.9429 19.6821 25.9966C18.7 26.078 17.8888 25.2522 17.9462 24.2439C17.9928 23.4276 18.4086 22.6861 18.4593 21.8764C18.4885 21.29 18.52 20.7464 18.626 20.305C18.7331 19.8589 18.9261 19.4748 19.3083 19.257C20.1453 18.7894 20.9539 19.7206 21.8097 19.6982ZM19.5219 19.6637C19.2953 19.7931 19.1512 20.0316 19.0586 20.4171C18.9649 20.8073 18.9341 21.3073 18.9043 21.9046C18.8543 22.7162 18.4377 23.4572 18.3913 24.2713C18.3499 24.9972 18.9075 25.5961 19.6467 25.5348C20.1484 25.4932 20.7272 25.1764 21.2091 24.5797C21.6397 24.0373 23.5137 23.5336 23.5529 22.8328C23.5785 22.3752 22.9765 21.9459 22.8351 21.4943C22.7245 21.1408 22.7187 20.5932 22.4355 20.3449C22.2545 20.1795 22.0641 20.1549 21.8209 20.1613C21.1162 20.1797 20.1761 19.2992 19.5219 19.6637Z"
+                    fill="#E68C3F"
+                  />
+                  <path
+                    d="M20.9156 22.9174C22.5793 20.3652 21.3413 20.3856 20.9221 20.1882C20.5029 19.9841 20.0641 19.5825 19.5728 19.8616C19.0815 20.1474 19.0553 20.8824 19.0422 21.8489C19.0226 22.5431 18.4658 23.7069 18.7999 24.3534C19.206 25.1089 20.1885 24.0131 20.9156 22.9174Z"
+                    fill="url(#paint11_linear_87_7435)"
+                  />
+                  <path
+                    d="M10.8682 23.2847C8.37909 21.6105 9.54502 21.0388 9.91839 20.7733C10.3704 20.433 10.3769 19.7797 10.9337 19.8409C11.4904 19.9022 11.8179 20.6168 12.1913 21.5016C12.4664 22.1345 13.4228 22.9784 13.3507 23.7066C13.259 24.5642 11.9424 23.9993 10.8682 23.2847Z"
+                    fill="url(#paint12_linear_87_7435)"
+                  />
+                  <path
+                    d="M21.7481 19.9362C21.5516 20.2901 20.7525 20.8481 20.2219 20.6984C19.6783 20.5555 19.4294 19.7592 19.5407 19.1603C19.639 18.4797 20.2219 18.4457 20.9556 18.786C21.735 19.1535 21.9774 19.4666 21.7481 19.9362Z"
+                    fill="#000000"
+                  />
+                  <path
+                    d="M21.2108 19.7389C21.0863 19.9839 20.5623 20.3718 20.1955 20.2697C19.8287 20.1676 19.6453 19.6164 19.7042 19.2012C19.7566 18.7316 20.1496 18.7044 20.6475 18.9358C21.1846 19.1944 21.3549 19.4122 21.2108 19.7389Z"
+                    fill="url(#paint13_linear_87_7435)"
+                  />
+                  <path
+                    d="M14.4374 10.8576C14.6994 10.6057 15.3348 9.83668 16.54 10.6398C16.7627 10.7895 16.9461 10.8031 17.3719 10.9937C18.23 11.3612 17.8238 12.2459 16.9068 12.5454C16.5138 12.6747 16.1601 13.1715 15.4527 13.1239C14.8435 13.0899 14.6863 12.6747 14.3129 12.4501C13.6514 12.0622 13.5531 11.5381 13.9134 11.2591C14.2736 10.9801 14.4112 10.878 14.4374 10.8576Z"
+                    fill="url(#paint14_linear_87_7435)"
+                  />
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M13.9933 11.3703C13.8563 11.4764 13.8127 11.6174 13.858 11.7734C13.951 12.0938 14.6216 12.5345 14.8784 12.7501C15.0244 12.8727 15.1914 12.9699 15.4613 12.985C16.0393 13.0239 16.3603 12.5792 16.8667 12.4126C17.1997 12.3038 17.9044 11.8882 17.671 11.4119C17.4718 11.0054 16.8008 10.9803 16.4675 10.7563C15.8939 10.3742 15.4763 10.3769 15.1788 10.4841C14.8528 10.6016 14.2885 11.1416 13.9933 11.3703ZM15.0911 10.2215C15.4781 10.0821 15.9812 10.1021 16.6126 10.5228C17.0276 10.8018 17.659 10.7749 17.9093 11.2858C18.2282 11.9365 17.4555 12.5116 16.947 12.6777C16.4025 12.857 16.0983 13.3061 15.4447 13.2624C15.1058 13.2433 14.8884 13.1158 14.7103 12.9663C14.3408 12.6561 13.7165 12.3613 13.5738 11.8694C13.4946 11.5966 13.6101 11.3204 13.8334 11.1474C14.1943 10.8679 14.682 10.369 15.0911 10.2215Z"
+                    fill="#E68C3F"
+                  />
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M17.4745 11.5671C17.4772 11.6182 17.4395 11.6619 17.3904 11.6646C16.6971 11.7039 16.2099 12.4951 15.427 12.4951C14.9889 12.4951 14.6421 12.2837 14.3941 12.0804C14.3442 12.0395 13.9033 11.6996 13.9033 11.613C13.9033 11.5618 13.9432 11.5203 13.9925 11.5203C14.0846 11.5203 14.3625 11.8219 14.4659 11.9067C14.6995 12.0982 15.0463 12.3098 15.427 12.3098C16.2021 12.3098 16.6776 11.5195 17.3806 11.4796C17.4298 11.4768 17.4718 11.516 17.4745 11.5671Z"
+                    fill="#E68C3F"
+                  />
+                  <path
+                    d="M14.8442 10.7893C14.9752 10.6668 15.3878 10.3333 15.9315 10.6736C16.0494 10.7416 16.1673 10.8165 16.3376 10.9186C16.6848 11.1296 16.5145 11.4358 16.0952 11.6264C15.9053 11.7081 15.5909 11.885 15.3551 11.8714C15.0931 11.8442 14.9162 11.6672 14.7459 11.5515C14.4249 11.3338 14.4446 11.15 14.5952 11.0071C14.7066 10.8982 14.8311 10.7961 14.8442 10.7893Z"
+                    fill="url(#paint15_linear_87_7435)"
+                  />
+                  <defs>
+                    <linearGradient
+                      id="paint0_linear_87_7435"
+                      x1="16.0578"
+                      y1="6.30617"
+                      x2="15.8364"
+                      y2="9.30598"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stop-color="white" stop-opacity="0.8" />
+                      <stop offset="1" stop-color="white" stop-opacity="0" />
+                    </linearGradient>
+                    <linearGradient
+                      id="paint1_linear_87_7435"
+                      x1="12.8966"
+                      y1="22.6721"
+                      x2="11.2506"
+                      y2="17.2716"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stop-color="#FFEED7" />
+                      <stop offset="1" stop-color="#BDBFC2" />
+                    </linearGradient>
+                    <linearGradient
+                      id="paint2_linear_87_7435"
+                      x1="12.8966"
+                      y1="22.6721"
+                      x2="11.2506"
+                      y2="17.2716"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stop-color="#FFEED7" />
+                      <stop offset="1" stop-color="#BDBFC2" />
+                    </linearGradient>
+                    <linearGradient
+                      id="paint3_linear_87_7435"
+                      x1="16.6681"
+                      y1="9.65546"
+                      x2="16.5748"
+                      y2="10.3542"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stop-color="white" stop-opacity="0.65" />
+                      <stop offset="1" stop-color="white" stop-opacity="0" />
+                    </linearGradient>
+                    <linearGradient
+                      id="paint4_linear_87_7435"
+                      x1="14.434"
+                      y1="9.78294"
+                      x2="14.5344"
+                      y2="10.3483"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stop-color="white" stop-opacity="0.65" />
+                      <stop offset="1" stop-color="white" stop-opacity="0" />
+                    </linearGradient>
+                    <linearGradient
+                      id="paint5_linear_87_7435"
+                      x1="15.7613"
+                      y1="15.6306"
+                      x2="15.778"
+                      y2="19.6272"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stop-color="white" stop-opacity="0.8" />
+                      <stop offset="1" stop-color="white" stop-opacity="0" />
+                    </linearGradient>
+                    <linearGradient
+                      id="paint6_linear_87_7435"
+                      x1="15.8504"
+                      y1="13.1247"
+                      x2="15.8688"
+                      y2="14.7138"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stop-color="white" stop-opacity="0.65" />
+                      <stop offset="1" stop-color="white" stop-opacity="0" />
+                    </linearGradient>
+                    <linearGradient
+                      id="paint7_linear_87_7435"
+                      x1="11.72"
+                      y1="14.1055"
+                      x2="11.72"
+                      y2="19.9372"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stop-color="white" stop-opacity="0.65" />
+                      <stop offset="1" stop-color="white" stop-opacity="0" />
+                    </linearGradient>
+                    <linearGradient
+                      id="paint8_linear_87_7435"
+                      x1="21.033"
+                      y1="13.5359"
+                      x2="21.0308"
+                      y2="18.8052"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stop-color="white" stop-opacity="0.65" />
+                      <stop offset="1" stop-color="white" stop-opacity="0" />
+                    </linearGradient>
+                    <linearGradient
+                      id="paint9_linear_87_7435"
+                      x1="11.4286"
+                      y1="22.4374"
+                      x2="10.5354"
+                      y2="25.4214"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stop-color="#FFA63F" />
+                      <stop offset="1" stop-color="#FFFF00" />
+                    </linearGradient>
+                    <linearGradient
+                      id="paint10_linear_87_7435"
+                      x1="19.882"
+                      y1="21.53"
+                      x2="22.2656"
+                      y2="24.7801"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stop-color="#FFA63F" />
+                      <stop offset="1" stop-color="#FFFF00" />
+                    </linearGradient>
+                    <linearGradient
+                      id="paint11_linear_87_7435"
+                      x1="20.5198"
+                      y1="18.9333"
+                      x2="19.6863"
+                      y2="22.8605"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stop-color="white" stop-opacity="0.65" />
+                      <stop offset="1" stop-color="white" stop-opacity="0" />
+                    </linearGradient>
+                    <linearGradient
+                      id="paint12_linear_87_7435"
+                      x1="11.2464"
+                      y1="19.9042"
+                      x2="11.4117"
+                      y2="24.3239"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stop-color="white" stop-opacity="0.65" />
+                      <stop offset="1" stop-color="white" stop-opacity="0" />
+                    </linearGradient>
+                    <linearGradient
+                      id="paint13_linear_87_7435"
+                      x1="20.3755"
+                      y1="18.8616"
+                      x2="20.5688"
+                      y2="20.1822"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stop-color="white" stop-opacity="0.65" />
+                      <stop offset="1" stop-color="white" stop-opacity="0" />
+                    </linearGradient>
+                    <linearGradient
+                      id="paint14_linear_87_7435"
+                      x1="15.7644"
+                      y1="10.784"
+                      x2="15.7805"
+                      y2="13.1098"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stop-color="#FFA63F" />
+                      <stop offset="1" stop-color="#FFFF00" />
+                    </linearGradient>
+                    <linearGradient
+                      id="paint15_linear_87_7435"
+                      x1="15.5106"
+                      y1="10.5638"
+                      x2="15.5062"
+                      y2="11.7936"
+                      gradientUnits="userSpaceOnUse"
+                    >
+                      <stop stop-color="white" stop-opacity="0.65" />
+                      <stop offset="1" stop-color="white" stop-opacity="0" />
+                    </linearGradient>
+                  </defs></svg
+              ></span>
+              <span>
+                <span class="answer-name">The Linux kernel</span>
+                <span class="answer-tag">the most conservative community</span>
+              </span>
+            </div>
+            <ul class="checks">
+              <li>
+                A policy written <span class="hl">for the agents</span>:
+                <span class="dim">coding-assistants.rst</span>.
+              </li>
+              <li>
+                <span class="hl"
+                  >«&nbsp;AI agents MUST NOT add Signed-off-by&nbsp;»</span
+                >
+                only a human certifies the DCO.
+              </li>
+            </ul>
+            <div class="takeaway">Yes, if a human owns every line.</div>
+          </div>
+
+          <div class="answer">
+            <div class="answer-head">
+              <span class="logo-mark"
+                ><svg
+                  viewBox="0 0 120 120"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <defs>
+                    <linearGradient
+                      id="lobster-gradient"
+                      x1="0%"
+                      y1="0%"
+                      x2="100%"
+                      y2="100%"
+                    >
+                      <stop offset="0%" stop-color="#ff4d4d" />
+                      <stop offset="100%" stop-color="#991b1b" />
+                    </linearGradient>
+                  </defs>
+                  <!-- Body -->
+                  <path
+                    d="M60 10 C30 10 15 35 15 55 C15 75 30 95 45 100 L45 110 L55 110 L55 100 C55 100 60 102 65 100 L65 110 L75 110 L75 100 C90 95 105 75 105 55 C105 35 90 10 60 10Z"
+                    fill="url(#lobster-gradient)"
+                  />
+                  <!-- Left Claw -->
+                  <path
+                    d="M20 45 C5 40 0 50 5 60 C10 70 20 65 25 55 C28 48 25 45 20 45Z"
+                    fill="url(#lobster-gradient)"
+                  />
+                  <!-- Right Claw -->
+                  <path
+                    d="M100 45 C115 40 120 50 115 60 C110 70 100 65 95 55 C92 48 95 45 100 45Z"
+                    fill="url(#lobster-gradient)"
+                  />
+                  <!-- Antenna -->
+                  <path
+                    d="M45 15 Q35 5 30 8"
+                    stroke="#ff4d4d"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                  />
+                  <path
+                    d="M75 15 Q85 5 90 8"
+                    stroke="#ff4d4d"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                  />
+                  <!-- Eyes -->
+                  <circle cx="45" cy="35" r="6" fill="#050810" />
+                  <circle cx="75" cy="35" r="6" fill="#050810" />
+                  <circle cx="46" cy="34" r="2.5" fill="#00e5cc" />
+                  <circle cx="76" cy="34" r="2.5" fill="#00e5cc" /></svg
+              ></span>
+              <span>
+                <span class="answer-name">OpenClaw</span>
+                <span class="answer-tag"
+                  >fastest-growing project · 376k&nbsp;★</span
+                >
+              </span>
+            </div>
+            <ul class="checks">
+              <li>
+                Wrote it down for the agents:
+                <span class="hl">VISION.md</span> +
+                <span class="hl">AGENTS.md</span>, in the repo.
+              </li>
+              <li>
+                Every PR: <span class="hl">real-behavior proof</span>, a human
+                signs the merge.
+              </li>
+            </ul>
+            <div class="takeaway">
+              The human is still the bottleneck, on purpose.
+            </div>
+          </div>
+        </div>
+
+        <div class="sources">
+          <span><b>Linux</b> docs.kernel.org/process/coding-assistants</span>
+          <span
+            ><b>OpenClaw</b> github.com/openclaw/openclaw ·
+            pragmaticengineer.com</span
+          >
+        </div>
+        <p class="footer-note">
+          →
+          <span class="hl"
+            >An agent is only as good as the docs and the rules you give
+            it.</span
+          >
         </p>
+      </section>
+
+      <!-- 6. SCENARIO -->
+      <section class="slide">
+        <span class="eyebrow"
+          >Back to LOTUSim · the scenario we'll walk through</span
+        >
+        <h2 class="title">
+          Adding a <em>sonar sensor</em><br />to an underwater platform.
+        </h2>
+
+        <div class="cols-2" style="margin-top: 16px">
+          <div class="stack">
+            <p class="lead">
+              Credible case. Deliberately non-trivial.<br />
+              Enough to touch the whole stack:
+            </p>
+            <ul class="checks">
+              <li>
+                <span class="hl">physics/</span>: simplified acoustic
+                propagation model,
+              </li>
+              <li>
+                <span class="hl">systems/</span>: Gazebo plugin that publishes
+                on ROS,
+              </li>
+              <li>
+                <span class="hl">interfaces/</span>: a new
+                <span class="dim">SonarPing.msg</span>,
+              </li>
+              <li>
+                <span class="hl">launch/</span>: demo scenario with the equipped
+                AUV,
+              </li>
+              <li>
+                <span class="hl">docs/</span>: the spec page and usage example.
+              </li>
+            </ul>
+          </div>
+          <div class="card" style="padding: 32px">
+            <span class="num">↳</span>
+            <h4>Stated objective</h4>
+            <p
+              style="
+                font-size: 16px;
+                color: var(--ink);
+                line-height: 1.6;
+                margin-top: 10px;
+              "
+            >
+              From zero knowledge of the repo,<br />
+              to a <span class="hl">PR ready for review</span>,<br />
+              in a single work session.
+            </p>
+            <p style="margin-top: 16px">
+              <span class="hl-2">No magic. Just method.</span>
+            </p>
+          </div>
+        </div>
+        <p class="footer-note">
+          → The agent wires the <span class="hl">structure</span>: plugin,
+          message, a zero-stub so it compiles. The
+          <span class="hl-2">acoustic model stays the engineer's</span>, plugged
+          in and validated before merge.
+        </p>
+      </section>
+
+      <!-- 7. PIPELINE OVERVIEW -->
+      <section class="slide">
+        <span class="eyebrow">The method at a glance</span>
+        <h2 class="title">Five stages, <em>five agent roles.</em></h2>
+        <h3 class="sub" style="margin-top: -1.8em">
+          one possible breakdown, not a doctrine. Adapt it to your project.
+        </h3>
+
+        <div class="relay">
+          <div class="agents">
+            <div class="agent">
+              <div class="sprite-wrap">
+                <div
+                  class="sprite"
+                  data-sprite="............|...X....X...|...X....X...|..XXXXXXXX..|.XXXXXXXXXX.|XX.XXXXXX.XX|XXXXXXXXXXXX|.XX.XXXX.XX.|X.X......X.X|.X........X."
+                ></div>
+              </div>
+              <div class="role-name">Cartographer</div>
+              <div class="verb">maps</div>
+              <div class="role-desc">understands the repo</div>
+            </div>
+            <div class="agent">
+              <div class="sprite-wrap">
+                <div
+                  class="sprite"
+                  data-sprite="............|.....XX.....|....XXXX....|...XXXXXX...|..XXXXXXXX..|.XX.XXXX.XX.|XX.XXXXXX.XX|.XX.XXXX.XX.|X.X.XXXX.X.X|.X.X....X.X."
+                ></div>
+              </div>
+              <div class="role-name">Architect</div>
+              <div class="verb">plans</div>
+              <div class="role-desc">weighs 2–3 options</div>
+            </div>
+            <div class="agent">
+              <div class="sprite-wrap">
+                <div
+                  class="sprite"
+                  data-sprite="X.X......X.X|.XX......XX.|..XXXXXXXX..|.XX.XXXX.XX.|XXXXXXXXXXXX|XX.XXXXXX.XX|XXXXXXXXXXXX|.XX.XXXX.XX.|X.X......X.X|.X........X."
+                ></div>
+              </div>
+              <div class="role-name">Companion</div>
+              <div class="verb">builds</div>
+              <div class="role-desc">
+                code + tests + review, closes the loop
+              </div>
+            </div>
+            <div class="agent">
+              <div class="sprite-wrap">
+                <div
+                  class="sprite"
+                  data-sprite="............|.XX......XX.|.XXXXXXXXXX.|XX.XXXXXX.XX|XX.XXXXXX.XX|XXXXXXXXXXXX|XX.XXXXXX.XX|XX.XXXXXX.XX|.XXXXXXXXXX.|.X.X....X.X."
+                ></div>
+              </div>
+              <div class="role-name">Writer</div>
+              <div class="verb">writes docs</div>
+              <div class="role-desc">while it's still fresh</div>
+            </div>
+            <div class="agent">
+              <div class="sprite-wrap">
+                <div
+                  class="sprite"
+                  data-sprite="............|...XXXXXX...|..XXXXXXXX..|.X.XXXXXX.X.|XXXXXXXXXXXX|XX.XXXXXX.XX|XXXXXXXXXXXX|.XXX.XX.XXX.|X.X..XX..X.X|.X..XXXX..X."
+                ></div>
+              </div>
+              <div class="role-name">Reviewer</div>
+              <div class="verb">ships</div>
+              <div class="role-desc">PR, the human signs</div>
+            </div>
+          </div>
+          <div class="baton" aria-hidden="true"></div>
+        </div>
+
+        <p class="footer-note" style="margin-top: 32px">
+          → <span class="hl">One agent, five hats.</span> Not a hundred in
+          parallel. The craft is in the sequence.
+        </p>
+      </section>
+
+      <!-- 8. THE LOOP IN ACTION -->
+      <section class="slide">
+        <span class="eyebrow"
+          ><span class="loop-icon">↻</span>The method · from clone to PR in one
+          session</span
+        >
+        <h2 class="title">The loop, <em>on the sonar.</em></h2>
+
+        <div class="cols-2">
+          <div class="stack">
+            <ul class="checks">
+              <li>
+                <span class="lbl-col hl">Map</span
+                ><span class="desc-col"
+                  >the agent reads the repo, finds the closest analog (a
+                  depth-camera plugin), answers with file:line, in minutes, not
+                  days.</span
+                >
+              </li>
+              <li>
+                <span class="lbl-col hl">Plan</span
+                ><span class="desc-col"
+                  >it proposes 2–3 strategies with trade-offs.
+                  <span class="hl-2">I choose.</span></span
+                >
+              </li>
+              <li>
+                <span class="lbl-col hl">Build</span
+                ><span class="desc-col"
+                  >it runs <span class="dim">colcon</span> + the sim, reads the
+                  failure, fixes, then
+                  <span class="hl-2">closes the loop</span> itself.</span
+                >
+              </li>
+              <li>
+                <span class="lbl-col hl">Doc</span
+                ><span class="desc-col"
+                  >it writes the docs page + a notebook example while the
+                  «&nbsp;why&nbsp;» is fresh.</span
+                >
+              </li>
+              <li>
+                <span class="lbl-col hl">Ship</span
+                ><span class="desc-col"
+                  >labelled issue → fork → PR,
+                  <span class="dim">Assisted-by:</span> + I sign.</span
+                >
+              </li>
+            </ul>
+            <div class="pull" style="margin-top: 18px; max-width: 34ch">
+              Taste and system design remain the ultimate moats.
+              <span class="attr"
+                >— P. Steinberger · State of the Claw, 2026</span
+              >
+            </div>
+          </div>
+          <div class="term">
+            <div class="c">
+              # the agent drives the loop: build, run, inspect, fix
+            </div>
+            <div>
+              <span class="p">$</span> colcon build --packages-select
+              lotusim_sonar
+            </div>
+            <div class="c">Finished &lt;&lt;&lt; lotusim_sonar [12.4s]</div>
+            <br />
+            <div>
+              <span class="p">$</span> ros2 launch lotusim
+              auv_with_sonar.launch.py
+            </div>
+            <div class="c">[INFO] sonar plugin loaded · /auv/sonar @ 10 Hz</div>
+            <br />
+            <div>
+              <span class="p">$</span> ros2 topic echo /auv/sonar --once
+            </div>
+            <div class="s">header: ... ranges: [4.21, 4.18, ..., 7.92]</div>
+            <br />
+            <div>
+              <span class="p">›</span> <span class="k">add</span> a unit test
+              for the ray-cast fallback case
+            </div>
+            <div class="s">
+              → targeted patch, follows repo style · code you own and can read
+            </div>
+          </div>
+        </div>
+
+        <p class="footer-note">
+          <span class="hl-2">Local CI &gt; remote CI</span>: the agent sees the
+          failure in 12 seconds, not 10 minutes. The two human moments:
+          <span class="hl">choosing</span> (Plan) and
+          <span class="hl">signing</span> (Ship).
+        </p>
+      </section>
+
+      <!-- 9. DEMO -->
+      <section class="slide">
+        <span class="eyebrow">Demonstration</span>
+        <h2 class="title">From cloned repo to PR,<br /><em>see it run.</em></h2>
+
+        <div class="cols-2" style="margin-top: 24px; align-items: center">
+          <div class="stack">
+            <p class="lead">
+              A sped-up capture of the whole session: map the repo, choose a
+              strategy, build &amp; close the loop, write the docs, open the PR.
+            </p>
+            <p style="margin-top: 14px">
+              <span class="hl-2">The code isn't disposable.</span> It's
+              readable, tested, documented, and follows the repo's conventions.
+            </p>
+            <div style="margin-top: 8px">
+              <span class="badge hl">map</span><span class="badge">plan</span
+              ><span class="badge">build</span><span class="badge">doc</span
+              ><span class="badge">ship</span>
+            </div>
+          </div>
+
+          <div class="videoframe">
+            <div class="vf-top">
+              <span class="vf-dot"></span><span class="vf-dot"></span
+              ><span class="vf-dot"></span>
+              <span class="vf-label">session.mp4 · sped-up</span>
+            </div>
+            <div class="vf-stage">
+              <span class="playbtn" aria-hidden="true"></span>
+            </div>
+            <div class="vf-bar"><i></i></div>
+          </div>
+        </div>
+
+        <p class="footer-note">
+          → Drop the sped-up screen capture here: the full session in ~2
+          minutes.
+        </p>
+      </section>
+
+      <!-- 10. LIMITS / HONESTY -->
+      <section class="slide">
+        <span class="eyebrow">Honest limits: the price of velocity</span>
+        <h2 class="title">What I'm <em>not</em> selling you.</h2>
+
+        <div class="filler"></div>
+        <div
+          class="cols-3"
+          style="grid-template-columns: repeat(4, 1fr); margin-top: 0"
+        >
+          <div class="card warn">
+            <span class="num">!</span>
+            <h4>Govern what the agent touches</h4>
+            <p>
+              Open-source LOTUSim is public, so sharing it with an agent is
+              fine. The real risk: without clear rules, an agent pulls in
+              something that shouldn't land in a public repo. Match the guard to
+              the data, and write the rules down.
+            </p>
+          </div>
+          <div class="card warn">
+            <span class="num">!</span>
+            <h4>Hallucinations</h4>
+            <p>
+              In C++/ROS/Gazebo, the agent sometimes invents Gazebo APIs that no
+              longer exist, or confuses versions. Build + tests = mandatory
+              safety net.
+            </p>
+          </div>
+          <div class="card danger">
+            <span class="num">×</span>
+            <h4>Supervision is not optional</h4>
+            <p>
+              No «&nbsp;dark factory&nbsp;» (Steinberger). An agent that can
+              write and commit needs to be supervised like a junior dev, not as
+              a metaphor.
+            </p>
+          </div>
+          <div class="card danger">
+            <span class="num">×</span>
+            <h4>Not a substitute</h4>
+            <p>
+              AI is «&nbsp;just a tool&nbsp;» (Torvalds). Without a real
+              foundation in C++/ROS/physics, the agent helps you hit the wall
+              faster.
+            </p>
+          </div>
+        </div>
+        <div class="filler"></div>
+      </section>
+
+      <!-- 11. LOTUSIM'S HOMEWORK -->
+      <section class="slide">
+        <span class="eyebrow">What this asks of the project</span>
+        <h2 class="title">
+          An agent is only as good as<br /><em>the docs it can read.</em>
+        </h2>
+
+        <div class="cols-2" style="margin-top: 16px">
+          <div class="card" style="padding: 28px">
+            <span
+              class="eyebrow"
+              style="display: inline-flex; margin-bottom: 14px"
+              >LOTUSim today</span
+            >
+            <ul class="checks">
+              <li><span class="dim">README.md</span>: one paragraph.</li>
+              <li>
+                <span class="dim">CONTRIBUTING.md</span>: written for humans.
+              </li>
+              <li>Docs live in a wiki, not in the repo.</li>
+              <li>
+                Testing guide:
+                <span class="dim">«&nbsp;available soon&nbsp;»</span>.
+              </li>
+              <li>Nothing addressed to the agents.</li>
+            </ul>
+          </div>
+          <div class="card" style="padding: 28px">
+            <span
+              class="eyebrow"
+              style="display: inline-flex; margin-bottom: 14px"
+              >Agent-ready: the homework</span
+            >
+            <ul class="checks">
+              <li>
+                <span class="hl">AGENTS.md</span>: how to map, build, test, plus
+                the conventions.
+              </li>
+              <li>
+                <span class="hl">VISION.md</span> in the repo: the roadmap, and
+                <span class="dim">what we won't merge</span>.
+              </li>
+              <li>
+                <span class="hl">Docs-as-code</span>: same repo, same PR, same
+                review.
+              </li>
+              <li>
+                A <span class="hl">test suite + local CI</span>, so the agent
+                can close the loop itself.
+              </li>
+              <li>
+                An <span class="hl">AI-contribution policy</span> (<span
+                  class="dim"
+                  >Assisted-by</span
+                >, the human signs) with review guardrails.
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <p class="footer-note">
+          → The wall from the start,
+          <span class="hl">those implicit conventions</span>, is exactly what
+          these files write down. Lower it for humans, and you lower it for
+          agents too.
+        </p>
+      </section>
+
+      <!-- 12. CLOSE -->
+      <section class="slide">
+        <span class="eyebrow">Closing</span>
+        <h2 class="title">
+          An open simulator.<br />An <em>augmented</em> practice.
+        </h2>
+
+        <div class="cols-2" style="margin-top: 24px">
+          <div class="card" style="padding: 28px">
+            <span
+              class="eyebrow"
+              style="display: inline-flex; margin-bottom: 14px"
+              >If you contribute</span
+            >
+            <ul class="checks">
+              <li>Clone the repo.</li>
+              <li>Ask an agent to map it.</li>
+              <li>Pick an issue, or open one.</li>
+              <li>
+                Come back with a PR: <span class="dim">Assisted-by</span>, and
+                <span class="hl">you sign</span>.
+              </li>
+            </ul>
+          </div>
+          <div class="card" style="padding: 28px">
+            <span
+              class="eyebrow"
+              style="display: inline-flex; margin-bottom: 14px"
+              >The moment</span
+            >
+            <p style="font-size: 16px; line-height: 1.6; color: var(--ink)">
+              LOTUSim just went open source, and the tooling to contribute
+              cleanly is mature today: the kernel wrote the contract, OpenClaw
+              showed it scales.
+            </p>
+            <p
+              style="
+                font-size: 16px;
+                line-height: 1.6;
+                color: var(--ink);
+                margin-top: 14px;
+              "
+            >
+              The entry barrier has never been lower. The homework is known.
+              Let's make LOTUSim the project that does this right, together.
+            </p>
+          </div>
+        </div>
+
+        <p class="footer-note" style="margin-top: auto">
+          <span class="hl">Thank you.</span>
+          <span class="dim">· Questions?</span>&nbsp;&nbsp;·&nbsp;&nbsp;Cyril
+          Moron · Lead Developer, Naval Group · github.com/naval-group/LOTUSim
+        </p>
+      </section>
+
+      <div class="hud">
+        <div class="left">
+          <span class="dot"></span>
+          <span>From idea → LOTUSim contribution</span>
+        </div>
+        <div class="right">
+          <span id="counter">01 / 12</span>
+          <span>← → / space</span>
+        </div>
       </div>
+      <div class="progress"><i id="progress"></i></div>
     </div>
 
-    <p class="footer-note" style="margin-top:auto"><span class="hl">Thank you.</span> <span class="dim">· Questions?</span>&nbsp;&nbsp;·&nbsp;&nbsp;Cyril Moron · Lead Developer, Naval Group · github.com/naval-group/LOTUSim</p>
-  </section>
+    <script>
+      (function () {
+        const slides = Array.from(document.querySelectorAll(".slide"));
+        const counter = document.getElementById("counter");
+        const progress = document.getElementById("progress");
+        const deck = document.getElementById("deck");
+        let i = 0;
 
-</div>
-
-<div class="hud">
-  <div class="left">
-    <span class="dot"></span>
-    <span>From idea → LOTUSim contribution</span>
-  </div>
-  <div class="right">
-    <span id="counter">01 / 13</span>
-    <span>← → / space</span>
-  </div>
-</div>
-<div class="progress"><i id="progress"></i></div>
-
-<script>
-(function(){
-  const slides = Array.from(document.querySelectorAll('.slide'));
-  const counter = document.getElementById('counter');
-  const progress = document.getElementById('progress');
-  let i = 0;
-
-  function pad(n){ return String(n).padStart(2,'0'); }
-
-  // ── Count-up animation for .countup elements
-  function formatVal(val, format){
-    if(format === 'comma') return val.toLocaleString('en-US');
-    return String(val);
-  }
-  function animateCountUp(el){
-    const target = parseInt(el.dataset.target, 10);
-    const suffix = el.dataset.suffix || '';
-    const format = el.dataset.format || 'plain';
-    const duration = Math.max(1000, Math.min(1800, 600 + target / 4));
-    const start = performance.now();
-    function tick(now){
-      const t = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
-      const val = Math.round(target * eased);
-      el.textContent = formatVal(val, format) + suffix;
-      if(t < 1) requestAnimationFrame(tick);
-    }
-    el.textContent = formatVal(0, format) + suffix;
-    requestAnimationFrame(tick);
-  }
-  function triggerCountUps(slide){
-    const list = slide.querySelectorAll('.countup');
-    list.forEach(el => {
-      // Small delay so it kicks in after the slide settles
-      setTimeout(() => animateCountUp(el), 250);
-    });
-  }
-
-  // ── Pixel sprite generation
-  // Converts a string-encoded bitmap (e.g. "..XX..|XXXX..") into an SVG.
-  // Compresses contiguous "X" runs in each row into single <rect>s.
-  function spriteToSVG(str){
-    const rows = str.split('|');
-    const w = rows[0].length;
-    const h = rows.length;
-    let rects = '';
-    for(let y=0; y<h; y++){
-      let runStart = -1;
-      for(let x=0; x<=w; x++){
-        const isOn = x<w && rows[y][x]==='X';
-        if(isOn && runStart===-1){
-          runStart = x;
-        } else if(!isOn && runStart!==-1){
-          rects += '<rect x="'+runStart+'" y="'+y+'" width="'+(x-runStart)+'" height="1"/>';
-          runStart = -1;
+        // ── Fixed 1920×1080 stage, scaled to fit the viewport (letterboxed).
+        // What you author at 1920×1080 is exactly what projects.
+        function fitStage() {
+          const s = Math.min(
+            window.innerWidth / 1920,
+            window.innerHeight / 1080,
+          );
+          deck.style.setProperty("--scale", s);
         }
-      }
-    }
-    return '<svg viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="xMidYMid meet" shape-rendering="crispEdges" fill="currentColor">'+rects+'</svg>';
-  }
-  function setupSprites(){
-    document.querySelectorAll('.sprite[data-sprite]').forEach(el => {
-      el.innerHTML = spriteToSVG(el.dataset.sprite);
-    });
-  }
+        window.addEventListener("resize", fitStage);
 
-  // ── Card stagger — set custom delays based on order
-  function setupCardDelays(){
-    document.querySelectorAll('.cols-3, .cols-2').forEach(grid => {
-      let cardIdx = 0;
-      Array.from(grid.children).forEach(child => {
-        if(child.classList.contains('card')){
-          child.style.setProperty('--card-delay', (0.15 + cardIdx * 0.09) + 's');
-          cardIdx++;
+        function pad(n) {
+          return String(n).padStart(2, "0");
         }
-      });
-    });
-  }
 
-  function render(){
-    slides.forEach((s,k)=>s.classList.toggle('is-active', k===i));
-    counter.textContent = pad(i+1) + ' / ' + pad(slides.length);
-    progress.style.width = ((i+1)/slides.length*100) + '%';
-    location.hash = '#'+(i+1);
-    triggerCountUps(slides[i]);
-  }
-  function go(n){
-    i = Math.max(0, Math.min(slides.length-1, n));
-    render();
-  }
-  function next(){ go(i+1); }
-  function prev(){ go(i-1); }
+        // ── Count-up animation for .countup elements
+        function formatVal(val, format) {
+          if (format === "comma") return val.toLocaleString("en-US");
+          return String(val);
+        }
+        function animateCountUp(el) {
+          const target = parseInt(el.dataset.target, 10);
+          const suffix = el.dataset.suffix || "";
+          const format = el.dataset.format || "plain";
+          const duration = Math.max(1000, Math.min(1800, 600 + target / 4));
+          const start = performance.now();
+          function tick(now) {
+            const t = Math.min(1, (now - start) / duration);
+            const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+            const val = Math.round(target * eased);
+            el.textContent = formatVal(val, format) + suffix;
+            if (t < 1) requestAnimationFrame(tick);
+          }
+          el.textContent = formatVal(0, format) + suffix;
+          requestAnimationFrame(tick);
+        }
+        function triggerCountUps(slide) {
+          const list = slide.querySelectorAll(".countup");
+          list.forEach((el) => {
+            // Small delay so it kicks in after the slide settles
+            setTimeout(() => animateCountUp(el), 250);
+          });
+        }
 
-  document.addEventListener('keydown', e=>{
-    if(['ArrowRight','PageDown',' '].includes(e.key)){ e.preventDefault(); next(); }
-    else if(['ArrowLeft','PageUp'].includes(e.key)){ e.preventDefault(); prev(); }
-    else if(e.key==='Home'){ go(0); }
-    else if(e.key==='End'){ go(slides.length-1); }
-    else if(e.key==='f' || e.key==='F'){
-      if(!document.fullscreenElement) document.documentElement.requestFullscreen();
-      else document.exitFullscreen();
-    }
-    else if(e.key==='t' || e.key==='T'){ document.body.classList.toggle('theme-ng'); }
-  });
+        // ── Pixel sprite generation
+        // Converts a string-encoded bitmap (e.g. "..XX..|XXXX..") into an SVG.
+        // Compresses contiguous "X" runs in each row into single <rect>s.
+        function spriteToSVG(str) {
+          const rows = str.split("|");
+          const w = rows[0].length;
+          const h = rows.length;
+          let rects = "";
+          for (let y = 0; y < h; y++) {
+            let runStart = -1;
+            for (let x = 0; x <= w; x++) {
+              const isOn = x < w && rows[y][x] === "X";
+              if (isOn && runStart === -1) {
+                runStart = x;
+              } else if (!isOn && runStart !== -1) {
+                rects +=
+                  '<rect x="' +
+                  runStart +
+                  '" y="' +
+                  y +
+                  '" width="' +
+                  (x - runStart) +
+                  '" height="1"/>';
+                runStart = -1;
+              }
+            }
+          }
+          return (
+            '<svg viewBox="0 0 ' +
+            w +
+            " " +
+            h +
+            '" preserveAspectRatio="xMidYMid meet" shape-rendering="crispEdges" fill="currentColor">' +
+            rects +
+            "</svg>"
+          );
+        }
+        function setupSprites() {
+          document.querySelectorAll(".sprite[data-sprite]").forEach((el) => {
+            el.innerHTML = spriteToSVG(el.dataset.sprite);
+          });
+        }
 
-  document.getElementById('deck').addEventListener('click', e=>{
-    if(e.target.closest('a,button,input')) return;
-    next();
-  });
+        // ── Card stagger — set custom delays based on order
+        function setupCardDelays() {
+          document.querySelectorAll(".cols-3, .cols-2").forEach((grid) => {
+            let cardIdx = 0;
+            Array.from(grid.children).forEach((child) => {
+              if (child.classList.contains("card")) {
+                child.style.setProperty(
+                  "--card-delay",
+                  0.15 + cardIdx * 0.09 + "s",
+                );
+                cardIdx++;
+              }
+            });
+          });
+        }
 
-  // Deep-link / browser back-forward: respond to hash changes
-  window.addEventListener('hashchange', ()=>{
-    const n = parseInt((location.hash||'').replace('#',''),10);
-    if(!isNaN(n) && n>=1 && n<=slides.length && (n-1)!==i) go(n-1);
-  });
+        function render() {
+          slides.forEach((s, k) => s.classList.toggle("is-active", k === i));
+          counter.textContent = pad(i + 1) + " / " + pad(slides.length);
+          progress.style.width = ((i + 1) / slides.length) * 100 + "%";
+          location.hash = "#" + (i + 1);
+          triggerCountUps(slides[i]);
+        }
+        function go(n) {
+          i = Math.max(0, Math.min(slides.length - 1, n));
+          render();
+        }
+        function next() {
+          go(i + 1);
+        }
+        function prev() {
+          go(i - 1);
+        }
 
-  setupSprites();
-  setupCardDelays();
+        document.addEventListener("keydown", (e) => {
+          if (["ArrowRight", "PageDown", " "].includes(e.key)) {
+            e.preventDefault();
+            next();
+          } else if (["ArrowLeft", "PageUp"].includes(e.key)) {
+            e.preventDefault();
+            prev();
+          } else if (e.key === "Home") {
+            go(0);
+          } else if (e.key === "End") {
+            go(slides.length - 1);
+          } else if (e.key === "f" || e.key === "F") {
+            if (!document.fullscreenElement)
+              document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+          } else if (e.key === "t" || e.key === "T") {
+            document.body.classList.toggle("theme-ng");
+          }
+        });
 
-  // ── Naval Group theme: apply on load if ?theme=ng is present
-  if(new URLSearchParams(location.search).get('theme') === 'ng'){
-    document.body.classList.add('theme-ng');
-  }
+        document.getElementById("deck").addEventListener("click", (e) => {
+          if (e.target.closest("a,button,input")) return;
+          next();
+        });
 
-  const h = parseInt((location.hash||'').replace('#',''),10);
-  if(!isNaN(h) && h>=1 && h<=slides.length) i = h-1;
-  render();
-})();
-</script>
-</body>
+        // Deep-link / browser back-forward: respond to hash changes
+        window.addEventListener("hashchange", () => {
+          const n = parseInt((location.hash || "").replace("#", ""), 10);
+          if (!isNaN(n) && n >= 1 && n <= slides.length && n - 1 !== i)
+            go(n - 1);
+        });
+
+        setupSprites();
+        setupCardDelays();
+        fitStage();
+
+        // ── Naval Group theme: apply on load if ?theme=ng is present
+        if (new URLSearchParams(location.search).get("theme") === "ng") {
+          document.body.classList.add("theme-ng");
+        }
+
+        const h = parseInt((location.hash || "").replace("#", ""), 10);
+        if (!isNaN(h) && h >= 1 && h <= slides.length) i = h - 1;
+        render();
+      })();
+    </script>
+  </body>
 </html>

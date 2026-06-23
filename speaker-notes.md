@@ -16,7 +16,7 @@
 ---
 
 ## 1 · Cover  *(0:45)*
-- One line about me: *"I'm Cyril, lead developer of LOTUSim."*
+- One line about me: *"I'm Cyril, lead developer for Naval Group."*
 - **Say:** *"In the next fifteen minutes: how AI agents bring down the entry barrier of a ROS / Gazebo / Xdyn simulator — and what the project has to do in return."*
 - Announce: *"One method, one demo, and some homework — including mine."*
 
