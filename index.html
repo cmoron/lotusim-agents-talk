@@ -1303,7 +1303,7 @@
               </svg>
               <span class="meta">Cyril Moron · Lead Developer</span>
             </div>
-            <span class="meta">02/07/2026 · LOTUSim Technical Conference</span>
+            <span class="meta">2 July 2026 · LOTUSim Technical Conference</span>
           </div>
         </div>
       </section>
@@ -1453,25 +1453,24 @@
             <ul class="checks">
               <li>
                 <span
-                  ><span class="hl">Models good at tool calling.</span> With
-                  <span class="dim">Opus 4.5, GPT-5.2</span>, multi-step tool
-                  chains finally stay on track.</span
+                  ><span class="hl">Models good at tool calling.</span>
+                  <span class="dim">Opus 4.5, GPT-5.2</span>: multi-step tool
+                  chains stay on track.</span
                 >
               </li>
               <li>
                 <span
-                  ><span class="hl">Long context windows.</span> A full codebase
-                  + docs + conventions fits in one shot, no more lossy
+                  ><span class="hl">Long context windows.</span> A whole
+                  codebase + docs + conventions in one shot, no lossy
                   summaries.</span
                 >
               </li>
               <li>
                 <span
-                  ><span class="hl">Sustained autonomy.</span> What holds a task
-                  together over hours isn't a bigger prompt. It's the agentic
-                  loop:
+                  ><span class="hl">Sustained autonomy.</span> Not a bigger
+                  prompt: the agentic loop,
                   <span class="hl-2">map → build → run → test → review</span>,
-                  repeated until it's green.</span
+                  until green.</span
                 >
               </li>
             </ul>
@@ -2090,37 +2089,35 @@
               <li>
                 <span class="lbl-col hl">Map</span
                 ><span class="desc-col"
-                  >the agent reads the repo, finds the closest analog (a
-                  depth-camera plugin), answers with file:line, in minutes, not
-                  days.</span
+                  >closest analog (a depth-camera plugin), answered in
+                  file:line. Minutes, not days.</span
                 >
               </li>
               <li>
                 <span class="lbl-col hl">Plan</span
                 ><span class="desc-col"
-                  >it proposes 2–3 strategies with trade-offs.
+                  >2–3 strategies, trade-offs.
                   <span class="hl-2">I choose.</span></span
                 >
               </li>
               <li>
                 <span class="lbl-col hl">Build</span
                 ><span class="desc-col"
-                  >it runs <span class="dim">colcon</span> + the sim, reads the
-                  failure, fixes, then
-                  <span class="hl-2">closes the loop</span> itself.</span
+                  ><span class="dim">colcon</span> + sim, reads the failure,
+                  fixes, <span class="hl-2">closes the loop</span> itself.</span
                 >
               </li>
               <li>
                 <span class="lbl-col hl">Doc</span
                 ><span class="desc-col"
-                  >it writes the docs page + a notebook example while the
-                  «&nbsp;why&nbsp;» is fresh.</span
+                  >docs page + notebook, while the «&nbsp;why&nbsp;» is
+                  fresh.</span
                 >
               </li>
               <li>
                 <span class="lbl-col hl">Ship</span
                 ><span class="desc-col"
-                  >labelled issue → fork → PR,
+                  >issue → fork → PR.
                   <span class="dim">Assisted-by:</span> + I sign.</span
                 >
               </li>
@@ -2164,9 +2161,9 @@
         </div>
 
         <p class="footer-note">
-          <span class="hl-2">Local CI &gt; remote CI</span>: the agent sees the
-          failure in 12 seconds, not 10 minutes. The two human moments:
-          <span class="hl">choosing</span> (Plan) and
+          <span class="hl-2">Local CI first</span>: failure in 12 s, not 10 min
+          (remote CI still gates). Two human moments:
+          <span class="hl">choosing</span> (Plan),
           <span class="hl">signing</span> (Ship).
         </p>
       </section>
@@ -2181,6 +2178,10 @@
             <p class="lead">
               A sped-up capture of the whole session: map the repo, choose a
               strategy, build &amp; close the loop, write the docs, open the PR.
+            </p>
+            <p style="margin-top: 14px">
+              Recorded on the repo <span class="hl">as it is today</span>: no
+              AGENTS.md, no prepared context.
             </p>
             <p style="margin-top: 14px">
               <span class="hl-2">The code isn't disposable.</span> It's
@@ -2282,7 +2283,7 @@
               <li>
                 <span class="dim">CONTRIBUTING.md</span>: written for humans.
               </li>
-              <li>Docs live in a wiki, not in the repo.</li>
+              <li>Docs in a wiki, not the repo.</li>
               <li>
                 Testing guide:
                 <span class="dim">«&nbsp;available soon&nbsp;»</span>.
@@ -2298,11 +2299,11 @@
             >
             <ul class="checks">
               <li>
-                <span class="hl">AGENTS.md</span>: how to map, build, test, plus
-                the conventions.
+                <span class="hl">AGENTS.md</span>: map, build, test,
+                conventions.
               </li>
               <li>
-                <span class="hl">VISION.md</span> in the repo: the roadmap, and
+                <span class="hl">VISION.md</span> in the repo: roadmap, and
                 <span class="dim">what we won't merge</span>.
               </li>
               <li>
@@ -2310,14 +2311,17 @@
                 review.
               </li>
               <li>
-                A <span class="hl">test suite + local CI</span>, so the agent
-                can close the loop itself.
+                A <span class="hl">test suite + local CI</span>: the agent
+                closes the loop itself.
               </li>
               <li>
-                An <span class="hl">AI-contribution policy</span> (<span
-                  class="dim"
-                  >Assisted-by</span
-                >, the human signs) with review guardrails.
+                <span class="hl">SECURITY.md</span>: report a vulnerability,
+                before contributions scale.
+              </li>
+              <li>
+                An <span class="hl">AI-contribution policy</span>:
+                <span class="dim">Assisted-by</span>, the human signs, with
+                guardrails.
               </li>
             </ul>
           </div>
@@ -2325,9 +2329,8 @@
 
         <p class="footer-note">
           → The wall from the start,
-          <span class="hl">those implicit conventions</span>, is exactly what
-          these files write down. Lower it for humans, and you lower it for
-          agents too.
+          <span class="hl">those implicit conventions</span>, is what these
+          files write down. Lower it for humans, you lower it for agents too.
         </p>
       </section>
 
