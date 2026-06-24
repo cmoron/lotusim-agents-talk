@@ -14,6 +14,15 @@ python -m http.server 8000   # then open http://localhost:8000
 
 Or open `index.html` directly in a browser.
 
+## Visual check (before claiming a slide change works)
+
+The deck is projected at **1920×1080** — verify there, in **both themes**, before saying a change is done:
+
+1. **Serve it** (`python -m http.server 8000`): a `file://` URL is **blocked** in Playwright/Chromium.
+2. **Deep-link a slide** via the hash, e.g. `localhost:8000/index.html#7`. ⚠️ Re-navigating to the **same URL doesn't reload** (hash-only change) — add a cache-buster: `?v=2#7`.
+3. **Resize to 1920×1080**, screenshot, and check **both themes** (white `theme-ng` is the default; press `t` for the dark one).
+4. For layout doubts (centering, overflow), **measure with `getBoundingClientRect()`** instead of eyeballing a scaled screenshot — e.g. the footer centering fix (`align-self: center`) was invisible to a glance but obvious from the box (width 893, anchored left at the 120px padding, not full-width).
+
 ## Architecture
 
 Everything lives in `index.html` (~2560 lines): CSS in `<style>`, slides as `<section class="slide">`, navigation logic in the trailing `<script>` IIFE. The deck was **reworked for 1080p projection** (2026-06-24, commit `98cab43`): **13 → 12 slides**, bigger/lighter, kernel+OpenClaw merged. See *Current state (2026-06-24)*.
