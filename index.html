@@ -644,16 +644,31 @@
         color: var(--accent);
         line-height: 1.2;
       }
+      .answer-points {
+        margin: 2px 0;
+      }
+      .answer-points p {
+        margin: 0;
+        padding: 12px 0;
+        border-bottom: 1px dashed var(--rule);
+        line-height: 1.5;
+      }
+      .answer-points p:last-of-type {
+        border-bottom: none;
+      }
 
       .filler {
         flex: 1;
       }
       .footer-note {
         margin-top: auto;
-        font-size: 15px;
-        color: var(--ink-dim);
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
+        align-self: center;
+        max-width: 70ch;
+        font-size: 24px;
+        color: var(--ink);
+        letter-spacing: 0;
+        text-transform: none;
+        text-align: center;
       }
       hr.rule {
         border: none;
@@ -1257,7 +1272,7 @@
       }
     </style>
   </head>
-  <body>
+  <body class="theme-ng">
     <div class="deck" id="deck">
       <!-- 1. COVER -->
       <section class="slide is-active">
@@ -1341,7 +1356,7 @@
           </div>
         </div>
         <p class="footer-note">
-          → Many good ideas die between
+          Many good ideas die between
           <span class="hl">«&nbsp;I want to contribute&nbsp;»</span> and
           <span class="hl">«&nbsp;my PR is ready&nbsp;»</span>.
         </p>
@@ -1425,17 +1440,7 @@
           </div>
         </div>
 
-        <p
-          class="footer-note"
-          style="
-            margin-top: auto;
-            text-align: center;
-            font-size: 24px;
-            letter-spacing: 0;
-            text-transform: none;
-            color: var(--ink);
-          "
-        >
+        <p class="footer-note">
           <span class="hl-2">The second kind</span> of agent helps you build
           <span class="hl">the first</span>.
         </p>
@@ -1499,24 +1504,14 @@
             <div class="c">→ readable first draft, ready to challenge</div>
           </div>
         </div>
-        <p
-          class="footer-note"
-          style="
-            margin-top: auto;
-            text-align: center;
-            font-size: 24px;
-            letter-spacing: 0;
-            text-transform: none;
-            color: var(--ink);
-          "
-        >
+        <p class="footer-note">
           An agent can write code. So:
           <span class="hl"
             >how do we handle agent-assisted contributions, responsibly?</span
           >
         </p>
         <p class="footer-note" style="margin-top: 12px; text-align: center">
-          → Two communities already answered.
+          Two communities already answered.
         </p>
       </section>
 
@@ -1824,18 +1819,17 @@
                 <span class="answer-tag">the most conservative community</span>
               </span>
             </div>
-            <ul class="checks">
-              <li>
+            <div class="answer-points">
+              <p>
                 A policy written <span class="hl">for the agents</span>:
                 <span class="dim">coding-assistants.rst</span>.
-              </li>
-              <li>
+              </p>
+              <p>
                 <span class="hl"
                   >«&nbsp;AI agents MUST NOT add Signed-off-by&nbsp;»</span
-                >
-                only a human certifies the DCO.
-              </li>
-            </ul>
+                >: only a human certifies the DCO.
+              </p>
+            </div>
             <div class="takeaway">Yes, if a human owns every line.</div>
           </div>
 
@@ -1900,17 +1894,17 @@
                 >
               </span>
             </div>
-            <ul class="checks">
-              <li>
+            <div class="answer-points">
+              <p>
                 Wrote it down for the agents:
                 <span class="hl">VISION.md</span> +
                 <span class="hl">AGENTS.md</span>, in the repo.
-              </li>
-              <li>
+              </p>
+              <p>
                 Every PR: <span class="hl">real-behavior proof</span>, a human
                 signs the merge.
-              </li>
-            </ul>
+              </p>
+            </div>
             <div class="takeaway">
               The human is still the bottleneck, on purpose.
             </div>
@@ -1925,11 +1919,8 @@
           >
         </div>
         <p class="footer-note">
-          →
-          <span class="hl"
-            >An agent is only as good as the docs and the rules you give
-            it.</span
-          >
+          An agent is only as good as
+          <span class="hl">the docs and the rules</span> you give it.
         </p>
       </section>
 
@@ -1991,7 +1982,7 @@
           </div>
         </div>
         <p class="footer-note">
-          → The agent wires the <span class="hl">structure</span>: plugin,
+          The agent wires the <span class="hl">structure</span>: plugin,
           message, a zero-stub so it compiles. The
           <span class="hl-2">acoustic model stays the engineer's</span>, plugged
           in and validated before merge.
@@ -2070,7 +2061,7 @@
         </div>
 
         <p class="footer-note" style="margin-top: 32px">
-          → <span class="hl">One agent, five hats.</span> Not a hundred in
+          <span class="hl">One agent, five hats.</span> Not a hundred in
           parallel. The craft is in the sequence.
         </p>
       </section>
@@ -2208,7 +2199,7 @@
         </div>
 
         <p class="footer-note">
-          → Drop the sped-up screen capture here: the full session in ~2
+          Drop the sped-up screen capture here: the full session in ~2
           minutes.
         </p>
       </section>
@@ -2328,7 +2319,7 @@
         </div>
 
         <p class="footer-note">
-          → The wall from the start,
+          The wall from the start,
           <span class="hl">those implicit conventions</span>, is what these
           files write down. Lower it for humans, you lower it for agents too.
         </p>
