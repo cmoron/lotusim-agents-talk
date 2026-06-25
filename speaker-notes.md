@@ -104,7 +104,7 @@
 - **Supervision is not optional** — supervise it like a junior dev. No "dark factory".
 - **Software wall ≠ domain wall** (this is the lesson the sailboat taught us): *"AI drops the software wall in hours — install, launch, a first feature, even a first bugfix. The domain wall stays: the environment and the vessel physics need real naval expertise. Without it, the agent just gets you to that wall faster."* This ties straight back to the slide-6 honesty beat (the physics model stays the engineer's).
 
-## 11 · LOTUSim's homework  *(1:30)* — the governance message, I own this
+## 11 · LOTUSim's homework  *(1:30)* — the governance message, I'll champion this (as a contributor, not the maintainer)
 - This is the second target. Say it plainly: *"This isn't only on you. The project has homework too — and today it isn't done."*
 - Left = today (README is one paragraph; docs in a wiki; nothing for the agents). Right = the homework (AGENTS.md, in-repo VISION, docs-as-code, test suite + local CI, SECURITY.md, an AI-contribution policy).
 - On SECURITY.md, one line, no dwelling: *"And a clear way to report vulnerabilities — set up before the volume arrives, not after. That's the one lesson OpenClaw learned the hard way."*
@@ -112,7 +112,7 @@
 
 ## 12 · Close  *(1:00)*
 - **Say (verbatim):** *"An open simulator. An augmented practice."*
-- Two columns: *"If you contribute"* (clone, ask an agent, pick an issue, PR with Assisted-by — you sign) / *"What the project will do"* (AGENTS.md, in-repo VISION, an AI policy — **my commitment, as lead dev**).
+- Two columns: *"If you contribute"* (clone, ask an agent, pick an issue, PR with Assisted-by — you sign) / *"What the project will do"* (AGENTS.md, in-repo VISION, an AI policy — **what I'll push for and contribute myself**, as a Naval Group developer; I'm not the LOTUSim maintainer, so frame it as a contribution + a call, not a unilateral roadmap).
 - One forward nod for the obvious question: *"And yes — agents can also generate simulation scenarios. That's business-typed agents, a different talk. Happy to discuss it after."*
 - *"Thank you. Questions?"*
 

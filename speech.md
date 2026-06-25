@@ -16,7 +16,7 @@
 
 ## 1 · Cover *(0:45)*
 
-Good morning, everyone. / My name is Cyril Moron. / I am the lead developer of LOTUSim.
+Good morning, everyone. / My name is Cyril Moron. / I am a lead developer at Naval Group.
 
 In the next fifteen minutes, I want to show you one thing: / how AI agents bring down the entry barrier of our simulator — / a simulator built on ROS, Gazebo, and Xdyn. /
 
@@ -214,7 +214,7 @@ So let me close. / An open simulator. / An augmented practice. /
 
 If you contribute: / clone the repo, / ask an agent to map it, / pick an issue, / and come back with a pull request. / Assisted-by — / and you sign. /
 
-And the project's side — / this is my commitment, as lead developer: / an agents file, a vision in the repo, / and a clear AI policy. / I will do that work. /
+And the project's side — / here is what I will push for, / and contribute myself: / an agents file, a vision in the repo, / and a clear AI policy. / I will bring that work to the table. /
 
 I want LOTUSim to be an example / of how an open project welcomes agents — / cleanly, / and with the human in charge. /
 
