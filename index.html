@@ -1493,7 +1493,7 @@
             <br />
             <div>
               <span class="p">$</span> claude
-              <span class="k">"propose 2 ways to add a sonar to the AUV"</span>
+              <span class="k">"propose 2 ways to add an RC sailboat to LOTUSim"</span>
             </div>
             <div class="c">→ two strategies, explicit trade-offs</div>
             <br />
@@ -1930,34 +1930,34 @@
           >Back to LOTUSim · the scenario we'll walk through</span
         >
         <h2 class="title">
-          Adding a <em>sonar sensor</em><br />to an underwater platform.
+          Adding an <em>RC sailboat</em><br />that rounds a race buoy.
         </h2>
 
         <div class="cols-2" style="margin-top: 16px">
           <div class="stack">
             <p class="lead">
-              Credible case. Deliberately non-trivial.<br />
-              Enough to touch the whole stack:
+              A real feature, end to end. Non-trivial on purpose:<br />
+              it touches the whole stack:
             </p>
             <ul class="checks">
               <li>
-                <span class="hl">physics/</span>: simplified acoustic
-                propagation model,
+                <span class="hl">physics/</span>: a 6-DOF hydro/aero model
+                (sail, keel, rudder),
               </li>
               <li>
-                <span class="hl">systems/</span>: Gazebo plugin that publishes
-                on ROS,
+                <span class="hl">systems/</span>: engine glue for
+                angle-commanded control surfaces,
               </li>
               <li>
-                <span class="hl">interfaces/</span>: a new
-                <span class="dim">SonarPing.msg</span>,
+                <span class="hl">assets/</span>: the boat model and its
+                <span class="dim">mesh</span>,
               </li>
               <li>
-                <span class="hl">launch/</span>: demo scenario with the equipped
-                AUV,
+                <span class="hl">worlds/</span>: a buoy-rounding scenario with a
+                closed-loop helmsman,
               </li>
               <li>
-                <span class="hl">docs/</span>: the spec page and usage example.
+                <span class="hl">docs/</span>: the spec page and how to run it.
               </li>
             </ul>
           </div>
@@ -1982,10 +1982,10 @@
           </div>
         </div>
         <p class="footer-note">
-          The agent wires the <span class="hl">structure</span>: plugin,
-          message, a zero-stub so it compiles. The
-          <span class="hl-2">acoustic model stays the engineer's</span>, plugged
-          in and validated before merge.
+          The agent wires the <span class="hl">structure</span>: the model
+          skeleton, the engine glue, the scenario. The
+          <span class="hl-2">hydro/aero model stays the naval engineer's</span>,
+          plugged in and validated before merge.
         </p>
       </section>
 
@@ -2072,7 +2072,7 @@
           ><span class="loop-icon">↻</span>The method · from clone to PR in one
           session</span
         >
-        <h2 class="title">The loop, <em>on the sonar.</em></h2>
+        <h2 class="title">The loop, <em>on the sailboat.</em></h2>
 
         <div class="cols-2">
           <div class="stack">
@@ -2080,7 +2080,7 @@
               <li>
                 <span class="lbl-col hl">Map</span
                 ><span class="desc-col"
-                  >closest analog (a depth-camera plugin), answered in
+                  >closest analog (an existing vessel model), answered in
                   file:line. Minutes, not days.</span
                 >
               </li>
@@ -2126,24 +2126,28 @@
             </div>
             <div>
               <span class="p">$</span> colcon build --packages-select
-              lotusim_sonar
+              physics_engine_interface
             </div>
-            <div class="c">Finished &lt;&lt;&lt; lotusim_sonar [12.4s]</div>
+            <div class="c">
+              Finished &lt;&lt;&lt; physics_engine_interface [38.2s]
+            </div>
             <br />
             <div>
-              <span class="p">$</span> ros2 launch lotusim
-              auv_with_sonar.launch.py
+              <span class="p">$</span> lotusim run --gui focus_v2_demo.world
             </div>
-            <div class="c">[INFO] sonar plugin loaded · /auv/sonar @ 10 Hz</div>
+            <div class="c">
+              [INFO] focus_v2 · xdyn co-sim up @ ws://127.0.0.1:12345
+            </div>
             <br />
             <div>
-              <span class="p">$</span> ros2 topic echo /auv/sonar --once
+              <span class="p">$</span> python3 ctrl_course.py
+              <span class="c"># closed-loop helmsman</span>
             </div>
-            <div class="s">header: ... ranges: [4.21, 4.18, ..., 7.92]</div>
+            <div class="s">[INFO] rounds the mark · closest 1.10 m</div>
             <br />
             <div>
               <span class="p">›</span> <span class="k">add</span> a unit test
-              for the ray-cast fallback case
+              for the control-surface command mapping
             </div>
             <div class="s">
               → targeted patch, follows repo style · code you own and can read
@@ -2168,7 +2172,8 @@
           <div class="stack">
             <p class="lead">
               A sped-up capture of the whole session: map the repo, choose a
-              strategy, build &amp; close the loop, write the docs, open the PR.
+              strategy, build &amp; close the loop, write the docs, open the PR,
+              until a <span class="hl">sailboat rounds a buoy</span> in LOTUSim.
             </p>
             <p style="margin-top: 14px">
               Recorded on the repo <span class="hl">as it is today</span>: no
@@ -2244,11 +2249,13 @@
           </div>
           <div class="card danger">
             <span class="num">×</span>
-            <h4>Not a substitute</h4>
+            <h4>Software wall ≠ domain wall</h4>
             <p>
-              AI is «&nbsp;just a tool&nbsp;» (Torvalds). Without a real
-              foundation in C++/ROS/physics, the agent helps you hit the wall
-              faster.
+              AI drops the <span class="hl-2">software</span> wall in hours:
+              install, launch, first feature, first bugfix. The
+              <span class="hl-2">domain</span> wall stays, environment and vessel
+              physics need real naval expertise. Without it, the agent only gets
+              you to that wall faster.
             </p>
           </div>
         </div>

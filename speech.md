@@ -4,6 +4,7 @@
 > This is a **word-for-word script**, written to be read out loud. Short sentences. Simple words. Easy to pronounce.
 > **[Square brackets] = delivery cues, not spoken.** A slash `/` marks a good place to breathe.
 > Aim for a calm, steady pace — about 120 words a minute. Slower is better than faster.
+> **12 slides** (the Linux kernel and OpenClaw share one slide). Slide numbers below match the deck.
 
 **Golden rules for the day**
 - One idea per breath. Stop at every period.
@@ -82,61 +83,43 @@ Two communities have already answered it. / Let's look at them.
 
 ---
 
-## 5 · The Linux kernel *(1:15)*
+## 5 · Industry — two answers *(2:30)*
 
-The first answer comes from the Linux kernel. /
+[The pivot from "the question" to "the answers". Two communities, side by side on one slide. Take your time — this is the proof. Point left, then right.]
 
-The most conservative community in open source. / They did not panic, and they did not ban it. / They took the time to think, / and they wrote an answer. /
+Two communities already answered that question. / Very different communities. / The same answer underneath. /
 
-It is a real document, in the repository. / And here is the interesting part: / it is addressed to the agents / and to the people who run them. /
+[Point at the left column.] First, the Linux kernel. / The most conservative community in open source. / They did not panic, and they did not ban it. / They took the time to think, / and they wrote a real document, in the repository, / addressed to the agents / and to the people who run them. /
 
-There is one line that does not move. / [Read it slowly.] "AI agents must not add Signed-off-by." / Only a human can certify the contribution. /
+There is one line that does not move. / [Read it slowly.] "AI agents must not add Signed-off-by." / Only a human can certify the contribution. / [Verbatim:] So their answer was yes — / under one condition: / the human who signs / answers for every line. /
 
-[Verbatim:] So their answer was yes — / under one condition. / The human who signs / answers for every line. /
+[Point at the right column.] Second, OpenClaw. / The opposite temperament. / The fastest-growing open-source project in GitHub history, / built agent-first, / about three hundred and seventy-six thousand stars. /
 
-[If someone pushes later, in questions: documentation alone does not fix bad code. Accountability does. Keep that for the Q&A.]
+But the numbers are not the lesson. / The lesson is what they wrote down for the agents: / a vision file — what to build, and what to refuse — / and an agents file — how to build and test, right in the repo. / And the guardrails are human: / every pull request needs real-behavior proof, / and a human signs the merge. /
 
----
+[The scale — say it as an aside, and be precise: this is Steinberger himself, not the project.] To get there, Steinberger himself / runs around a hundred agents in parallel. / About one point three million dollars of tokens, / in a single month, / funded by OpenAI. / A hundred agents — / and the human is still the bottleneck. / On purpose. /
 
-## 6 · OpenClaw *(1:30)*
-
-The second answer is very different. /
-
-This is OpenClaw, from Peter Steinberger. / It was built agent-first, from end to end. / Today it is the fastest-growing open-source project in GitHub history. /
-
-[Point at the numbers on the right.] Three hundred and seventy-six thousand stars. / Fifty-six thousand commits. / In about a year, mostly written by agents. /
-
-But the numbers are not the lesson. / The lesson is what they wrote down for the agents. /
-
-A vision file: / what to build, / and what to refuse. / And an agents file: / how to map, build, and test, right in the repo. /
-
-And the guardrails are human. / Every pull request needs real-behavior proof. / More than twenty-eight humans sign the merge. /
-
-[The scale — say it as an aside, and be precise: this is Steinberger himself, not the project.] To get there, Steinberger himself / runs around a hundred agents in parallel. / About one point three million dollars of tokens, / in a single month, / funded by OpenAI. /
-
-[Verbatim — this is the seed for the end:] An agent is only as good / as the docs and the rules you give it. /
-
-A hundred agents — / and the human is still the bottleneck. / On purpose.
+[Verbatim — this is the seed for the end:] An agent is only as good / as the docs and the rules you give it.
 
 ---
 
-## 7 · Scenario — the sonar *(1:00)*
+## 6 · Scenario — the sailboat *(1:00)*
 
 Now let's bring this home, to LOTUSim. / We want the best of both: / the kernel's contract, / and OpenClaw's discipline. /
 
-Let's make it concrete. / We want to add a sonar sensor / to an underwater platform. /
+Let's make it concrete, / with something real. / We want to add a small RC sailboat / and make it round a race buoy. /
 
-I chose this on purpose. It is not trivial. / It touches the whole stack: / the physics, a Gazebo plugin, a new ROS message, a launch scenario, and the docs. /
+I chose this on purpose. It is not trivial. / It touches the whole stack: / the boat physics, the engine, / the model and its mesh, a scenario, and the docs. /
 
 And let me be honest about the physics, / because there are engineers in this room. /
 
-[Verbatim:] The agent writes the skeleton, the ROS message, / and a zero-stub, so the simulator compiles. / The acoustic model stays yours. / You plug it in, / and it is validated before the merge. /
+[Verbatim:] The agent writes the structure: / the model skeleton, the engine glue, the scenario. / The hydro and aero model stays yours. / You plug it in, / and it is validated before the merge. /
 
 The goal: / from zero knowledge of the repo, / to a pull request ready for review, / in one work session.
 
 ---
 
-## 8 · The relay — five roles *(0:45)*
+## 7 · The relay — five roles *(0:45)*
 
 [Let the animation play. Point at it. Do not over-explain.]
 
@@ -150,17 +133,20 @@ This is one possible breakdown. / Adapt it to your own project.
 
 ---
 
-## 9 · The loop, on the sonar *(2:00)*
+## 8 · The loop, on the sailboat *(2:00)*
 
 [This is the main "how" slide. Walk the left column, top to bottom, one short line each. Take your time.]
 
-Let's walk the loop, on our sonar. /
+Let's walk the loop, on our sailboat. /
 
-**Map.** / The agent reads the repo. / It finds the closest analog — / here, a depth-camera plugin. / It answers with file and line numbers, / in minutes, not days. /
+**Map.** / The agent reads the repo. / It finds the closest analog — / an existing vessel model. / It answers with file and line numbers, / in minutes, not days. /
 
 **Plan.** / It proposes two or three strategies, with trade-offs. / And then — / I choose. / [Slow down.] This is the part that does not get delegated. / Taste, and system design, / stay with the human. /
 
 **Build.** / It runs colcon and the simulator. / It reads the failure. / It fixes it. / It closes the loop by itself. / [Point at the terminal.] And local CI beats remote CI: / the agent sees the failure in twelve seconds, / not ten minutes. /
+
+[Optional oral beat — the engine bug. NOT on the slide. Use it if you have the time; it lands hard. This is the proof of "map" and of the loop.]
+And here is the best part. / While wiring the boat, / the agent went down into the C++ engine. / And it found a real bug. / A quaternion, read the wrong way. / A pure change of heading / came back as a roll. / It was invisible on a boat going straight; / our turning sailboat made it surface. / The agent characterised it, / fixed it, / and wrote a regression test. / [Verbatim:] That is the power of the loop: / map an unknown engine, / and close the loop on a real fix. /
 
 **Doc.** / It writes the documentation page, / while the "why" is still fresh. /
 
@@ -170,13 +156,15 @@ Let's walk the loop, on our sonar. /
 
 ---
 
-## 10 · Demo — the video *(2:00)*
+## 9 · Demo — the video *(2:00)*
 
 [This is your breather. Let the sped-up video play. Say very little.]
 
 Enough slides. / Let me show you the real thing, / sped up. /
 
-From a cloned repo / to a pull request. /
+From a cloned repo / to a sailboat rounding a buoy, / inside LOTUSim. /
+
+[Verbatim, before the video — this is the credibility beat:] This was recorded on LOTUSim exactly as it is today. / No AGENTS.md, no prepared context. / Keep that in mind for the homework slide. /
 
 [Start the video. Stay quiet. Let it run. Speak only to mark the steps if you want: "map… plan… build… docs… the pull request."]
 
@@ -186,7 +174,7 @@ From a cloned repo / to a pull request. /
 
 ---
 
-## 11 · Limits — what I am *not* selling *(1:15)*
+## 10 · Limits — what I am *not* selling *(1:15)*
 
 [Four honest points. Go fast. One line each. Honesty builds trust here.]
 
@@ -198,11 +186,11 @@ Two: hallucinations. / Sometimes it invents a Gazebo API that does not exist. / 
 
 Three: supervision is not optional. / You supervise the agent like a junior developer. / There is no "dark factory" here. /
 
-Four: it is not a substitute. / Without a real foundation in C++, ROS, and physics, / the agent just lets you hit the wall faster.
+Four: the software wall is not the domain wall. / AI drops the software wall in hours — / install, launch, a first feature, even a first bugfix. / But the domain wall stays. / The environment and the vessel physics / need real naval expertise. / Without it, / the agent just gets you to that wall faster.
 
 ---
 
-## 12 · LOTUSim's homework *(1:30)*
+## 11 · LOTUSim's homework *(1:30)*
 
 [This is the second half of the answer. I own this part — say it plainly.]
 
@@ -218,7 +206,7 @@ This is how LOTUSim becomes a reference — / not just another repo.
 
 ---
 
-## 13 · Close *(1:00)*
+## 12 · Close *(1:00)*
 
 [Land it calmly. This is your commitment in front of the room.]
 
@@ -244,7 +232,8 @@ A few words in this talk are easy to trip on. Practise these out loud a few time
 |---|---|---|
 | **agent** | *AY-jent* | soft "j", not "ah-zhon" |
 | **launch** | *lawnch* | rhymes with "haunch" |
-| **acoustic** | *uh-KOO-stik* | stress on KOO |
+| **buoy** | *BOO-ee* | (US) — or *BOY* (UK); pick one and stay with it |
+| **quaternion** | *kwuh-TUR-nee-on* | only if you tell the bug story |
 | **conventions** | *kon-VEN-shuns* | |
 | **threshold** | *THRESH-hold* | the "th" is soft, tongue behind teeth |
 | **though / through / thought** | *thoh / throo / thawt* | three different words — slow down |
@@ -257,4 +246,4 @@ A few words in this talk are easy to trip on. Practise these out loud a few time
 
 **Two contractions you'll use a lot:** "it is" → *it's*, "do not" → *don't*. Both are fine and sound natural. If a contraction trips you, just say the full words — no problem.
 
-**Timing check:** if you reach slide 6 (OpenClaw) at around the 6-minute mark, you are on pace. If you are ahead, slow down on the loop (slide 9) and the demo (slide 10) — those are the heart of the talk.
+**Timing check:** if you finish slide 5 (the two industry answers) at around the 7-minute mark, you are on pace. If you are ahead, slow down on the loop (slide 8) and the demo (slide 9) — those are the heart of the talk. The engine-bug aside on slide 8 is the first thing to cut if you are running long.
