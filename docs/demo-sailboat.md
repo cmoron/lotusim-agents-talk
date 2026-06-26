@@ -117,6 +117,31 @@ l'intérieur), puis repart (pas d'arrêt terminal — il continue sur son erre).
   `mainsail(sail)` + `rudder(angle)` (cf. skill `lotusim-developer`, piège n°6).
 - **dt = 0.05 s** (le bateau léger 3.87 kg diverge à 0.2 s).
 
+## Où vivent les pièces — core / generic-scenario / projet perso (2026-06-27)
+
+LOTUSim sépare **le moteur + les modèles** (core) du **comportement + les scénarios**
+(`LOTUSim-generic-scenario`). Vérifié de première main : le core n'embarque **aucun
+contrôleur** (`vessel_cmd_array` n'y est que *consommé* par le plugin) ; les pilotes vivent
+dans generic-scenario — un **package ROS2 par agent** (`src/agents/<name>/`) + le précédent
+`src/external_packages/lrauv_propeller/lrauv_propeller.py`, qui publie sur `vessel_cmd_array`
+avec **exactement notre format JSON** (`{"<thruster>(rpm)": …}`). Les scénarios sont
+**config-driven** (`src/simulation_run/config/*.json`, cf. `defenseScenario.json`).
+
+Nos pièces se répartissent donc en **3 destinations** :
+
+| Pièce | Destination | Précédent à copier |
+|---|---|---|
+| modèle focus_v2 (sdf/yaml/mesh) + world | **core** `assets/models/`, `assets/worlds/` | `wamv`, `dtmb_hull`, `circling_ship_example.world` |
+| fix moteur (quaternion, `<control_surfaces>`) | **core** `systems/physics_engine_interface/` | — |
+| contrôleur (ex-`ctrl_course.py`) | **generic-scenario** `src/agents/focus_v2/` | `lrauv_propeller.py` |
+| scénario bouée (config) | **generic-scenario** `src/simulation_run/config/focus_v2_course.json` | `defenseScenario.json` |
+| harnais macOS, source Blender, captures, CSV | **projet perso** | — |
+
+`ctrl_course.py` n'était donc pas un orphelin : sa maison est `src/agents/focus_v2/`, et il
+**enrichit** generic-scenario (1er voilier, 1er contrôleur *closed-loop*, 1er usage de
+`<control_surfaces>` — `lrauv_propeller` est en boucle ouverte sur un thruster). Le prompt du
+record (`docs/demo-prompt.md`) laisse l'agent **découvrir** cette répartition par le map.
+
 ## Fichiers livrables (fork `~/src/LOTUSim/LOTUSim/`, **non commités**)
 
 | Fichier | Rôle |

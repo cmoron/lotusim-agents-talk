@@ -113,7 +113,7 @@ I chose this on purpose. It is not trivial. / It touches the whole stack: / the 
 
 And let me be honest about the physics, / because there are engineers in this room. /
 
-[Verbatim:] The agent writes the structure: / the model skeleton, the engine glue, the scenario. / The hydro and aero model stays yours. / You plug it in, / and it is validated before the merge. /
+[Verbatim:] The agent writes the structure: / the model skeleton, the engine glue, the scenario. / It even gives you a model that runs. / But a model that runs / is not a model true to the real boat. / The hydro and aero model stays yours. / You plug it in, / and it is validated before the merge. /
 
 The goal: / from zero knowledge of the repo, / to a pull request ready for review, / in one work session.
 
@@ -186,7 +186,7 @@ Two: hallucinations. / Sometimes it invents a Gazebo API that does not exist. / 
 
 Three: supervision is not optional. / You supervise the agent like a junior developer. / There is no "dark factory" here. /
 
-Four: the software wall is not the domain wall. / AI drops the software wall in hours — / install, launch, a first feature, even a first bugfix. / But the domain wall stays. / The environment and the vessel physics / need real naval expertise. / Without it, / the agent just gets you to that wall faster.
+Four: the software wall is not the domain wall. / AI drops the software wall in hours — / install, launch, a first feature, even a first bugfix. / It even gives you a boat model that runs in Xdyn — / stable enough to measure a speed polar. / But a model that runs / is not a model true to the real boat. / And no AI agent / will run the towing-tank tests for you. / The true hydro and aero / come from the tank and CFD — / the craft of our hydrodynamicists, at Sirehna. / Without that, / the agent just gets you to that wall faster.
 
 ---
 
@@ -246,4 +246,4 @@ A few words in this talk are easy to trip on. Practise these out loud a few time
 
 **Two contractions you'll use a lot:** "it is" → *it's*, "do not" → *don't*. Both are fine and sound natural. If a contraction trips you, just say the full words — no problem.
 
-**Timing check:** if you finish slide 5 (the two industry answers) at around the 7-minute mark, you are on pace. If you are ahead, slow down on the loop (slide 8) and the demo (slide 9) — those are the heart of the talk. The engine-bug aside on slide 8 is the first thing to cut if you are running long.
+**Timing check:** if you finish slide 5 (the two industry answers) at around the 7-minute mark, you are on pace. If you are ahead, slow down on the loop (slide 8) and the demo (slide 9) — those are the heart of the talk. The engine-bug aside on slide 8 is the first thing to cut if you are running long; on slide 10, the "speed polar in Xdyn" sentence is the next to trim.
