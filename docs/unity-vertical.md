@@ -6,7 +6,13 @@ rendu LOTUSim, Unity** (mer HDRP, lumières, ombres), avec **xdyn + gz qui calcu
 toujours la physique derrière**. Aucun accès interne : tout reconstruit depuis les
 repos publics `naval-group` + les sources LOTUSim — ce qui *est* la thèse du talk.
 
-> ## ⛔ VERDICT 2026-06-26 — verticale Unity ABANDONNÉE (décision Cyril). Le talk part avec la démo gz.
+> ## ✅ UPDATE 2026-06-26 (macOS) — verticale UNPARKÉE + validée. Et le blocage WSL était MAL diagnostiqué.
+>
+> La verticale Unity **marche end-to-end sur macOS** (Docker amd64/Rosetta headless + Unity natif Metal, pont `ros_tcp_endpoint`) — runbook complet : [`macos-demo.md`](macos-demo.md). Ce doc-ci reste le **récit WSL** (valide pour ce qu'il décrit).
+>
+> ⚠️ **Correction de diagnostic** : le *« bateau ne spawn jamais »* qu'on attribue plus bas au **NAT return relay** était un **FAUX diagnostic**. Vrai coupable (trouvé sur Mac) : la scène **`defenseScenario`**, dont le **`GameManager` Photon** recharge `Launcher` en standalone (`if(!PhotonNetwork.IsConnected) LoadScene(...)`) → **détruit le `LotusimConnector`** → rien ne spawn, **déguisé en bug de pont/relaye** (le `RosInterface` singleton survit, le connector non — d'où l'absence de `HandleCommand` qu'on prenait pour « le message n'arrive pas »). Le mur **HDRP/Vulkan sous WSLg** (ci-dessous) est un problème **séparé et réel** (propre à WSL ; absent sur Mac/Metal). → toujours **bypasser le login Photon/Launcher**, ou partir d'une **scène minimale dédiée**.
+
+> ## ⛔ VERDICT WSL (2026-06-26) — la voie WSL est un mur (HDRP/Vulkan) ; la verticale, elle, est validée sur macOS (UPDATE ci-dessus). Le talk garde la démo gz comme filet.
 >
 > **Toute la chaîne marche SAUF le rendu : WSLg n'a pas de device Vulkan de type GPU, et HDRP refuse de rendre sans.** Mur structurel, pas une config ratée.
 > - **Installé + prouvé en WSL (NAT) :** Unity Hub + Editor **2022.3.62f2 Linux**, projet copié en `~/src/LOTUSim-Unity-modules` (FBX + prefab + Addressable `focus_v2` + namespace `lotusim` + fix double-Start + `Library/` chaud), **licence Personal active**. L'**import marche en headless** (`-batchmode -nographics -quit` → `Exiting batchmode successfully`).
