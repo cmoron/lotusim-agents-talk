@@ -1,0 +1,5 @@
+# Large video rushes and renders — keep them local, never commit.
+video/*.mov
+video/*.mp4
+video/_build/
+# The montage pipeline (scripts + small badge PNGs) under video/montage/ IS tracked.

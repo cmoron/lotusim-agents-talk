@@ -10,7 +10,7 @@
 **Two targets, one through-line:** the *contributor* adopts the loop; the *project* makes itself agent-ready. An agent is only as good as the docs it can read.
 
 **Budget (~15-16 min):**
-1 Cover 0:45 · 2 Wall 1:00 · 3 Agents 0:45 · 4 Why now 1:15 · 5 Industry (Linux + OpenClaw) 2:30 · 6 Scenario 1:00 · 7 Relay 0:45 · 8 Loop 2:00 · 9 Demo 2:00 · 10 Limits 1:15 · 11 Homework 1:30 · 12 Close 1:00
+1 Cover 0:45 · 2 Wall 1:00 · 3 Agents 0:45 · 4 Why now 1:15 · 5 Industry (Linux + OpenClaw) 2:30 · 6 Scenario 1:00 · 7 Relay 0:45 · 8 Loop 2:00 · 9 Demo 2:30 · 10 Limits 1:15 · 11 Almost agent-ready 1:30 · 12 Close 1:00
 
 **Arc (Acte 1 problem → Acte 2 proof → Acte 3 method → Acte 4 contract):** open on the wall, drop the "plan" line on slide 4, keep the industry proof (Linux + OpenClaw, one slide) before the LOTUSim sailboat block, finish on the two contracts.
 
@@ -73,14 +73,15 @@
 
 ## 7 · Relay — five roles  *(0:45)*
 - Point at the animation, let it play. Don't over-explain.
-- **Say (verbatim, anti-FOMO):** *"This is one agent wearing five hats — not a hundred running in parallel. The craft is in the sequence."*
+- **Say (verbatim, anti-FOMO):** *"Several agents, sometimes in parallel — a few just to map the repo. But it's not the count that matters: it's the roles, the sequence, and the human who signs."*
+- (Honest to our own demo: we did pop several agents, parallel even for the map. The slide footer matches this — don't claim "one agent".)
 - *"One possible breakdown — adapt it to your project."* Then move on quickly.
 
 ## 8 · The loop, on the sailboat  *(2:00)* — main "how" slide
 - Walk the left column top to bottom, one short line each: Map · Plan · Build · Doc · Ship.
 - Land the **two human moments** clearly:
   - at **Plan**: *"It proposes two or three options. I choose. That's the part that doesn't get delegated — taste and system design."*
-  - at **Build**: *"The agent runs colcon and the sim, reads the failure, fixes it. It closes the loop itself. Local CI beats remote CI — twelve seconds, not ten minutes."*
+  - at **Build**: *"The agent runs colcon and the sim, reads the failure, fixes it. It closes the loop itself. Local CI beats remote CI — seconds, not minutes."*
 - Point at the terminal during Build (it's the proof).
 - **The engine-bug beat — ORAL ONLY, not on the slide** (decision 2026-06-25). This is the strongest illustration of *map* + *the loop*; use it if you have time, it lands hard. **First thing to cut if you're running long.**
   - **Say:** *"And here's the best part. While wiring the boat, the agent went down into the C++ engine and found a real bug — a quaternion read the wrong way. A pure change of heading came back as a roll. Invisible on a boat going straight; our turning sailboat made it surface. It characterised it, fixed it, and wrote a regression test."*
@@ -89,13 +90,13 @@
 - The on-slide quote uses "moats" — rare word; gloss it if faces go blank: *"moats — the things a machine can't easily replace."*
 - **Say (verbatim):** *"The code is yours — readable, and you can defend every line."*
 
-## 9 · Demo — video  *(2:00)*
-- This is my breather. Let the **sped-up video** play; say little. The video = the sailboat rounding the buoy in LOTUSim.
+## 9 · Demo — video  *(2:30)*
+- This is my breather. Let the video play (mostly sped up, back to real time on the key moments); say little. The video = the full session, ending on the sailboat rounding the buoy in LOTUSim.
 - Before: *"From a cloned repo to a sailboat rounding a buoy — let me show you the real thing, sped up."*
 - **Say (verbatim, before the video — this is the credibility beat):** *"This was recorded on LOTUSim exactly as it is today. No AGENTS.md, no prepared context. Keep that in mind for the homework slide."*
 - After: *"The code isn't disposable. It's readable, tested, documented, and it follows the repo's conventions."*
 - ⚠️ No invented numbers. The video is the evidence. (If the video isn't ready: say "a recorded session" and describe the five steps in one sentence each.)
-- ⚠️ PREP CHECK: the current sailboat run was a **preparatory spike** — the real video will be **re-recorded from scratch on the unmodified repo** (that's what the slide claims), by 27 June at the latest; then remove the placeholder line from the slide footer. See `docs/demo-sailboat.md`.
+- ⚠️ PREP CHECK: filming is **done** — the full session was recorded (several takes). Remaining: **edit to ~2–3 min** (most of it sped up, back to 1× on the key moments — the map finding the analog, the engine-bug fix, the boat rounding the buoy, the PR), then **embed it into slide 9** (replace the empty player frame) before the talk. The contribution itself is **shipped**: 6 signed PRs are live on the `cmoron-lab` forks (Assisted-by + I sign) — usable if anyone asks "was this real?". See `docs/demo-sailboat.md`.
 
 ## 10 · Limits — what I'm not selling  *(1:15)*
 - Four honest cards. Go fast, one line each.
@@ -106,15 +107,23 @@
   - **Say:** *"AI drops the software wall in hours — install, launch, a first feature, even a model that runs in Xdyn. But a model that runs isn't a model true to the real boat. And no AI agent runs the towing-tank tests for you — the true hydro and aero come from the tank and CFD, the craft of our hydrodynamicists at Sirehna. Without that, the agent just gets you to that wall faster."*
   - Ties straight back to the slide-6 honesty beat (the physics model stays the engineer's).
 
-## 11 · LOTUSim's homework  *(1:30)* — the governance message, I'll champion this (as a contributor, not the maintainer)
-- This is the second target. Say it plainly: *"This isn't only on you. The project has homework too — and today it isn't done."*
-- Left = today (README is one paragraph; docs in a wiki; nothing for the agents). Right = the homework (AGENTS.md, in-repo VISION, docs-as-code, test suite + local CI, SECURITY.md, an AI-contribution policy).
-- On SECURITY.md, one line, no dwelling: *"And a clear way to report vulnerabilities — set up before the volume arrives, not after. That's the one lesson OpenClaw learned the hard way."*
+## 11 · LOTUSim is almost agent-ready  *(1:30)* — the governance message, stay POSITIVE (we work for LOTUSim)
+- ⚠️ Reframed 2026-06-28: NOT "today it's broken → here's the homework". It's *"already very usable, proven by the demo, and the rest is mostly under way."* Go easy on the project.
+- **Left = what already works** (the demo proved it): from a cloned repo, **no special setup**, the agent **mapped the project on its own** and produced a **working PR**; there are **already enough docs to get started**.
+- **Right = what completes it**, with status pills (most are in motion):
+  - **VISION.md** — *being finalized by the project team* (governance).
+  - **AI-contribution policy** — *publishing soon*.
+  - **lotusim-developer skill** — *ready to share* (we built it during the first-PR exercise).
+  - **AGENTS.md** — *to add* (genuinely missing).
+  - **Docs-as-code + test suite + local CI** — *to add*.
+- **Say:** *"This isn't only on you. The project has homework too — and the good news, LOTUSim is already very close. On the left, what already works, you just saw it in the demo. On the right, what completes it — and a lot of it is already on the way."*
 - **Say (verbatim, ties back to slide 2):** *"The wall I started with — the implicit conventions — is exactly what these files write down. Lower it for humans, and you lower it for agents too."*
+- **Close:** *"Not fully agent-ready yet. But already very usable. And the rest is mostly under way."*
+- (SECURITY.md is no longer a slide item — keep it for Q&A only if the OpenClaw-CVE question comes up.)
 
 ## 12 · Close  *(1:00)*
 - **Say (verbatim):** *"An open simulator. An augmented practice."*
-- Two columns: *"If you contribute"* (clone, ask an agent, pick an issue, PR with Assisted-by — you sign) / *"What the project will do"* (AGENTS.md, in-repo VISION, an AI policy — **what I'll push for and contribute myself**, as a Naval Group developer; I'm not the LOTUSim maintainer, so frame it as a contribution + a call, not a unilateral roadmap).
+- Two columns: *"If you contribute"* (clone, ask an agent, pick an issue, PR with Assisted-by — you sign) / *"What the project will do"* (an AGENTS file, the VISION in the repo, a clear AI policy, **and the developer skill we already built** — **what I'll push for and contribute myself**, as a Naval Group developer; I'm not the LOTUSim maintainer, so frame it as a contribution + a call, not a unilateral roadmap).
 - One forward nod for the obvious question: *"And yes — agents can also generate simulation scenarios. That's business-typed agents, a different talk. Happy to discuss it after."*
 - *"Thank you. Questions?"*
 

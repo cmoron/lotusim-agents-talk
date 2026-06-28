@@ -22,6 +22,8 @@
         --accent-deep: #c73e1f;
         --danger: #ff5a5a;
         --glow: 255, 90, 54; /* accent as r,g,b — for glow shadows */
+        --ai: 202, 124, 94; /* Claude Code terracotta — the AI-agent role colour (theme-independent) */
+        --sim: 77, 139, 240; /* LOTUSim / simulated-platform blue — brightened for the dark bg */
         --display: "Instrument Serif", "Times New Roman", serif;
         --mono:
           "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -298,6 +300,28 @@
         color: var(--danger);
       }
 
+      /* Slide 10 — honest limits: 2x2, fewer words, larger type */
+      .limits-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 28px 44px;
+      }
+      .limits-grid .card {
+        padding: 30px 34px;
+      }
+      .limits-grid .card .num {
+        font-size: 38px;
+        margin-bottom: 10px;
+      }
+      .limits-grid .card h4 {
+        font-size: 20px;
+        margin-bottom: 14px;
+      }
+      .limits-grid .card p {
+        font-size: 24px;
+        line-height: 1.45;
+        text-wrap: balance;
+      }
+
       .term {
         background: #08070a;
         border: 1px solid var(--rule);
@@ -433,7 +457,8 @@
         color: var(--ink-dim);
       }
       .picto.platform .sprite {
-        color: var(--ink);
+        color: rgb(var(--sim));
+        filter: drop-shadow(0 0 12px rgba(var(--sim), 0.4));
       }
       .picto.ai {
         width: auto;
@@ -441,11 +466,17 @@
       .picto.ai .sprite {
         width: 84px;
         height: 70px;
-        color: var(--accent);
-        filter: drop-shadow(0 0 16px rgba(var(--glow), 0.4));
+        color: rgb(var(--ai));
+        filter: drop-shadow(0 0 16px rgba(var(--ai), 0.45));
+      }
+      /* The Claude Code mark — bitmap is 18x10, keep that aspect so pixels stay square */
+      .picto.ai .sprite.logo {
+        width: 90px;
+        height: 50px;
+        filter: drop-shadow(0 0 18px rgba(var(--ai), 0.5));
       }
 
-      /* Baton — a glowing orange orb that arcs between agents */
+      /* Baton — a glowing orb (Claude Code terracotta) that arcs between agents */
       .baton {
         position: absolute;
         bottom: 14px;
@@ -453,11 +484,11 @@
         width: 14px;
         height: 14px;
         border-radius: 50%;
-        background: var(--accent);
+        background: rgb(var(--ai));
         box-shadow:
-          0 0 10px var(--accent),
-          0 0 24px rgba(var(--glow), 0.55),
-          0 0 48px rgba(var(--glow), 0.25);
+          0 0 10px rgb(var(--ai)),
+          0 0 24px rgba(var(--ai), 0.55),
+          0 0 48px rgba(var(--ai), 0.25);
         transform: translateX(-50%) translateY(0);
         opacity: 0;
         pointer-events: none;
@@ -492,6 +523,44 @@
       }
       ul.checks li .desc-col {
         flex: 1 1 0;
+      }
+
+      /* Slide 11 — plain flowing rows (no flex list: spans must stay inline). */
+      .docs-list p {
+        margin: 0;
+        padding: 10px 0 10px 28px;
+        position: relative;
+        border-bottom: 1px dashed var(--rule);
+        font-size: 22px; /* match ul.checks li (global p,li), not .card p's 18px */
+        line-height: 1.55;
+      }
+      .docs-list p::before {
+        content: "›";
+        position: absolute;
+        left: 0;
+        top: 10px;
+        color: var(--accent);
+        font-family: var(--mono);
+      }
+      /* status pills on slide 11 (in motion vs to add) */
+      .docs-list .st {
+        display: inline-block;
+        font-size: 12.5px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 2px 9px;
+        border-radius: 999px;
+        margin-left: 6px;
+        vertical-align: middle;
+        white-space: nowrap;
+      }
+      .docs-list .st.go {
+        color: var(--accent);
+        background: rgba(var(--glow), 0.14);
+      }
+      .docs-list .st.todo {
+        color: var(--ink-dim);
+        border: 1px solid var(--rule);
       }
 
       .cover {
@@ -566,8 +635,8 @@
       }
 
       .sources {
-        margin-top: auto;
-        padding-top: 24px;
+        margin-top: 20px;
+        padding-top: 18px;
         border-top: 1px solid var(--rule);
         font-family: var(--mono);
         font-size: 13px;
@@ -663,17 +732,45 @@
       .footer-note {
         margin-top: auto;
         align-self: center;
-        max-width: 70ch;
+        max-width: 92ch;
         font-size: 24px;
         color: var(--ink);
         letter-spacing: 0;
         text-transform: none;
         text-align: center;
+        text-wrap: balance;
       }
       hr.rule {
         border: none;
         border-top: 1px solid var(--rule);
         margin: 32px 0;
+      }
+
+      /* Slide 4 — the bridge teaser into the industry answers: accent + glow */
+      .bridge {
+        align-self: center;
+        margin-top: 22px;
+        font-family: var(--mono);
+        font-size: 28px;
+        line-height: 1;
+        color: var(--accent);
+        text-shadow:
+          0 0 22px rgba(var(--glow), 0.55),
+          0 0 46px rgba(var(--glow), 0.28);
+        animation: bridgePulse 2.8s ease-in-out infinite;
+      }
+      @keyframes bridgePulse {
+        0%,
+        100% {
+          text-shadow:
+            0 0 18px rgba(var(--glow), 0.42),
+            0 0 36px rgba(var(--glow), 0.18);
+        }
+        50% {
+          text-shadow:
+            0 0 30px rgba(var(--glow), 0.72),
+            0 0 58px rgba(var(--glow), 0.4);
+        }
       }
 
       .badge {
@@ -724,6 +821,8 @@
       }
       .vf-stage {
         aspect-ratio: 16/9;
+        position: relative;
+        overflow: hidden;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -739,13 +838,34 @@
             transparent 60%
           );
       }
+      .vf-video {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        background: #000;
+        display: block;
+      }
       .playbtn {
+        appearance: none;
+        -webkit-appearance: none;
+        padding: 0;
+        cursor: pointer;
+        background: rgba(8, 7, 10, 0.35);
         width: 66px;
         height: 66px;
         border-radius: 50%;
         border: 1.5px solid var(--accent);
-        position: relative;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2;
         box-shadow: 0 0 22px rgba(var(--glow), 0.3);
+      }
+      .videoframe.playing .playbtn {
+        display: none;
       }
       .playbtn::after {
         content: "";
@@ -1015,20 +1135,22 @@
           transform: scale(1);
         }
         30% {
-          color: var(--accent);
-          filter: drop-shadow(0 0 14px rgba(var(--glow), 0.7));
-          transform: scale(1.08);
+          color: rgb(var(--ai));
+          filter: drop-shadow(0 0 20px rgba(var(--ai), 0.95))
+            drop-shadow(0 0 38px rgba(var(--ai), 0.55));
+          transform: scale(1.14);
         }
         70% {
-          color: var(--accent);
-          filter: drop-shadow(0 0 14px rgba(var(--glow), 0.7));
-          transform: scale(1.08);
+          color: rgb(var(--ai));
+          filter: drop-shadow(0 0 20px rgba(var(--ai), 0.95))
+            drop-shadow(0 0 38px rgba(var(--ai), 0.55));
+          transform: scale(1.14);
         }
         100% {
-          color: var(--accent);
-          filter: drop-shadow(0 0 4px rgba(var(--glow), 0.25));
+          /* baton has passed: stay in the selection colour, but drop the halo */
+          color: rgb(var(--ai));
+          filter: none;
           transform: scale(1);
-          opacity: 0.55;
         }
       }
       @keyframes agentLightFinal {
@@ -1038,9 +1160,10 @@
           transform: scale(1);
         }
         100% {
-          color: var(--accent);
-          filter: drop-shadow(0 0 16px rgba(var(--glow), 0.75));
-          transform: scale(1.08);
+          color: rgb(var(--ai));
+          filter: drop-shadow(0 0 24px rgba(var(--ai), 1))
+            drop-shadow(0 0 48px rgba(var(--ai), 0.6));
+          transform: scale(1.14);
         }
       }
 
@@ -1081,7 +1204,7 @@
         }
         50%,
         70% {
-          color: var(--accent);
+          color: rgb(var(--ai));
         }
         100% {
           color: var(--ink-dim);
@@ -1093,7 +1216,7 @@
           color: var(--ink-dim);
         }
         100% {
-          color: var(--accent);
+          color: rgb(var(--ai));
         }
       }
 
@@ -1230,6 +1353,7 @@
         --accent-deep: #061835;
         --danger: #ed051d; /* Naval Group red */
         --glow: 22, 65, 148; /* brand-blue glow */
+        --sim: 22, 65, 148; /* on white, the platform blue is the deep Naval Group navy */
       }
       body.theme-ng .deck {
         background-image: none;
@@ -1418,8 +1542,8 @@
             <div class="pictos">
               <div class="picto ai">
                 <div
-                  class="sprite"
-                  data-sprite="............|...X....X...|...X....X...|..XXXXXXXX..|.XXXXXXXXXX.|XX.XXXXXX.XX|XXXXXXXXXXXX|.XX.XXXX.XX.|X.X......X.X|.X........X."
+                  class="sprite logo"
+                  data-sprite="...XXXXXXXXXXXX...|...XXXXXXXXXXXX...|...XX.XXXXXX.XX...|...XX.XXXXXX.XX...|.XXXXXXXXXXXXXXXX.|.XXXXXXXXXXXXXXXX.|...XXXXXXXXXXXX...|...XXXXXXXXXXXX...|....X.X....X.X....|....X.X....X.X...."
                 ></div>
                 <span class="picto-label">AI agent</span>
               </div>
@@ -1510,9 +1634,7 @@
             >how do we handle agent-assisted contributions, responsibly?</span
           >
         </p>
-        <p class="footer-note" style="margin-top: 12px; text-align: center">
-          Two communities already answered.
-        </p>
+        <p class="bridge">Two communities already answered.</p>
       </section>
 
       <!-- 5. INDUSTRY · TWO ANSWERS -->
@@ -1911,6 +2033,10 @@
           </div>
         </div>
 
+        <p class="footer-note" style="margin-top: auto">
+          An agent is only as good as
+          <span class="hl">the docs and the rules</span> you give it.
+        </p>
         <div class="sources">
           <span><b>Linux</b> docs.kernel.org/process/coding-assistants</span>
           <span
@@ -1918,10 +2044,6 @@
             pragmaticengineer.com</span
           >
         </div>
-        <p class="footer-note">
-          An agent is only as good as
-          <span class="hl">the docs and the rules</span> you give it.
-        </p>
       </section>
 
       <!-- 6. SCENARIO -->
@@ -1983,7 +2105,8 @@
         </div>
         <p class="footer-note">
           The agent wires the <span class="hl">structure</span>: the model
-          skeleton, the engine glue, the scenario. The
+          skeleton, the engine glue, the scenario.<br />
+          The
           <span class="hl-2">hydro/aero model stays the naval engineer's</span>,
           plugged in and validated before merge.
         </p>
@@ -2061,8 +2184,9 @@
         </div>
 
         <p class="footer-note" style="margin-top: 32px">
-          <span class="hl">One agent, five hats.</span> Not a hundred in
-          parallel. The craft is in the sequence.
+          <span class="hl">Several agents, sometimes in parallel</span>
+          (mapping fans out). The roles and their sequence are the method,
+          <span class="hl">a human signs.</span>
         </p>
       </section>
 
@@ -2156,8 +2280,8 @@
         </div>
 
         <p class="footer-note">
-          <span class="hl-2">Local CI first</span>: failure in 12 s, not 10 min
-          (remote CI still gates). Two human moments:
+          <span class="hl-2">Local CI first</span>: failure in seconds, not
+          minutes (remote CI still gates). Two human moments:
           <span class="hl">choosing</span> (Plan),
           <span class="hl">signing</span> (Ship).
         </p>
@@ -2194,18 +2318,24 @@
             <div class="vf-top">
               <span class="vf-dot"></span><span class="vf-dot"></span
               ><span class="vf-dot"></span>
-              <span class="vf-label">session.mp4 · sped-up</span>
+              <span class="vf-label">demo.mp4 · the full run · ~2.5 min</span>
             </div>
             <div class="vf-stage">
-              <span class="playbtn" aria-hidden="true"></span>
+              <video
+                class="vf-video"
+                src="media/demo.mp4"
+                preload="metadata"
+                playsinline
+              ></video>
+              <button class="playbtn" type="button" aria-label="Play the demo"></button>
             </div>
             <div class="vf-bar"><i></i></div>
           </div>
         </div>
 
         <p class="footer-note">
-          Drop the sped-up screen capture here: the full session in ~2
-          minutes.
+          The full run, condensed to about two and a half minutes: sped up
+          throughout, back to real time on the moments that matter.
         </p>
       </section>
 
@@ -2215,48 +2345,32 @@
         <h2 class="title">What I'm <em>not</em> selling you.</h2>
 
         <div class="filler"></div>
-        <div
-          class="cols-3"
-          style="grid-template-columns: repeat(4, 1fr); margin-top: 0"
-        >
+        <div class="cols-3 limits-grid" style="margin-top: 0">
           <div class="card warn">
             <span class="num">!</span>
-            <h4>Govern what the agent touches</h4>
+            <h4>Govern what it touches</h4>
             <p>
-              Open-source LOTUSim is public, so sharing it with an agent is
-              fine. The real risk: without clear rules, an agent pulls in
-              something that shouldn't land in a public repo. Match the guard to
-              the data, and write the rules down.
+              Public repo, fine to share. With no rules, an agent ships what
+              should never leave it.
             </p>
           </div>
           <div class="card warn">
             <span class="num">!</span>
-            <h4>Hallucinations</h4>
-            <p>
-              In C++/ROS/Gazebo, the agent sometimes invents Gazebo APIs that no
-              longer exist, or confuses versions. Build + tests = mandatory
-              safety net.
-            </p>
+            <h4>It hallucinates</h4>
+            <p>It invents Gazebo APIs that don't exist. Build + tests catch it.</p>
           </div>
           <div class="card danger">
             <span class="num">×</span>
-            <h4>Supervision is not optional</h4>
-            <p>
-              No «&nbsp;dark factory&nbsp;» (Steinberger). An agent that can
-              write and commit needs to be supervised like a junior dev, not as
-              a metaphor.
-            </p>
+            <h4>Supervision isn't optional</h4>
+            <p>No «&nbsp;dark factory&nbsp;». You supervise it like a junior dev.</p>
           </div>
           <div class="card danger">
             <span class="num">×</span>
             <h4>Software wall ≠ domain wall</h4>
             <p>
-              AI drops the <span class="hl-2">software</span> wall in hours:
-              install, launch, first feature, first bugfix, even a model that
-              <em>runs</em>. The <span class="hl-2">domain</span> wall stays:
-              making it <span class="hl-2">true to the real vessel</span> (the
-              hydro/aero coefficients) needs naval expertise. Without it, the
-              agent only gets you to that wall faster.
+              AI drops the <span class="hl-2">software</span> wall in hours. The
+              <span class="hl-2">domain</span> wall, physics true to the vessel,
+              stays yours.
             </p>
           </div>
         </div>
@@ -2265,7 +2379,7 @@
 
       <!-- 11. LOTUSIM'S HOMEWORK -->
       <section class="slide">
-        <span class="eyebrow">What this asks of the project</span>
+        <span class="eyebrow">Already close to agent-ready</span>
         <h2 class="title">
           An agent is only as good as<br /><em>the docs it can read.</em>
         </h2>
@@ -2275,54 +2389,45 @@
             <span
               class="eyebrow"
               style="display: inline-flex; margin-bottom: 14px"
-              >LOTUSim today</span
+              >Already workable by agents</span
             >
-            <ul class="checks">
-              <li><span class="dim">README.md</span>: one paragraph.</li>
-              <li>
-                <span class="dim">CONTRIBUTING.md</span>: written for humans.
-              </li>
-              <li>Docs in a wiki, not the repo.</li>
-              <li>
-                Testing guide:
-                <span class="dim">«&nbsp;available soon&nbsp;»</span>.
-              </li>
-              <li>Nothing addressed to the agents.</li>
-            </ul>
+            <div class="docs-list">
+              <p>
+                Proven in the demo: from zero repo knowledge to a
+                <span class="hl">working PR</span>.
+              </p>
+              <p>An agent <span class="hl">maps the repository</span> on its own.</p>
+              <p>Enough docs already to get operational.</p>
+            </div>
           </div>
           <div class="card" style="padding: 28px">
             <span
               class="eyebrow"
               style="display: inline-flex; margin-bottom: 14px"
-              >Agent-ready: the homework</span
+              >What completes it</span
             >
-            <ul class="checks">
-              <li>
+            <div class="docs-list">
+              <p>
+                <span class="hl">VISION.md</span>: roadmap, and what we won't
+                merge. <span class="st go">being finalized</span>
+              </p>
+              <p>
+                An <span class="hl">AI-contribution policy</span>: Assisted-by,
+                you sign. <span class="st go">publishing soon</span>
+              </p>
+              <p>
+                A <span class="hl">lotusim-developer skill</span>, built on the
+                first PR. <span class="st go">ready to share</span>
+              </p>
+              <p>
                 <span class="hl">AGENTS.md</span>: map, build, test,
-                conventions.
-              </li>
-              <li>
-                <span class="hl">VISION.md</span> in the repo: roadmap, and
-                <span class="dim">what we won't merge</span>.
-              </li>
-              <li>
-                <span class="hl">Docs-as-code</span>: same repo, same PR, same
-                review.
-              </li>
-              <li>
-                A <span class="hl">test suite + local CI</span>: the agent
-                closes the loop itself.
-              </li>
-              <li>
-                <span class="hl">SECURITY.md</span>: report a vulnerability,
-                before contributions scale.
-              </li>
-              <li>
-                An <span class="hl">AI-contribution policy</span>:
-                <span class="dim">Assisted-by</span>, the human signs, with
-                guardrails.
-              </li>
-            </ul>
+                conventions. <span class="st todo">to add</span>
+              </p>
+              <p>
+                <span class="hl">Docs-as-code</span>, a test suite + local CI.
+                <span class="st todo">to add</span>
+              </p>
+            </div>
           </div>
         </div>
 
@@ -2347,15 +2452,15 @@
               style="display: inline-flex; margin-bottom: 14px"
               >If you contribute</span
             >
-            <ul class="checks">
-              <li>Clone the repo.</li>
-              <li>Ask an agent to map it.</li>
-              <li>Pick an issue, or open one.</li>
-              <li>
+            <div class="docs-list">
+              <p>Clone the repo.</p>
+              <p>Ask an agent to map it.</p>
+              <p>Pick an issue, or open one.</p>
+              <p>
                 Come back with a PR: <span class="dim">Assisted-by</span>, and
                 <span class="hl">you sign</span>.
-              </li>
-            </ul>
+              </p>
+            </div>
           </div>
           <div class="card" style="padding: 28px">
             <span
@@ -2552,9 +2657,22 @@
         });
 
         document.getElementById("deck").addEventListener("click", (e) => {
-          if (e.target.closest("a,button,input")) return;
+          if (e.target.closest("a,button,input,video,.videoframe")) return;
           next();
         });
+
+        // Slide 9 demo: click the frame to play, with native controls (does not advance the deck)
+        (function () {
+          const vf = document.querySelector(".videoframe");
+          const vid = vf && vf.querySelector(".vf-video");
+          const btn = vf && vf.querySelector(".playbtn");
+          if (!vf || !vid || !btn) return;
+          btn.addEventListener("click", () => {
+            vid.setAttribute("controls", "");
+            vf.classList.add("playing");
+            vid.play();
+          });
+        })();
 
         // Deep-link / browser back-forward: respond to hash changes
         window.addEventListener("hashchange", () => {
