@@ -1,4 +1,4 @@
-# Speaking script — *From idea to LOTUSim contribution, faster with AI agents*
+# Speaking script — _From idea to LOTUSim contribution, faster with AI agents_
 
 > LOTUSim Technical Conference · Naval Group · 2 July 2026 · ~15–16 min
 > This is a **word-for-word script**, written to be read out loud. Short sentences. Simple words. Easy to say.
@@ -7,28 +7,29 @@
 > **12 slides** (the Linux kernel and OpenClaw share one slide). Slide numbers below match the deck.
 
 **Golden rules for the day**
+
 - One idea per breath. Stop at every period.
-- When you point at the screen, *stop talking* for one second. Let them look.
+- When you point at the screen, _stop talking_ for one second. Let them look.
 - If you lose your line, read the slide title and start the next sentence. The slides carry the story.
 - It is fine to pause. Silence feels long to you, not to them.
 
 ---
 
-## 1 · Cover *(0:45)*
+## 1 · Cover _(0:45)_
 
 Good morning, everyone. / My name is Cyril Moron. / I am a lead developer at Naval Group. / I do not work on LOTUSim itself. / I come to it from another team, / as a contributor — / like many of you. /
 
 In the next fifteen minutes, / I want to show you one thing: / how AI agents make it easier / to start contributing to LOTUSim. / A simulator built on ROS, Gazebo, and Xdyn. /
 
-And, just as important: / what the project can do in return. /
+And the other side of it: / what the project can do in return. /
 
-LOTUSim is open source now. / Let's make it a project / people are proud to contribute to. /
+LOTUSim is open source now. / So now is the time / to make it easy to contribute to. /
 
-So: one method, one demo, / and some homework for the project. /
+So: a method, / a demo, / and some homework for the project. /
 
 ---
 
-## 2 · The wall *(1:00)*
+## 2 · The wall _(1:00)_
 
 [Slow down. This is the hook. Let them feel it.]
 
@@ -46,7 +47,7 @@ So what happens? / Many good ideas die / between "I want to contribute" / and "m
 
 ---
 
-## 3 · Two kinds of "agent" *(0:45)*
+## 3 · Two kinds of "agent" _(0:45)_
 
 [Quick. Under a minute. This is just to avoid confusion.]
 
@@ -60,7 +61,7 @@ In this talk, / an agent is something else. / It is a large language model / tha
 
 ---
 
-## 4 · Why now *(1:15)*
+## 4 · Why now _(1:15)_
 
 Why now? / Why not eighteen months ago? /
 
@@ -83,7 +84,7 @@ Two communities have already answered it. / Let's look at them. /
 
 ---
 
-## 5 · Industry — two answers *(2:30)*
+## 5 · Industry — two answers _(2:30)_
 
 [The pivot from "the question" to "the answers". Two communities, side by side on one slide. Take your time — this is the proof. Point left, then right.]
 
@@ -103,9 +104,9 @@ But the numbers are not the lesson. / The lesson is what they wrote down / for t
 
 ---
 
-## 6 · Scenario — the sailboat *(1:00)*
+## 6 · Scenario — the sailboat _(1:00)_
 
-Now let's bring this home, / to LOTUSim. / We want the best of both: / the kernel's contract, / and OpenClaw's discipline. /
+Now, back to LOTUSim. / We can take both: / the kernel's contract, / and OpenClaw's discipline. /
 
 Let's make it concrete, / with something real. / We want to add a small RC sailboat, / and make it round a race buoy. /
 
@@ -119,7 +120,7 @@ The goal: / from zero knowledge of the repo, / to a pull request ready for revie
 
 ---
 
-## 7 · The relay — five roles *(0:45)*
+## 7 · The relay — five roles _(0:45)_
 
 [Let the animation play. Point at it. Do not over-explain.]
 
@@ -133,7 +134,7 @@ This is one way to split the work. / Change it to fit your own project. /
 
 ---
 
-## 8 · The loop, on the sailboat *(2:00)*
+## 8 · The loop, on the sailboat _(2:00)_
 
 [This is the main "how" slide. Walk the left column, top to bottom, one short line each. Take your time.]
 
@@ -146,7 +147,7 @@ Let's walk the loop, / on our sailboat. /
 **Build.** / It runs colcon and the simulator. / It reads the error. / It fixes it. / It closes the loop by itself. / [Point at the terminal.] And local CI beats remote CI: / the agent sees the error in seconds, / not minutes. /
 
 [Optional oral beat — the engine bug. NOT on the slide. Use it if you have the time; it lands hard. This is the proof of "map" and of the loop.]
-And here is the best part. / While wiring the boat, / the agent went down / into the C++ engine. / And it found a real bug. / A quaternion, read the wrong way. / A simple change of heading / came back as a roll. / You could not see it / on a boat going straight. / Our turning sailboat / made it show up. / The agent understood the bug, / fixed it, / and wrote a test for it. / [Verbatim:] That is the power of the loop: / map an unknown engine, / and close the loop / on a real fix. /
+And there is more. / While wiring the boat, / the agent went down / into the C++ engine. / And it found a real bug. / A quaternion, read the wrong way. / A simple change of heading / came back as a roll. / You could not see it / on a boat going straight. / Our turning sailboat / made it show up. / The agent understood the bug, / fixed it, / and wrote a test for it. / [Verbatim:] That is the power of the loop: / map an unknown engine, / and close the loop / on a real fix. /
 
 **Doc.** / It writes the documentation page, / while the "why" is still fresh. /
 
@@ -156,11 +157,11 @@ And here is the best part. / While wiring the boat, / the agent went down / into
 
 ---
 
-## 9 · Demo — the video *(2:30)*
+## 9 · Demo — the video _(2:30)_
 
 [This is your breather. Let the video play — mostly sped up, back to real time on the key moments. Say very little.]
 
-Enough slides. / Let me show you the real thing, / sped up. /
+Enough slides. / Let me show you the demo, / sped up. /
 
 From a cloned repo, / to a sailboat rounding a buoy, / inside LOTUSim. /
 
@@ -174,11 +175,11 @@ From a cloned repo, / to a sailboat rounding a buoy, / inside LOTUSim. /
 
 ---
 
-## 10 · Limits — what I am *not* selling *(1:15)*
+## 10 · Limits — what I am _not_ selling _(1:15)_
 
 [Four honest points. Go fast. One line each. Honesty builds trust here.]
 
-Now, / what I am *not* selling you. / Four honest limits. /
+Now, / what I am _not_ selling you. / Four honest limits. /
 
 One: / govern what the agent touches. / Open-source LOTUSim is public, / so sharing it with an agent is fine. / The real risk is different. / Without clear rules, / an agent can bring in something / that should not land in a public repo. /
 
@@ -190,11 +191,11 @@ Four: / the software wall / is not the domain wall. / AI drops the software wall
 
 ---
 
-## 11 · LOTUSim is almost agent-ready *(1:30)*
+## 11 · LOTUSim is almost agent-ready _(1:30)_
 
 [Second half of the answer. Stay positive — we work for LOTUSim, not against it. The demo already proved the left side.]
 
-So far I talked about you, / the contributor. / But this is not only on you. / The project has homework too. / And the good news: / LOTUSim is already very close. /
+So far I talked about you, / the contributor. / But this is not only on you. / The project has homework too. / And LOTUSim is already very close. /
 
 On the left: / what already works. / You just saw it in the demo. / From a cloned repo, / with no special setup, / the agent mapped the project on its own / and produced a working pull request. / There are already enough docs / to get started. /
 
@@ -208,7 +209,7 @@ So: LOTUSim is not fully agent-ready yet. / But it is already very usable. / And
 
 ---
 
-## 12 · Close *(1:00)*
+## 12 · Close _(1:00)_
 
 [Land it calmly. This is your commitment in front of the room.]
 
@@ -216,7 +217,7 @@ So let me close. / An open simulator. / An augmented practice. /
 
 If you contribute: / clone the repo, / ask an agent to map it, / pick an issue, / and come back with a pull request. / Assisted-by — / and you sign. /
 
-And on the project's side, / here is what I will push for, / and contribute myself: / an agents file, / the vision in the repo, / a clear AI policy, / and the developer skill / we already built. / I will bring that work to the table. /
+And on the project's side, / here is what I will push for, / and contribute myself: / an agents file, / the vision in the repo, / a clear AI policy, / and the developer skill / we already built. / I will do that work. /
 
 I want LOTUSim to be an example / of how an open project welcomes agents. / Cleanly. / And with the human in charge. /
 
@@ -230,20 +231,20 @@ I want LOTUSim to be an example / of how an open project welcomes agents. / Clea
 
 A few words in this talk are easy to trip on. Practise these out loud a few times.
 
-| Word | Say it like | Note |
-|---|---|---|
-| **agent** | *AY-jent* | soft "j", not "ah-zhon" |
-| **launch** | *lawnch* | rhymes with "haunch" |
-| **buoy** | *BOO-ee* | (US) — or *BOY* (UK); pick one and stay with it |
-| **quaternion** | *kwuh-TUR-nee-on* | only if you tell the bug story |
-| **conventions** | *kon-VEN-shuns* | |
-| **threshold** | *THRESH-hold* | the "th" is soft, tongue behind teeth |
-| **though / through / thought** | *thoh / throo / thawt* | three different words — slow down |
-| **bottleneck** | *BOTT-l-nek* | |
-| **repository / repo** | *ri-POZ-i-tory / REE-po* | "repo" is fine and shorter |
-| **hallucinates** | *huh-LOO-si-nates* | |
-| **careful** | *KAIR-ful* | (used for the kernel — easier than "conservative") |
+| Word                           | Say it like              | Note                                               |
+| ------------------------------ | ------------------------ | -------------------------------------------------- |
+| **agent**                      | _AY-jent_                | soft "j", not "ah-zhon"                            |
+| **launch**                     | _lawnch_                 | rhymes with "haunch"                               |
+| **buoy**                       | _BOO-ee_                 | (US) — or _BOY_ (UK); pick one and stay with it    |
+| **quaternion**                 | _kwuh-TUR-nee-on_        | only if you tell the bug story                     |
+| **conventions**                | _kon-VEN-shuns_          |                                                    |
+| **threshold**                  | _THRESH-hold_            | the "th" is soft, tongue behind teeth              |
+| **though / through / thought** | _thoh / throo / thawt_   | three different words — slow down                  |
+| **bottleneck**                 | _BOTT-l-nek_             |                                                    |
+| **repository / repo**          | _ri-POZ-i-tory / REE-po_ | "repo" is fine and shorter                         |
+| **hallucinates**               | _huh-LOO-si-nates_       |                                                    |
+| **careful**                    | _KAIR-ful_               | (used for the kernel — easier than "conservative") |
 
-**Two short forms you'll use a lot:** "it is" → *it's*, "do not" → *don't*. Both are fine and sound natural. If a short form trips you, just say the full words — no problem.
+**Two short forms you'll use a lot:** "it is" → _it's_, "do not" → _don't_. Both are fine and sound natural. If a short form trips you, just say the full words — no problem.
 
 **Timing check:** if you finish slide 5 (the two industry answers) at around the 7-minute mark, you are on pace. If you are ahead, slow down on the loop (slide 8) and the demo (slide 9) — those are the heart of the talk. The engine-bug aside on slide 8 is the first thing to cut if you are running long; on slide 10, the "speed polar in Xdyn" sentence is the next to trim.
