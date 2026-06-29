@@ -17,9 +17,9 @@
 ---
 
 ## 1 · Cover  *(0:45)*
-- One line about me: *"I'm Cyril, lead developer for Naval Group."*
-- **Say:** *"In the next fifteen minutes: how AI agents bring down the entry barrier of a ROS / Gazebo / Xdyn simulator — and what the project has to do in return."*
-- Announce: *"One method, one demo, and some homework — including mine."*
+- One line about me: *"I'm Cyril, lead developer at Naval Group — but I come to LOTUSim as a contributor, from another team, like you. Not part of its team."*
+- **Say:** *"In the next fifteen minutes: how AI agents bring down the entry barrier of a ROS / Gazebo / Xdyn simulator — and what the project can do in return."*
+- Announce: *"One method, one demo, and some homework — for the project."*
 
 ## 2 · The wall  *(1:00)* — open here, this is the hook
 - Opening beat. The wall is a *shared pain*: name it, let the room nod (insiders and newcomers alike).
@@ -130,7 +130,7 @@
 ---
 
 ## Prep Q&A — the hard ones (keep in mind, not on slide)
-- **"Tell me more about that engine bug."** → It was a quaternion serialization bug in the co-simulation bridge: the state coming back from Xdyn had two axes swapped (j/k), so a pure yaw came back as roll. Vessels going straight masked it; the turning sailboat surfaced it. The agent mapped the C++ it had never seen, characterised the bug, fixed it (two lines), and wrote a **regression test** — *that's* the loop and the "real-behavior proof". The fix is a separate, self-contained engine PR; **I sign it** as lead dev. (This is oral; it's not on a slide on purpose.)
+- **"Tell me more about that engine bug."** → It was a quaternion serialization bug in the co-simulation bridge: the state coming back from Xdyn had two axes swapped (j/k), so a pure yaw came back as roll. Vessels going straight masked it; the turning sailboat surfaced it. The agent mapped the C++ it had never seen, characterised the bug, fixed it (two lines), and wrote a **regression test** — *that's* the loop and the "real-behavior proof". The fix is a separate, self-contained engine PR; **I sign it** — as the contributor, I answer for every line. (This is oral; it's not on a slide on purpose.)
 - **"How do you know the agent's code is any good?"** → Best proof: on this very feature it found and fixed a real bug *in our own engine*, with a test. Plus: build + tests are the net, and the human signs every line.
 - **"En reprenant generic-scenario, un humain n'allait-il pas aussi vite ?"** → Trois temps. **(1) Le map EST le gain** : « reprendre generic-scenario » suppose de *savoir* qu'il existe et d'en maîtriser l'archi (le pattern `lrauv_propeller`, le format `vessel_cmd_array`, la répartition core/scenario, le piège co-sim). Pour un contributeur entrant — l'audience — c'est le mur ; l'agent l'a cartographié en minutes. **(2) Pas une copie** : `lrauv_propeller` = thruster en boucle ouverte ; le voilier a exigé des **control surfaces à angle** (que le *moteur* ne gérait pas → patch `<control_surfaces>`), une **boucle fermée** sur le cap de route, et en route le fix du **bug quaternion** du moteur — rien de ça n'était dans generic-scenario. **(3) Retournement** : si un connaisseur de generic-scenario va vite, c'est la *preuve* que la structure est bonne — exactement la slide 11 : une bonne structure abaisse le mur pour les humains *et* les agents. *« An agent is only as good as the docs it can read. »*
 - **"Cost / licence / can it even run behind the Naval Group proxy?"** → Honest: depends on your setup; the workflow is tool-agnostic. For open-source LOTUSim there's no requirement to self-host. Don't oversell.

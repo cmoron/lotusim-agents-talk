@@ -16,15 +16,15 @@
 
 ## 1 · Cover *(0:45)*
 
-Good morning, everyone. / My name is Cyril Moron. / I am a lead developer at Naval Group. /
+Good morning, everyone. / My name is Cyril Moron. / I am a lead developer at Naval Group. / I do not work on LOTUSim itself. / I come to it from another team, / as a contributor — / like many of you. /
 
-In the next fifteen minutes, / I want to show you one thing: / how AI agents make it easier / to start working with our simulator. / A simulator built on ROS, Gazebo, and Xdyn. /
+In the next fifteen minutes, / I want to show you one thing: / how AI agents make it easier / to start contributing to LOTUSim. / A simulator built on ROS, Gazebo, and Xdyn. /
 
-And, just as important: / what the project must do in return. /
+And, just as important: / what the project can do in return. /
 
-LOTUSim is open source now. / I want it to become a project / people are proud to contribute to. /
+LOTUSim is open source now. / Let's make it a project / people are proud to contribute to. /
 
-So: one method, one demo, / and some homework — including mine. /
+So: one method, one demo, / and some homework for the project. /
 
 ---
 
