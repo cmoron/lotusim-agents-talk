@@ -17,15 +17,13 @@
 
 ## 1 · Cover _(0:45)_
 
-Good morning, everyone. / My name is Cyril Moron. / I am a lead developer at Naval Group. / I do not work on LOTUSim itself. / I come to it from another team, / as a contributor — / like many of you. /
+Hello, everyone. / My name is Cyril Moron. / I am a lead developer at Naval Group. / I am not part of the LOTUSim team. / I'm here as an open source contributor, / like many of you. /
 
-In the next fifteen minutes, / I want to show you one thing: / how AI agents make it easier / to start contributing to LOTUSim. / A simulator built on ROS, Gazebo, and Xdyn. /
+In the next fifteen minutes, / I want to show you how AI agents make it easier / to start contributing to LOTUSim. /
 
-And the other side of it: / what the project can do in return. /
+LOTUSim is open source now. / So now is the time to contribute. / And the good news: / it is already a good fit for AI agents. / We will see why, / and what is being added / to make it even easier. /
 
-LOTUSim is open source now. / So now is the time / to make it easy to contribute to. /
-
-So: a method, / a demo, / and some homework for the project. /
+So: a method, / and a demo. /
 
 ---
 

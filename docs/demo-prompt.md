@@ -13,40 +13,46 @@ est en anglais (cohérent avec le deck + l'écosystème ; bascule en FR si tu pr
 
 ## Le prompt (à coller au démarrage, on caméra)
 
-> **Goal.** I want to contribute a feature to **LOTUSim** (open-source ROS2 + Gazebo +
-> xdyn maritime simulator, EPL-2.0): a small **RC sailboat — the Focus V2 — that rounds
-> a race buoy**. End to end: the mesh, the physics model, the scenario, and the
-> closed-loop helmsman. Success = from this freshly cloned workspace to **the sailboat
-> rounding the mark**, delivered as clean PRs.
->
-> I know agentic workflows well, but I'm **new to LOTUSim** — so don't take my word for
-> the structure, **map it**.
->
-> **1. Map first (don't guess).** Everything is cloned locally — the LOTUSim **core**,
-> the **LOTUSim-generic-scenario** project, and the wiki. Work out: how a vehicle/model is
-> defined and **where models live**; the closest existing analog to a small surface
-> craft; how a vessel is driven **under physics** (who sends actuator commands, on what
-> topic); and **where behaviours/scenarios live vs. where models live**. Report what you
-> find (file:line), then tell me your plan.
->
-> **2. Plan.** Propose 2 approaches with trade-offs and the placement you'd recommend per
-> the project's own conventions. I'll pick one.
->
-> **3. Build, in a loop.** Author an **original mesh in Blender** (you have the MCP) for
-> the Focus V2 — hull, sails, rig, keel/bulb. Implement the model and the scenario, run
-> it **with physics**, read the failures, fix, and repeat until the boat sails and rounds
-> the mark. Respect what the map taught you (frame conventions, how commands are actually
-> sent under co-simulation).
->
-> **4. Document & ship.** Write the docs while the "why" is fresh. Open clean PRs — **one
-> per target** — each with a clear scope and a **"real behavior proof"** (a headless run /
-> trajectory showing it rounds the mark).
->
-> **Honesty on physics:** the hydro/aero coefficients won't be tank-validated — estimate
-> them, tune only enough to sail plausibly, and mark each
-> `# ESTIMATED — pending naval-engineer validation`. Don't claim validated hydro.
-> **Licensing:** EPL-2.0 — author everything from published dimensions, vendor nothing
-> GPL or manufacturer-CAD.
+**Goal.** I want to contribute a feature to **LOTUSim** (open-source ROS2 + Gazebo +
+xdyn maritime simulator, EPL-2.0): a small **RC sailboat — the Focus V2 — that rounds
+a race buoy**. 
+Specs here : https://www.toemen.nl/en/product/joysway-focus-v2-1-meter-zeilboot-rtr-hoogte-158cm
+Search for complementary specs if needed to build a credible physics model and mesh.
+
+End to end: the mesh, the physics model, the scenario, and the
+closed-loop helmsman. Success = from this freshly cloned workspace to **the sailboat
+rounding the mark**, delivered as clean PRs.
+LOTUSim upstream repositories are available here : https://github.com/orgs/naval-group/repositories
+We must fork every repositories we will working on here : https://github.com/orgs/cmoron-lab/repositories
+(LOTUSim already forked). 
+We will work locally in ~/src/lotusim-lab
+
+**1. Map first (don't guess).** Clone what you need locally — the LOTUSim **core**,
+the **LOTUSim-generic-scenario** project, and the wiki (https://github.com/naval-group/LOTUSim/wiki). 
+Work out: how a vehicle/model is
+defined and **where models live**; the closest existing analog to a small surface
+craft; how a vessel is driven **under physics** (who sends actuator commands, on what
+topic); and **where behaviours/scenarios live vs. where models live**. Report what you
+find (file:line), then tell me your plan.
+
+**2. Plan.** Propose 2 approaches with trade-offs and the placement you'd recommend per
+the project's own conventions. I'll pick one.
+
+**3. Build, in a loop.** Author an **original mesh in Blender** (you have the MCP) for
+the Focus V2 — hull, sails, rig, keel/bulb. Implement the model and the scenario, run
+it **with physics**, read the failures, fix, and repeat until the boat sails and rounds
+the mark. Respect what the map taught you (frame conventions, how commands are actually
+sent under co-simulation).
+
+**4. Document & ship.** Write the docs while the "why" is fresh. Open clean PRs — **one
+per target** — each with a clear scope and a **"real behavior proof"** (a headless run /
+trajectory showing it rounds the mark).
+
+**Honesty on physics:** the hydro/aero coefficients won't be tank-validated — estimate
+them, tune only enough to sail plausibly, and mark each
+`# ESTIMATED — pending naval-engineer validation`. Don't claim validated hydro.
+**Licensing:** EPL-2.0 — author everything from published dimensions, vendor nothing
+GPL or manufacturer-CAD.
 
 ---
 

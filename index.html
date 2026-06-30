@@ -2531,6 +2531,45 @@
       <div class="progress"><i id="progress"></i></div>
     </div>
 
+    <!-- Presenter view (?presenter): word-for-word notes from speech.md, synced across windows -->
+    <style>
+      body.presenter #deck { display: none; }
+      #presenter { display: none; }
+      body.presenter { overflow: hidden; }
+      body.presenter #presenter {
+        display: flex; flex-direction: column;
+        position: fixed; inset: 0; z-index: 50;
+        background: #0d0d0f; color: #eee;
+        font-family: var(--mono); padding: 28px 40px; gap: 18px;
+      }
+      #presenter header {
+        display: flex; justify-content: space-between; align-items: baseline;
+        font-size: 22px; color: #9aa6b2; border-bottom: 1px solid #2a2d33; padding-bottom: 12px;
+      }
+      #pv-clock { font-size: 34px; color: #fff; cursor: pointer; font-variant-numeric: tabular-nums; }
+      #pv-notes {
+        flex: 1; overflow-y: auto; font-size: 30px; line-height: 1.6;
+        white-space: pre-wrap; color: #f3f3f3;
+      }
+      #pv-notes .cue { color: #7fa6c9; }
+      #pv-notes .br { color: #555; }
+      #pv-notes b { color: #fff; }
+      #pv-notes i { color: #d8c08a; font-style: normal; }
+      #presenter footer {
+        display: flex; justify-content: space-between; align-items: center;
+        border-top: 1px solid #2a2d33; padding-top: 12px; font-size: 20px; color: #9aa6b2;
+      }
+      #pv-next b { color: #cdd9a0; }
+    </style>
+    <div id="presenter">
+      <header><span id="pv-pos"></span><span id="pv-clock">00:00</span></header>
+      <div id="pv-notes"></div>
+      <footer>
+        <span id="pv-next"></span>
+        <span>← → navigate · click the clock to reset</span>
+      </footer>
+    </div>
+
     <script>
       (function () {
         const slides = Array.from(document.querySelectorAll(".slide"));
@@ -2538,6 +2577,70 @@
         const progress = document.getElementById("progress");
         const deck = document.getElementById("deck");
         let i = 0;
+
+        // ── Presenter view + cross-window sync (BroadcastChannel)
+        const isPresenter = new URLSearchParams(location.search).has(
+          "presenter",
+        );
+        const chan =
+          "BroadcastChannel" in window
+            ? new BroadcastChannel("lotusim-deck")
+            : null;
+        let applyingRemote = false;
+        function broadcast() {
+          if (chan && !applyingRemote) chan.postMessage({ i });
+        }
+        if (chan)
+          chan.onmessage = (e) => {
+            if (e.data && typeof e.data.i === "number" && e.data.i !== i) {
+              applyingRemote = true;
+              go(e.data.i);
+              applyingRemote = false;
+            }
+          };
+
+        let notes = {};
+        function fmtNote(t) {
+          return t
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+            .replace(/_(.+?)_/g, "<i>$1</i>")
+            .replace(/\[([^\]]+)\]/g, '<span class="cue">[$1]</span>')
+            .replace(/ \//g, ' <span class="br">/</span>');
+        }
+        function parseSpeech(md) {
+          const map = {};
+          md.split(/\n## /).forEach((block) => {
+            const m = block.match(/^(\d+) ·/);
+            if (!m) return;
+            let body = block.slice(block.indexOf("\n") + 1).trim();
+            body = body.replace(/\n*-{3,}\s*$/, "").trim();
+            map[parseInt(m[1], 10)] = body;
+          });
+          return map;
+        }
+        function slideTitle(s) {
+          const el = s && s.querySelector(".title, .display");
+          return el ? el.textContent.replace(/\s+/g, " ").trim() : "";
+        }
+        function updatePresenter() {
+          if (!isPresenter) return;
+          const title = slideTitle(slides[i]);
+          document.getElementById("pv-pos").textContent =
+            "Slide " + (i + 1) + " / " + slides.length + (title ? " · " + title : "");
+          const nx = slides[i + 1];
+          document.getElementById("pv-next").innerHTML = nx
+            ? "Next → <b>" + (slideTitle(nx) || "slide " + (i + 2)) + "</b>"
+            : "<b>End of deck</b>";
+          const el = document.getElementById("pv-notes");
+          el.innerHTML =
+            notes[i + 1] != null
+              ? fmtNote(notes[i + 1])
+              : "(no notes for this slide)";
+          el.scrollTop = 0;
+        }
 
         // ── Fixed 1920×1080 stage, scaled to fit the viewport (letterboxed).
         // What you author at 1920×1080 is exactly what projects.
@@ -2648,6 +2751,8 @@
           progress.style.width = ((i + 1) / slides.length) * 100 + "%";
           location.hash = "#" + (i + 1);
           triggerCountUps(slides[i]);
+          broadcast();
+          updatePresenter();
         }
         function go(n) {
           i = Math.max(0, Math.min(slides.length - 1, n));
@@ -2677,6 +2782,12 @@
             else document.exitFullscreen();
           } else if (e.key === "t" || e.key === "T") {
             document.body.classList.toggle("theme-ng");
+          } else if ((e.key === "p" || e.key === "P") && !isPresenter) {
+            window.open(
+              location.pathname + "?presenter" + (location.hash || ""),
+              "lotusim-presenter",
+              "width=1100,height=820",
+            );
           }
         });
 
@@ -2712,6 +2823,35 @@
         // ── Naval Group theme: apply on load if ?theme=ng is present
         if (new URLSearchParams(location.search).get("theme") === "ng") {
           document.body.classList.add("theme-ng");
+        }
+
+        // ── Presenter view: load speech.md, run the timer
+        if (isPresenter) {
+          document.body.classList.add("presenter");
+          fetch("speech.md")
+            .then((r) => r.text())
+            .then((md) => {
+              notes = parseSpeech(md);
+              updatePresenter();
+            })
+            .catch(() => {
+              document.getElementById("pv-notes").textContent =
+                "Could not load speech.md — serve the deck over HTTP, not file://.";
+            });
+          let t0 = Date.now();
+          const clock = document.getElementById("pv-clock");
+          function tickClock() {
+            const s = Math.floor((Date.now() - t0) / 1000);
+            clock.textContent =
+              String(Math.floor(s / 60)).padStart(2, "0") +
+              ":" +
+              String(s % 60).padStart(2, "0");
+          }
+          clock.addEventListener("click", () => {
+            t0 = Date.now();
+            tickClock();
+          });
+          setInterval(tickClock, 1000);
         }
 
         const h = parseInt((location.hash || "").replace("#", ""), 10);
