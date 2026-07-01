@@ -4,14 +4,20 @@ Slides d'un talk sur l'utilisation d'agents de code IA pour contribuer à [LOTUS
 
 ## Voir la présentation
 
-https://cmoron.github.io/lotusim-agents-talk/
+- **Slides** : https://cmoron.github.io/lotusim-agents-talk/
+- **Notes présentateur** (minuteur + notes, synchronisées entre fenêtres du même navigateur) : [`?presenter`](https://cmoron.github.io/lotusim-agents-talk/?presenter) — ou touche `p`
+- **Speech seul** (prompteur défilable au doigt, pour tablette — pas de slides, pas de clavier) : [`?speech`](https://cmoron.github.io/lotusim-agents-talk/?speech)
 
 ## Navigation
 
 | Touche | Action |
 |---|---|
-| `→` · `Space` · `PageDown` | Slide suivante |
-| `←` · `PageUp` | Slide précédente |
+| `→` · `↓` · `Space` · `PageDown` · `Enter` | Slide suivante |
+| `←` · `↑` · `PageUp` · `Backspace` | Slide précédente |
+| `Home` · `End` | Première · dernière slide |
+| `f` · `t` · `p` | Plein écran · thème · vue présentateur |
+
+Le jeu de touches suivant/précédent couvre celui de PowerPoint, pour que les télécommandes de présentation USB fonctionnent.
 
 ## Local
 
