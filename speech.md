@@ -1,10 +1,10 @@
 # Speaking script — _From idea to LOTUSim contribution, faster with AI agents_
 
-> LOTUSim Technical Conference · Naval Group · 2 July 2026 · ~15–16 min
+> LOTUSim Technical Conference · Naval Group · 2 July 2026 · ~13–14 min
 > This is a **word-for-word script**, written to be read out loud. Short sentences. Simple words. Easy to say.
 > **[Square brackets] = delivery cues, not spoken.** A slash `/` marks a good place to breathe.
 > Aim for a calm, steady pace — about 120 words a minute. Slower is better than faster.
-> **12 slides** (the Linux kernel and OpenClaw share one slide). Slide numbers below match the deck.
+> **11 slides** (the Linux kernel and OpenClaw share one slide). Slide numbers below match the deck.
 
 **Golden rules for the day**
 
@@ -19,7 +19,7 @@
 
 Hello, everyone. / My name is Cyril Moron. / I am a lead developer at Naval Group. / I am not part of the LOTUSim team. / I'm here as an open source contributor, / like many of you. /
 
-In the next fifteen minutes, / I want to show you how AI agents make it easier / to start contributing to LOTUSim. /
+In the next few minutes, / I want to show you how AI agents make it easier / to start contributing to LOTUSim. /
 
 LOTUSim is open source now. / So now is the time to contribute. / And the good news: / it is already a good fit for AI agents. / We will see why, / and what is being added / to make it even easier. /
 
@@ -75,7 +75,7 @@ Three, / and this is the real one: / the agent can work on its own, / for a long
 
 And once an agent can write code, / one question follows: / how do we handle agent-assisted contributions, / responsibly? /
 
-[Optional — oral only, never on the slide. Sensitive; say it calmly, name no one. Skip it if you are not comfortable.]
+[Optional — oral only, never on the slide. Default: skip it. Use only if you need to justify why governance matters here; say it calmly, name no one.]
 We have already seen, here, / what this looks like / without a frame. / Contributions, made with agents, / with no rules around them. / And some content / that should not have been public. / [Pause.] That is exactly / why the question matters for us. /
 
 Two communities have already answered it. / Let's look at them. /
@@ -92,11 +92,11 @@ Two communities already answered that question. / Very different communities. / 
 
 There is one line that does not move. / [Read it slowly.] "AI agents must not add Signed-off-by." / Only a human can approve the contribution. / [Verbatim:] So their answer was yes. / Under one condition: / the human who signs / answers for every line. /
 
-[Point at the right column.] Second, OpenClaw. / The opposite style. / The fastest-growing open-source project / in GitHub history. / Built with agents from day one. / About three hundred and seventy-six thousand stars. /
+[Point at the right column.] Second, OpenClaw. / The opposite style. / The fastest-growing open-source project / in GitHub history. / Built with agents from day one. / About three hundred and eighty-one thousand stars. /
 
 But the numbers are not the lesson. / The lesson is what they wrote down / for the agents. / A vision file: / what to build, / and what to refuse. / And an agents file: / how to build and test, / right in the repo. / And the humans stay in control. / Every pull request needs proof / that the code really works. / And a human signs the merge. /
 
-[The scale — say it as an aside, and be precise: this is Steinberger himself, not the project.] To get there, / Steinberger himself / runs about a hundred agents in parallel. / Around one point three million dollars of tokens, / in a single month, / paid by OpenAI. / A hundred agents. / And the human is still the bottleneck. / On purpose. /
+[The scale — say it as an aside, and be precise: this is Steinberger's small team, not "the project".] To get there, / Steinberger's small team / runs about a hundred agents in parallel. / Around one point three million dollars of tokens, / in a single month, / paid by OpenAI. / A hundred agents. / And the human is still the bottleneck. / On purpose. /
 
 [Verbatim — this is the seed for the end:] An agent is only as good / as the docs and the rules / you give it. /
 
@@ -132,30 +132,7 @@ This is one way to split the work. / Change it to fit your own project. /
 
 ---
 
-## 8 · The loop, on the sailboat _(2:00)_
-
-[This is the main "how" slide. Walk the left column, top to bottom, one short line each. Take your time.]
-
-Let's walk the loop, / on our sailboat. /
-
-**Map.** / The agent reads the repo. / It finds the closest example: / an existing vessel model. / It answers with file and line numbers. / In minutes, / not days. /
-
-**Plan.** / It proposes two or three options, / with trade-offs. / And then — / I choose. / [Slow down.] This is the part / that I do not delegate. / Taste, / and system design, / stay with the human. /
-
-**Build.** / It runs colcon and the simulator. / It reads the error. / It fixes it. / It closes the loop by itself. / [Point at the terminal.] And local CI beats remote CI: / the agent sees the error in seconds, / not minutes. /
-
-[Optional oral beat — the engine bug. NOT on the slide. Use it if you have the time; it lands hard. This is the proof of "map" and of the loop.]
-And there is more. / While wiring the boat, / the agent went down / into the C++ engine. / And it found a real bug. / A quaternion, read the wrong way. / A simple change of heading / came back as a roll. / You could not see it / on a boat going straight. / Our turning sailboat / made it show up. / The agent understood the bug, / fixed it, / and wrote a test for it. / [Verbatim:] That is the power of the loop: / map an unknown engine, / and close the loop / on a real fix. /
-
-**Doc.** / It writes the documentation page, / while the "why" is still fresh. /
-
-**Ship.** / A labelled issue, / a fork, / a pull request. / Assisted-by — / and I sign. /
-
-[Verbatim:] The code is yours. / Readable. / And you can defend every line. /
-
----
-
-## 9 · Demo — the video _(2:30)_
+## 8 · Demo — the video _(2:30)_
 
 [This is your breather. Let the video play — mostly sped up, back to real time on the key moments. Say very little.]
 
@@ -173,7 +150,7 @@ From a cloned repo, / to a sailboat rounding a buoy, / inside LOTUSim. /
 
 ---
 
-## 10 · Limits — what I am _not_ selling _(1:15)_
+## 9 · Limits — what I am _not_ selling _(1:15)_
 
 [Four honest points. Go fast. One line each. Honesty builds trust here.]
 
@@ -189,7 +166,7 @@ Four: / the software wall / is not the domain wall. / AI drops the software wall
 
 ---
 
-## 11 · LOTUSim is almost agent-ready _(1:30)_
+## 10 · LOTUSim is almost agent-ready _(1:30)_
 
 [Second half of the answer. Stay positive — we work for LOTUSim, not against it. The demo already proved the left side.]
 
@@ -207,7 +184,7 @@ So: LOTUSim is not fully agent-ready yet. / But it is already very usable. / And
 
 ---
 
-## 12 · Close _(1:00)_
+## 11 · Close _(1:00)_
 
 [Land it calmly. This is your commitment in front of the room.]
 
@@ -215,7 +192,7 @@ So let me close. / An open simulator. / An augmented practice. /
 
 If you contribute: / clone the repo, / ask an agent to map it, / pick an issue, / and come back with a pull request. / Assisted-by — / and you sign. /
 
-And on the project's side, / here is what I will push for, / and contribute myself: / an agents file, / the vision in the repo, / a clear AI policy, / and the developer skill / we already built. / I will do that work. /
+And on the project's side, / here is what I will push for, / and help contribute / with the project team: / an agents file, / the vision in the repo, / a clear AI policy, / and the developer skill / we already built. /
 
 I want LOTUSim to be an example / of how an open project welcomes agents. / Cleanly. / And with the human in charge. /
 
@@ -245,4 +222,4 @@ A few words in this talk are easy to trip on. Practise these out loud a few time
 
 **Two short forms you'll use a lot:** "it is" → _it's_, "do not" → _don't_. Both are fine and sound natural. If a short form trips you, just say the full words — no problem.
 
-**Timing check:** if you finish slide 5 (the two industry answers) at around the 7-minute mark, you are on pace. If you are ahead, slow down on the loop (slide 8) and the demo (slide 9) — those are the heart of the talk. The engine-bug aside on slide 8 is the first thing to cut if you are running long; on slide 10, the "speed polar in Xdyn" sentence is the next to trim.
+**Timing check:** if you finish slide 5 (the two industry answers) at around the 7-minute mark, you are on pace. The demo is now slide 8 and carries the method. If you are running long, keep the video intro short; on slide 9, the "speed polar in Xdyn" sentence is the next to trim.

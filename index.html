@@ -292,11 +292,13 @@
         grid-template-columns: 1.1fr 0.9fr;
         gap: 96px;
         align-items: start;
+        min-height: 0;
       }
       .cols-3 {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 32px;
+        min-height: 0;
       }
       .row {
         display: flex;
@@ -412,11 +414,12 @@
         color: #cdd1d8;
       }
 
-      /* Agent relay (slide 9) — pixel-sprite agents pass a glowing baton */
+      /* Agent relay (slide 7) — pixel-sprite agents pass a glowing baton */
       .relay {
         position: relative;
         padding-bottom: 64px;
         margin-top: 8px;
+        min-height: 0;
       }
       .agents {
         display: flex;
@@ -479,7 +482,7 @@
 
       /* Slide 6 — a little pixel sailboat in the bottom-right corner (same
          data-sprite system as the relay agents). Accent colour, theme-aware
-         glow via --glow, gently rocking as if on a swell. */
+         glow via --glow, with a small vertical bob as if on gentle waves. */
       .sailboat-deco {
         position: absolute;
         right: 112px;
@@ -487,22 +490,27 @@
         width: 132px;
         height: 132px;
         pointer-events: none;
+        transform: translateY(0);
       }
       .sailboat-deco .sprite {
         width: 100%;
         height: 100%;
         color: var(--accent);
         filter: drop-shadow(0 0 14px rgba(var(--glow), 0.55));
-        transform-origin: 50% 80%;
-        animation: boatRock 3.4s ease-in-out infinite;
       }
-      @keyframes boatRock {
+      .slide.is-active .sailboat-deco {
+        animation: boatBob 3.2s ease-in-out infinite;
+      }
+      @keyframes boatBob {
         0%,
         100% {
-          transform: translateY(0) rotate(-3deg);
+          transform: translateY(0);
         }
-        50% {
-          transform: translateY(-5px) rotate(3deg);
+        35% {
+          transform: translateY(-9px);
+        }
+        70% {
+          transform: translateY(5px);
         }
       }
 
@@ -618,7 +626,7 @@
         color: var(--accent);
         font-family: var(--mono);
       }
-      /* status pills on slide 11 (in motion vs to add) */
+      /* status pills on slide 10 (in motion vs to add) */
       .docs-list .st {
         display: inline-block;
         font-size: 12.5px;
@@ -737,6 +745,7 @@
         gap: 48px;
         margin-top: 22px;
         align-items: stretch;
+        min-height: 0;
       }
       .answer {
         border: 1px solid var(--rule);
@@ -816,6 +825,17 @@
         text-align: center;
         text-wrap: balance;
       }
+      .footer-note.footer-rescue {
+        position: absolute;
+        left: 120px;
+        right: 120px;
+        bottom: 88px;
+        margin: 0;
+        max-width: none;
+      }
+      .footer-note.footer-rescue-sources {
+        bottom: 142px;
+      }
       hr.rule {
         border: none;
         border-top: 1px solid var(--rule);
@@ -866,7 +886,7 @@
         color: var(--accent);
       }
 
-      /* Demo slide (10) — video placeholder frame */
+      /* Demo slide (8) — video frame */
       .videoframe {
         border: 1px solid var(--rule);
         border-radius: 2px;
@@ -1302,15 +1322,6 @@
         }
       }
 
-      /* 4) Loop icon — used to illustrate "close the loop" */
-      .loop-icon {
-        display: inline-block;
-        color: var(--accent);
-        animation: spin 3s linear infinite;
-        margin-right: 4px;
-        font-size: 1.1em;
-        transform-origin: center;
-      }
       @keyframes rotate {
         to {
           transform: rotate(360deg);
@@ -1375,7 +1386,6 @@
           transform: none !important;
         }
         .term::after,
-        .loop-icon,
         .hud .dot {
           animation: none !important;
         }
@@ -1390,6 +1400,10 @@
           animation-duration: 0.01s !important;
           animation-iteration-count: 1 !important;
           transition-duration: 0.01s !important;
+        }
+        .slide.is-active .sailboat-deco {
+          animation-duration: 3.2s !important;
+          animation-iteration-count: infinite !important;
         }
       }
 
@@ -2088,7 +2102,7 @@
               <span>
                 <span class="answer-name">OpenClaw</span>
                 <span class="answer-tag"
-                  >fastest-growing project · 376k&nbsp;★</span
+                  >fastest-growing project · 381k&nbsp;★</span
                 >
               </span>
             </div>
@@ -2272,104 +2286,7 @@
         </p>
       </section>
 
-      <!-- 8. THE LOOP IN ACTION -->
-      <section class="slide">
-        <span class="eyebrow"
-          ><span class="loop-icon">↻</span>The method · from clone to PR in one
-          session</span
-        >
-        <h2 class="title">The loop, <em>on the sailboat.</em></h2>
-
-        <div class="cols-2">
-          <div class="stack">
-            <ul class="checks">
-              <li>
-                <span class="lbl-col hl">Map</span
-                ><span class="desc-col"
-                  >closest analog (an existing vessel model), answered in
-                  file:line. Minutes, not days.</span
-                >
-              </li>
-              <li>
-                <span class="lbl-col hl">Plan</span
-                ><span class="desc-col"
-                  >2–3 strategies, trade-offs.
-                  <span class="hl-2">I choose.</span></span
-                >
-              </li>
-              <li>
-                <span class="lbl-col hl">Build</span
-                ><span class="desc-col"
-                  ><span class="dim">colcon</span> + sim, reads the failure,
-                  fixes, <span class="hl-2">closes the loop</span> itself.</span
-                >
-              </li>
-              <li>
-                <span class="lbl-col hl">Doc</span
-                ><span class="desc-col"
-                  >docs page + notebook, while the «&nbsp;why&nbsp;» is
-                  fresh.</span
-                >
-              </li>
-              <li>
-                <span class="lbl-col hl">Ship</span
-                ><span class="desc-col"
-                  >issue → fork → PR.
-                  <span class="dim">Assisted-by:</span> + I sign.</span
-                >
-              </li>
-            </ul>
-            <div class="pull" style="margin-top: 18px; max-width: 34ch">
-              Taste and system design remain the ultimate moats.
-              <span class="attr"
-                >— P. Steinberger · State of the Claw, 2026</span
-              >
-            </div>
-          </div>
-          <div class="term">
-            <div class="c">
-              # the agent drives the loop: build, run, inspect, fix
-            </div>
-            <div>
-              <span class="p">$</span> colcon build --packages-select
-              physics_engine_interface
-            </div>
-            <div class="c">
-              Finished &lt;&lt;&lt; physics_engine_interface [38.2s]
-            </div>
-            <br />
-            <div>
-              <span class="p">$</span> lotusim run --gui focus_v2_demo.world
-            </div>
-            <div class="c">
-              [INFO] focus_v2 · xdyn co-sim up @ ws://127.0.0.1:12345
-            </div>
-            <br />
-            <div>
-              <span class="p">$</span> python3 ctrl_course.py
-              <span class="c"># closed-loop helmsman</span>
-            </div>
-            <div class="s">[INFO] rounds the mark · closest 1.10 m</div>
-            <br />
-            <div>
-              <span class="p">›</span> <span class="k">add</span> a unit test
-              for the control-surface command mapping
-            </div>
-            <div class="s">
-              → targeted patch, follows repo style · code you own and can read
-            </div>
-          </div>
-        </div>
-
-        <p class="footer-note">
-          <span class="hl-2">Local CI first</span>: failure in seconds, not
-          minutes (remote CI still gates). Two human moments:
-          <span class="hl">choosing</span> (Plan),
-          <span class="hl">signing</span> (Ship).
-        </p>
-      </section>
-
-      <!-- 9. DEMO -->
+      <!-- 8. DEMO -->
       <section class="slide">
         <span class="eyebrow">Demonstration</span>
         <h2 class="title">From cloned repo to PR,<br /><em>see it run.</em></h2>
@@ -2421,7 +2338,7 @@
         </p>
       </section>
 
-      <!-- 10. LIMITS / HONESTY -->
+      <!-- 9. LIMITS / HONESTY -->
       <section class="slide">
         <span class="eyebrow">Honest limits: the price of velocity</span>
         <h2 class="title">What I'm <em>not</em> selling you.</h2>
@@ -2459,7 +2376,7 @@
         <div class="filler"></div>
       </section>
 
-      <!-- 11. LOTUSIM'S HOMEWORK -->
+      <!-- 10. LOTUSIM'S HOMEWORK -->
       <section class="slide">
         <span class="eyebrow">Already close to agent-ready</span>
         <h2 class="title">
@@ -2520,7 +2437,7 @@
         </p>
       </section>
 
-      <!-- 12. CLOSE -->
+      <!-- 11. CLOSE -->
       <section class="slide">
         <span class="eyebrow">Closing</span>
         <h2 class="title">
@@ -2703,13 +2620,30 @@
         // ── Fixed 1920×1080 stage, scaled to fit the viewport (letterboxed).
         // What you author at 1920×1080 is exactly what projects.
         function fitStage() {
+          const viewport = window.visualViewport || window;
+          const width = viewport.width || window.innerWidth;
+          const height = viewport.height || window.innerHeight;
           const s = Math.min(
-            window.innerWidth / 1920,
-            window.innerHeight / 1080,
+            width / 1920,
+            height / 1080,
           );
           deck.style.setProperty("--scale", s);
         }
-        window.addEventListener("resize", fitStage);
+        function scheduleFitStage() {
+          fitStage();
+          requestAnimationFrame(fitStage);
+          requestAnimationFrame(() => keepFooterVisible(slides[i]));
+          setTimeout(() => {
+            fitStage();
+            keepFooterVisible(slides[i]);
+          }, 150);
+        }
+        window.addEventListener("resize", scheduleFitStage);
+        window.addEventListener("load", scheduleFitStage);
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener("resize", scheduleFitStage);
+          window.visualViewport.addEventListener("scroll", scheduleFitStage);
+        }
 
         function pad(n) {
           return String(n).padStart(2, "0");
@@ -2803,12 +2737,42 @@
           });
         }
 
+        function keepFooterVisible(slide) {
+          document
+            .querySelectorAll(".footer-rescue, .footer-rescue-sources")
+            .forEach((el) =>
+              el.classList.remove("footer-rescue", "footer-rescue-sources"),
+            );
+
+          const footer = slide && slide.querySelector(".footer-note");
+          if (!footer) return;
+
+          requestAnimationFrame(() => {
+            const footerBox = footer.getBoundingClientRect();
+            const deckBox = deck.getBoundingClientRect();
+            const hudBox = document.querySelector(".hud").getBoundingClientRect();
+            const safeBottom = Math.min(deckBox.bottom, hudBox.top) - 14;
+            if (
+              footerBox.bottom <= safeBottom &&
+              footerBox.top >= deckBox.top
+            ) {
+              return;
+            }
+
+            footer.classList.add("footer-rescue");
+            if (slide.querySelector(".sources")) {
+              footer.classList.add("footer-rescue-sources");
+            }
+          });
+        }
+
         function render() {
           slides.forEach((s, k) => s.classList.toggle("is-active", k === i));
           counter.textContent = pad(i + 1) + " / " + pad(slides.length);
           progress.style.width = ((i + 1) / slides.length) * 100 + "%";
           location.hash = "#" + (i + 1);
           triggerCountUps(slides[i]);
+          keepFooterVisible(slides[i]);
           broadcast();
           updatePresenter();
         }
@@ -2854,7 +2818,7 @@
           next();
         });
 
-        // Slide 9 demo: click the frame to play, with native controls (does not advance the deck)
+        // Slide 8 demo: click the frame to play, with native controls (does not advance the deck)
         (function () {
           const vf = document.querySelector(".videoframe");
           const vid = vf && vf.querySelector(".vf-video");
@@ -2876,7 +2840,7 @@
 
         setupSprites();
         setupCardDelays();
-        fitStage();
+        scheduleFitStage();
 
         // ── Naval Group theme: apply on load if ?theme=ng is present
         if (new URLSearchParams(location.search).get("theme") === "ng") {
