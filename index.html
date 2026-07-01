@@ -2788,10 +2788,11 @@
         }
 
         document.addEventListener("keydown", (e) => {
-          if (["ArrowRight", "PageDown", " "].includes(e.key)) {
+          // Match PowerPoint's slideshow keys so any USB presenter's next/prev works.
+          if (["ArrowRight", "ArrowDown", "PageDown", " ", "Enter"].includes(e.key)) {
             e.preventDefault();
             next();
-          } else if (["ArrowLeft", "PageUp"].includes(e.key)) {
+          } else if (["ArrowLeft", "ArrowUp", "PageUp", "Backspace"].includes(e.key)) {
             e.preventDefault();
             prev();
           } else if (e.key === "Home") {
