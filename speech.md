@@ -75,9 +75,6 @@ Three, / and this is the real one: / the agent can work on its own, / for a long
 
 And once an agent can write code, / one question follows: / how do we handle agent-assisted contributions, / responsibly? /
 
-[Optional — oral only, never on the slide. Default: skip it. Use only if you need to justify why governance matters here; say it calmly, name no one.]
-We have already seen, here, / what this looks like / without a frame. / Contributions, made with agents, / with no rules around them. / And some content / that should not have been public. / [Pause.] That is exactly / why the question matters for us. /
-
 Two communities have already answered it. / Let's look at them. /
 
 ---
