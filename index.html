@@ -2545,6 +2545,29 @@
       </footer>
     </div>
 
+    <!-- Speech reader (?speech): the whole spoken script in one scroll, for a phone/tablet teleprompter. No keyboard, no sync — just scroll. -->
+    <style>
+      body.speech #deck, body.speech #counter { display: none; }
+      body.speech { overflow-y: auto; background: #0d0d0f; }
+      #speech { display: none; }
+      body.speech #speech {
+        display: block; max-width: 900px; margin: 0 auto;
+        padding: 4px 28px 160px; font-family: var(--mono);
+        color: #f3f3f3; font-size: 30px; line-height: 1.6;
+      }
+      #speech h2 {
+        position: sticky; top: 0; background: #0d0d0f; z-index: 1;
+        font-size: 23px; font-weight: 600; color: #9aa6b2;
+        margin: 0; padding: 22px 0 10px; border-bottom: 1px solid #2a2d33;
+      }
+      #speech p, #speech li { margin: 18px 0; color: #f3f3f3; }
+      #speech .cue { color: #7fa6c9; }
+      #speech .br { color: #555; }
+      #speech b { color: #fff; }
+      #speech i { color: #d8c08a; font-style: normal; }
+    </style>
+    <div id="speech"></div>
+
     <script>
       (function () {
         const slides = Array.from(document.querySelectorAll(".slide"));
@@ -2557,6 +2580,7 @@
         const isPresenter = new URLSearchParams(location.search).has(
           "presenter",
         );
+        const isSpeech = new URLSearchParams(location.search).has("speech");
         const chan =
           "BroadcastChannel" in window
             ? new BroadcastChannel("lotusim-deck")
@@ -2875,6 +2899,44 @@
             tickClock();
           });
           setInterval(tickClock, 1000);
+        }
+
+        // ── Speech reader: whole script in one scroll (no keyboard, no sync) — for a tablet
+        if (isSpeech) {
+          document.body.classList.add("speech");
+          fetch("speech.md")
+            .then((r) => r.text())
+            .then((md) => {
+              document.getElementById("speech").innerHTML = md
+                .split(/\n## /)
+                .slice(1)
+                .map((block) => {
+                  const nl = block.indexOf("\n");
+                  const header = block.slice(0, nl).trim();
+                  const body = block
+                    .slice(nl + 1)
+                    .replace(/\n*-{3,}\s*$/, "")
+                    .trim();
+                  const paras = body
+                    .split(/\n{2,}/)
+                    .map(
+                      (p) => "<p>" + fmtNote(p.replace(/\n+/g, " ").trim()) + "</p>",
+                    )
+                    .join("");
+                  return (
+                    '<section class="sp-sec"><h2>' +
+                    fmtNote(header) +
+                    "</h2>" +
+                    paras +
+                    "</section>"
+                  );
+                })
+                .join("");
+            })
+            .catch(() => {
+              document.getElementById("speech").textContent =
+                "Could not load speech.md — open the GitHub Pages URL (HTTP), not a local file.";
+            });
         }
 
         const h = parseInt((location.hash || "").replace("#", ""), 10);
